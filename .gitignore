@@ -1,0 +1,9 @@
+*.opensdf
+*.sdf
+*.suo
+*.user
+ipch/
+Debug/
+Release/
+TinyC/Debug/
+TinyC/Release
