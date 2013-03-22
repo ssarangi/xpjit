@@ -29,16 +29,22 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\midend\include\ConstantFolder.h">
+    <ClInclude Include="..\include\midend\ConstantFolder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\midend\include\DominanceFrontier.h">
+    <ClInclude Include="..\include\midend\DominanceFrontier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\midend\include\DominanceTree.h">
+    <ClInclude Include="..\include\midend\DominanceTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\midend\include\DominanceTreeConstructor.h">
+    <ClInclude Include="..\include\midend\DominanceTreeConstructor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\midend\ITransform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\midend\PassManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

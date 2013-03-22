@@ -29,19 +29,19 @@ class GenLLVM;
 class IcaValue
 {
 public:
-	virtual void accept(IClassVisitor &) {}
-	virtual CompEA* codegen() = 0;
-	virtual IcaValue* genIL(GenIL*) = 0;
-	virtual llvm::Value* genLLVM(GenLLVM*) = 0;
+    virtual void accept(IClassVisitor &) {}
+    virtual CompEA* codegen() = 0;
+    virtual IcaValue* genIL(GenIL*) = 0;
+    virtual llvm::Value* genLLVM(GenLLVM*) = 0;
 };
 
 class Expression: public IcaValue 
 {
 public:
-	virtual void accept(IClassVisitor &) = 0;
-	virtual CompEA* codegen() = 0;
-	virtual IcaValue* genIL(GenIL*) = 0;
-	virtual llvm::Value* genLLVM(GenLLVM*) = 0;
+    virtual void accept(IClassVisitor &) = 0;
+    virtual CompEA* codegen() = 0;
+    virtual IcaValue* genIL(GenIL*) = 0;
+    virtual llvm::Value* genLLVM(GenLLVM*) = 0;
 };
 
 /*
@@ -51,307 +51,307 @@ class Constant: public Expression
 {
 public:
 
-	Constant(int value):m_value(value) {}
-	
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-	virtual CompEA* codegen();
+    Constant(int value):m_value(value) {}
+    
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    virtual CompEA* codegen();
 
-	virtual IcaValue* genIL(GenIL*);
-	virtual llvm::Value* genLLVM(GenLLVM*);
-	
-	int getValue(){ return m_value; }
-	
+    virtual IcaValue* genIL(GenIL*);
+    virtual llvm::Value* genLLVM(GenLLVM*);
+    
+    int getValue(){ return m_value; }
+    
 private:
-	int m_value; //int for now. We need to change it 
-	Constant();
+    int m_value; //int for now. We need to change it 
+    Constant();
 };
 
 class Variable: public Expression 
 {
 public:
-	Variable(Symbol& s)
+    Variable(Symbol& s)
         : m_symbol(s)
     {}
 
-	//Getter-Setters
-	Symbol& getSymbol() { return m_symbol; }
-	
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-	virtual CompEA* codegen();
-	virtual IcaValue* genIL(GenIL*);
-	virtual llvm::Value* genLLVM(GenLLVM*);
+    //Getter-Setters
+    Symbol& getSymbol() { return m_symbol; }
+    
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    virtual CompEA* codegen();
+    virtual IcaValue* genIL(GenIL*);
+    virtual llvm::Value* genLLVM(GenLLVM*);
 private:
-	Symbol& m_symbol;//check this
+    Symbol& m_symbol;//check this
 };
 
 class BinopExpression : public Expression 
 {
 public:
-	enum BinaryOperation
+    enum BinaryOperation
     { 
-		Add,
-		Sub,
-		Mul,
-		Div,
-		EQ,
-		NE,
-		LT,
-		GT,
-		LTEQ,
-		GTEQ
-	};
+        Add,
+        Sub,
+        Mul,
+        Div,
+        EQ,
+        NE,
+        LT,
+        GT,
+        LTEQ,
+        GTEQ
+    };
 
-	BinopExpression(IcaValue& left,IcaValue& right, BinaryOperation op)
+    BinopExpression(IcaValue& left,IcaValue& right, BinaryOperation op)
         : m_left(left)
         , m_right(right)
         , m_op(op)
     {}
 
-	//Getter-Setters	
-	IcaValue& getLeftValue() { return m_left; }
-	IcaValue& getRightValue() { return m_right; }
-	BinaryOperation getOperation() { return m_op; }
+    //Getter-Setters	
+    IcaValue& getLeftValue() { return m_left; }
+    IcaValue& getRightValue() { return m_right; }
+    BinaryOperation getOperation() { return m_op; }
 
-	//Visitors
-	virtual void accept(IClassVisitor &visitor) { visitor.Visit(*this); }
-	virtual CompEA* codegen();
-	virtual IcaValue* genIL(GenIL*);
-	virtual llvm::Value* genLLVM(GenLLVM*);
+    //Visitors
+    virtual void accept(IClassVisitor &visitor) { visitor.Visit(*this); }
+    virtual CompEA* codegen();
+    virtual IcaValue* genIL(GenIL*);
+    virtual llvm::Value* genLLVM(GenLLVM*);
 private:
-	IcaValue& m_left;
-	IcaValue& m_right;
-	BinaryOperation m_op;
-	BinopExpression();
+    IcaValue& m_left;
+    IcaValue& m_right;
+    BinaryOperation m_op;
+    BinopExpression();
 };
 
 class FunctionCall : public Expression 
 {
 public:
-	FunctionCall(FunctionProtoType& fp, std::list<IcaValue*>& params)
+    FunctionCall(FunctionProtoType& fp, std::list<IcaValue*>& params)
         : m_functionProtoType(fp)
         , m_paramList(params)
     {}
 
-	//Getter-Setters
-	FunctionProtoType& getFunctionProtoType() { return m_functionProtoType; }
-	std::list<IcaValue*>& getParamList() { return m_paramList; }
+    //Getter-Setters
+    FunctionProtoType& getFunctionProtoType() { return m_functionProtoType; }
+    std::list<IcaValue*>& getParamList() { return m_paramList; }
 
-	//Visitors
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-	virtual CompEA* codegen();
-	virtual IcaValue* genIL(GenIL*);
-	virtual llvm::Value* genLLVM(GenLLVM*);
+    //Visitors
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    virtual CompEA* codegen();
+    virtual IcaValue* genIL(GenIL*);
+    virtual llvm::Value* genLLVM(GenLLVM*);
 private:
-	FunctionProtoType& m_functionProtoType;
-	std::list<IcaValue*> m_paramList;
+    FunctionProtoType& m_functionProtoType;
+    std::list<IcaValue*> m_paramList;
 };
 
 class Statement : public IcaValue
 {
 public:
-	//Visitors
-	virtual void accept(IClassVisitor &visitor) = 0;
-	
+    //Visitors
+    virtual void accept(IClassVisitor &visitor) = 0;
+    
 private:	
 };
 
 class Assignment : public Statement
 {
 public:
-	Assignment(Variable& lVal, IcaValue& rVal)
+    Assignment(Variable& lVal, IcaValue& rVal)
         : m_lval(lVal)
         , m_rval(rVal)
     {}
-	
+    
     //Getter-Setters
-	Variable& getLVal() const { return m_lval; }
-	IcaValue& getRVal() const { return m_rval; }
+    Variable& getLVal() const { return m_lval; }
+    IcaValue& getRVal() const { return m_rval; }
 
-	//Visitors
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-	virtual CompEA* codegen();
-	virtual IcaValue* genIL(GenIL*);
-	virtual llvm::Value* genLLVM(GenLLVM*);
+    //Visitors
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    virtual CompEA* codegen();
+    virtual IcaValue* genIL(GenIL*);
+    virtual llvm::Value* genLLVM(GenLLVM*);
 private:
-	Variable& m_lval;
-	IcaValue& m_rval;
-	Assignment();
+    Variable& m_lval;
+    IcaValue& m_rval;
+    Assignment();
 };
 
 class ReturnStatement : public Statement 
 {
 public:
-	ReturnStatement(IcaValue *value)
+    ReturnStatement(IcaValue *value)
         : m_value(value)
     {}
 
-	//Getter-Setters
-	IcaValue* getReturnValue() { return m_value; }
-	
-	//Visitors	
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-	virtual CompEA* codegen();
-	virtual IcaValue* genIL(GenIL*);
-	virtual llvm::Value* genLLVM(GenLLVM*);
+    //Getter-Setters
+    IcaValue* getReturnValue() { return m_value; }
+    
+    //Visitors	
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    virtual CompEA* codegen();
+    virtual IcaValue* genIL(GenIL*);
+    virtual llvm::Value* genLLVM(GenLLVM*);
 private:
-	IcaValue *m_value; //return statement can have NULL expression
-	ReturnStatement();
+    IcaValue *m_value; //return statement can have NULL expression
+    ReturnStatement();
 };
 
 class ExpressionStatement : public Statement 
 {
 public:
-	ExpressionStatement(Expression& expression)
+    ExpressionStatement(Expression& expression)
         : m_expression(expression)
     {}
 
-	Expression& getExpression() { return m_expression; }
+    Expression& getExpression() { return m_expression; }
 
-	//Visitors	
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-	virtual CompEA* codegen();
-	virtual IcaValue* genIL(GenIL*);
-	virtual llvm::Value* genLLVM(GenLLVM*);
+    //Visitors	
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    virtual CompEA* codegen();
+    virtual IcaValue* genIL(GenIL*);
+    virtual llvm::Value* genLLVM(GenLLVM*);
 private:
-	Expression& m_expression;
-	ExpressionStatement();
+    Expression& m_expression;
+    ExpressionStatement();
 
 };
 
 class BreakStatement : public Statement 
 {
 public:
-	//Visitors
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-	virtual CompEA* codegen() { return nullptr; }
-	virtual IcaValue* genIL(GenIL*);
-	virtual llvm::Value* genLLVM(GenLLVM*);
+    //Visitors
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    virtual CompEA* codegen() { return nullptr; }
+    virtual IcaValue* genIL(GenIL*);
+    virtual llvm::Value* genLLVM(GenLLVM*);
 };
 
 class FunctionProtoType
 {
 public:
-	FunctionProtoType(const std::string& name, std::list<Type*>& typeList, Type returnType)
+    FunctionProtoType(const std::string& name, std::list<Type*>& typeList, Type returnType)
         : m_name(name)
         , m_argTypeList(typeList)
         , m_returnType(returnType)
     {}
 
-	//Getter-Setters
-	std::string getName() const { return m_name; }
-	std::list<Type*>& getTypeList() { return m_argTypeList; }
-	Type& getReturnType() { return m_returnType; }
+    //Getter-Setters
+    std::string getName() const { return m_name; }
+    std::list<Type*>& getTypeList() { return m_argTypeList; }
+    Type& getReturnType() { return m_returnType; }
 
-	//overloaded operators
-	bool operator==(const FunctionProtoType& fpOther) const;
+    //overloaded operators
+    bool operator==(const FunctionProtoType& fpOther) const;
 
-	//Visitors
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-	
+    //Visitors
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    
 private:
-	std::string m_name;
-	std::list<Type*> m_argTypeList; //just store the datatypes; no need of names for the proto
-	Type m_returnType;
-	FunctionProtoType();
+    std::string m_name;
+    std::list<Type*> m_argTypeList; //just store the datatypes; no need of names for the proto
+    Type m_returnType;
+    FunctionProtoType();
 };
 
 class Symbol
 {
 public:
-	Symbol(std::string& name, Type& type)
+    Symbol(std::string& name, Type& type)
         : m_name(name)
         , m_type(type)
     {}
-	
+    
     ~Symbol();
 
-	//Getter-Setters
-	std::string getName() const { return m_name; }
-	Type& getType() { return m_type; }
+    //Getter-Setters
+    std::string getName() const { return m_name; }
+    Type& getType() { return m_type; }
 
-	//Visitors
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    //Visitors
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
 private:
-	Symbol();
-	std::string m_name; //we need to add more details regarding the type
-	Type m_type;
+    Symbol();
+    std::string m_name; //we need to add more details regarding the type
+    Type m_type;
 };
 
 class SymbolTable
 {
 public:
-	//Getter-Setters
-	IcErr add(Symbol& sym);	
-	std::list<Symbol*>& getSymbols() { return m_symbols; }	
+    //Getter-Setters
+    IcErr add(Symbol& sym);	
+    std::list<Symbol*>& getSymbols() { return m_symbols; }	
 
-	//Visitors
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    //Visitors
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
 
 private:
-	std::list<Symbol*> m_symbols;
+    std::list<Symbol*> m_symbols;
 };
 
 class ControlFlowStatement : public Statement 
 {
 public:
-	ControlFlowStatement()
+    ControlFlowStatement()
         : m_currentInsertStatement(NULL)
     {}
-	
+    
     virtual IcErr addStatement(Statement& s) = 0;
-	virtual bool endCodeBlock();  //return true if it accepted the request of ending a codeblock, false if no codeblocks were found to end
-	virtual Statement* getCurrentStatement();
+    virtual bool endCodeBlock();  //return true if it accepted the request of ending a codeblock, false if no codeblocks were found to end
+    virtual Statement* getCurrentStatement();
 protected:
-	ControlFlowStatement *m_currentInsertStatement;
+    ControlFlowStatement *m_currentInsertStatement;
 };
 
 //each branch in an ifelse
 class Branch 
 {
 public:
-	Branch(Expression& condition)
+    Branch(Expression& condition)
         : m_condition(condition)
         , m_currentInsertStatement(NULL)
     {}
 
-	std::list<Statement*>& getStatements() { return m_statementList; }
-	IcErr addStatement(Statement& s);
-	bool endCodeBlock();
-	virtual Statement* getCurrentStatement();
-	Expression& getCondition() { return m_condition; }
+    std::list<Statement*>& getStatements() { return m_statementList; }
+    IcErr addStatement(Statement& s);
+    bool endCodeBlock();
+    virtual Statement* getCurrentStatement();
+    Expression& getCondition() { return m_condition; }
 private:
-	Expression& m_condition;
-	std::list<Statement*> m_statementList;
-	ControlFlowStatement* m_currentInsertStatement;
-	Branch();	
-	
+    Expression& m_condition;
+    std::list<Statement*> m_statementList;
+    ControlFlowStatement* m_currentInsertStatement;
+    Branch();	
+    
 };
 
 //our if-else handler
 class BranchStatement : public ControlFlowStatement 
 {
 public:
-	//an if-else will be like if (cond) do something else do something.
-	//if else-if else will be if() do something else jump to end. if(second condition) else jump to end
-	
-	BranchStatement(Expression& condition);
-	
-	virtual CompEA* codegen();
-	virtual IcaValue* genIL(GenIL*);
-	virtual llvm::Value* genLLVM(GenLLVM*);
+    //an if-else will be like if (cond) do something else do something.
+    //if else-if else will be if() do something else jump to end. if(second condition) else jump to end
+    
+    BranchStatement(Expression& condition);
+    
+    virtual CompEA* codegen();
+    virtual IcaValue* genIL(GenIL*);
+    virtual llvm::Value* genLLVM(GenLLVM*);
 
-	virtual IcErr addStatement(Statement& s);
-	virtual IcErr addBranch(Expression& e);
-	virtual bool endCodeBlock();
-	virtual Statement* getCurrentStatement();
-	std::list<Branch*>& getBranches(){ return m_branches; }
+    virtual IcErr addStatement(Statement& s);
+    virtual IcErr addBranch(Expression& e);
+    virtual bool endCodeBlock();
+    virtual Statement* getCurrentStatement();
+    std::list<Branch*>& getBranches(){ return m_branches; }
 
-	//Visitors
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    //Visitors
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
 private:
-	std::list<Branch*> m_branches;
-	Branch* m_currentBranch;
-	BranchStatement();
+    std::list<Branch*> m_branches;
+    Branch* m_currentBranch;
+    BranchStatement();
 };
 
 
@@ -359,109 +359,109 @@ private:
 class WhileStatement : public ControlFlowStatement 
 {
 public:
-	WhileStatement(Expression& condition)
+    WhileStatement(Expression& condition)
         : m_condition(condition)
     {}
 
-	virtual CompEA* codegen() { return nullptr; }
-	virtual IcaValue* genIL(GenIL*);
-	virtual llvm::Value* genLLVM(GenLLVM*);	
+    virtual CompEA* codegen() { return nullptr; }
+    virtual IcaValue* genIL(GenIL*);
+    virtual llvm::Value* genLLVM(GenLLVM*);	
 
-	virtual IcErr addStatement(Statement& s);
-	std::list<Statement*>& getStatements() { return m_statementList; }
-	
-	//Visitors
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    virtual IcErr addStatement(Statement& s);
+    std::list<Statement*>& getStatements() { return m_statementList; }
+    
+    //Visitors
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
 
-	Expression& getCondition() { return m_condition; }
+    Expression& getCondition() { return m_condition; }
 private:
-	Expression& m_condition;
-	std::list<Statement*> m_statementList;	
-	WhileStatement();
+    Expression& m_condition;
+    std::list<Statement*> m_statementList;	
+    WhileStatement();
 };
 
 class Function
 {
 public:
-	Function(FunctionProtoType& protoType, std::list<Symbol*>& argSymbolList)
+    Function(FunctionProtoType& protoType, std::list<Symbol*>& argSymbolList)
         : m_protoType(protoType)
         , m_argSymbolList(argSymbolList)
         , m_symbolTable(*new SymbolTable()), m_currentInsertStatement(NULL)
     {}
 
-	~Function();
+    ~Function();
 
-	//Getter-Setters
+    //Getter-Setters
 
-	std::string getName() const { return m_protoType.getName(); }
-	std::list<Statement*>& getStatements() { return m_statementList; }
-	FunctionProtoType& getProtoType() const { return m_protoType; }
-	std::list<Symbol*>& getArgSymbolList() { return m_argSymbolList; }
-	std::list<Symbol*>& getSymbols() { return m_symbolTable.getSymbols(); }
-	SymbolTable& getSymbolTable() { return m_symbolTable; }
-	Statement* getCurrentStatement();
+    std::string getName() const { return m_protoType.getName(); }
+    std::list<Statement*>& getStatements() { return m_statementList; }
+    FunctionProtoType& getProtoType() const { return m_protoType; }
+    std::list<Symbol*>& getArgSymbolList() { return m_argSymbolList; }
+    std::list<Symbol*>& getSymbols() { return m_symbolTable.getSymbols(); }
+    SymbolTable& getSymbolTable() { return m_symbolTable; }
+    Statement* getCurrentStatement();
 
-	IcErr addStatement(Statement& s);
-	IcErr addSymbol(Symbol& sym);
+    IcErr addStatement(Statement& s);
+    IcErr addSymbol(Symbol& sym);
 
-	bool endCodeBlock();
+    bool endCodeBlock();
 
-	virtual CompEA* codegen();
-	virtual IcaValue* genIL(GenIL*);
-	virtual llvm::Value* genLLVM(GenLLVM*);
+    virtual CompEA* codegen();
+    virtual IcaValue* genIL(GenIL*);
+    virtual llvm::Value* genLLVM(GenLLVM*);
 
-	//overloaded operators
-	friend std::ostream& operator<<(std::ostream& stream, const Function& f);
+    //overloaded operators
+    friend std::ostream& operator<<(std::ostream& stream, const Function& f);
 
-	//Visitors
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }	
+    //Visitors
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }	
 private:
-	std::list<Statement*> m_statementList;
-	FunctionProtoType& m_protoType;
-	std::list<Symbol*> m_argSymbolList;
-	SymbolTable& m_symbolTable; //we should have a table for the function locals. this will get precendence over the global one	
-	ControlFlowStatement* m_currentInsertStatement;
+    std::list<Statement*> m_statementList;
+    FunctionProtoType& m_protoType;
+    std::list<Symbol*> m_argSymbolList;
+    SymbolTable& m_symbolTable; //we should have a table for the function locals. this will get precendence over the global one	
+    ControlFlowStatement* m_currentInsertStatement;
 
-	//prevent unintended c++ synthesis
-	Function();
-	
+    //prevent unintended c++ synthesis
+    Function();
+    
 };
 
 class IcarusModule
 {
 public:
-	IcarusModule(const std::string& name);
-	~IcarusModule();
-	//Getter-Setters
+    IcarusModule(const std::string& name);
+    ~IcarusModule();
+    //Getter-Setters
 
-	std::string getName() const { return m_name; }
-	std::list<Function*>& getFunctions() { return m_functionList; }
-	std::list<Symbol*>& getSymbols() { return m_symbolTable.getSymbols(); }
-	FunctionProtoType* getProtoType(const std::string name, std::list<Type*>& dataTypes);
-	FunctionProtoType* getProtoType(const std::string name);//works till we allow overloading
-	Function* getFunction(const std::string name); //need to add support for datatypes too
+    std::string getName() const { return m_name; }
+    std::list<Function*>& getFunctions() { return m_functionList; }
+    std::list<Symbol*>& getSymbols() { return m_symbolTable.getSymbols(); }
+    FunctionProtoType* getProtoType(const std::string name, std::list<Type*>& dataTypes);
+    FunctionProtoType* getProtoType(const std::string name);//works till we allow overloading
+    Function* getFunction(const std::string name); //need to add support for datatypes too
 
-	IcErr addFunction(Function& f);
-	IcErr addSymbol(Symbol& s);
-	IcErr addProtoType(FunctionProtoType& fp);
-	IcErr insertStatement(Function& f, Statement& s);
+    IcErr addFunction(Function& f);
+    IcErr addSymbol(Symbol& s);
+    IcErr addProtoType(FunctionProtoType& fp);
+    IcErr insertStatement(Function& f, Statement& s);
 
-	virtual CompEA* codegen();
-	virtual IcaValue* genIL(GenIL*);
-	virtual llvm::Value* genLLVM(GenLLVM*);
+    virtual CompEA* codegen();
+    virtual IcaValue* genIL(GenIL*);
+    virtual llvm::Value* genLLVM(GenLLVM*);
 
-	//overloaded operators
-	friend std::ostream& operator<<(std::ostream& stream, const IcarusModule& m);
+    //overloaded operators
+    friend std::ostream& operator<<(std::ostream& stream, const IcarusModule& m);
 
-	//Visitors
-	virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-	
+    //Visitors
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+    
 private:
-	std::string m_name;
-	std::list<Function*> m_functionList;
-	std::list<FunctionProtoType*> m_funcProtoList;
-	SymbolTable& m_symbolTable;
-	IcarusModule();
+    std::string m_name;
+    std::list<Function*> m_functionList;
+    std::list<FunctionProtoType*> m_funcProtoList;
+    SymbolTable& m_symbolTable;
+    IcarusModule();
 };
 
 #endif //codegen.h

@@ -20,20 +20,20 @@ class ExpressionStatement;
 class IClassVisitor
 {
 public:
-	virtual void Visit(IcaValue& ) = 0;
-	virtual void Visit(Expression&) = 0;
-	virtual void Visit(Variable&) = 0;
-	virtual void Visit(BinopExpression&) = 0;
-	virtual void Visit(FunctionCall&) = 0;
-	virtual void Visit(Statement&) = 0;
-	virtual void Visit(Assignment&) = 0;
-	virtual void Visit(ExpressionStatement&) = 0;
-	virtual void Visit(ReturnStatement&) = 0;
-	virtual void Visit(FunctionProtoType&) = 0;
-	virtual void Visit(Function&) = 0;
-	virtual void Visit(SymbolTable&) = 0;	
-	virtual void Visit(Symbol& ) = 0;
-	virtual void Visit(IcarusModule& ) = 0;
+    virtual void Visit(IcaValue& ) = 0;
+    virtual void Visit(Expression&) = 0;
+    virtual void Visit(Variable&) = 0;
+    virtual void Visit(BinopExpression&) = 0;
+    virtual void Visit(FunctionCall&) = 0;
+    virtual void Visit(Statement&) = 0;
+    virtual void Visit(Assignment&) = 0;
+    virtual void Visit(ExpressionStatement&) = 0;
+    virtual void Visit(ReturnStatement&) = 0;
+    virtual void Visit(FunctionProtoType&) = 0;
+    virtual void Visit(Function&) = 0;
+    virtual void Visit(SymbolTable&) = 0;	
+    virtual void Visit(Symbol& ) = 0;
+    virtual void Visit(IcarusModule& ) = 0;
 };
 //don't forget to add the const visitor
 #endif //ICLASSVISITOR_H

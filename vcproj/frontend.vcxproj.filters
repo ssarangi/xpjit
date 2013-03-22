@@ -48,41 +48,38 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\frontend\include\ASTBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\frontend\include\codegen.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\frontend\include\CompEA.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\frontend\include\genIL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\frontend\include\genllvm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\frontend\include\IClassVisitor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\frontend\include\parser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\frontend\include\PrintVisitor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\frontend\include\SSAConstructor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\frontend\include\Type.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\frontend\include\unistd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\frontend\generated\parser.h">
       <Filter>generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\ASTBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\codegen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\CompEA.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\genIL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\genllvm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\IClassVisitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\PrintVisitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\SSAConstructor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\Type.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

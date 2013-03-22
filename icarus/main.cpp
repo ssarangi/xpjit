@@ -35,23 +35,23 @@ void genExecutable()
 
 int Compile(char *fileName)
 {
-	gTrace <<"Compiling file: " << fileName;
-	module = ParseFile(fileName);
-	if(module == NULL)
-		return -1; //there was some syntax error. Hence we skip all other checks
-	GenIL *myILGen = new GenIL(*module);
-	module = myILGen->generateIL();
+    gTrace <<"Compiling file: " << fileName;
+    module = ParseFile(fileName);
+    if(module == NULL)
+        return -1; //there was some syntax error. Hence we skip all other checks
+    GenIL *myILGen = new GenIL(*module);
+    module = myILGen->generateIL();
 
-	if(gDebug.isDotGen())
+    if(gDebug.isDotGen())
     {
-		DotWriter d;
-		std::string filename = "postgenIL.dot";
-		d.writeDotFile(filename, *module);
-	}
-		
-	GenLLVM genLLVM;
-	genLLVM.generateLLVM(*module);
-	llvm::Module& llvmModule = genLLVM.getModule();
+        DotWriter d;
+        std::string filename = "postgenIL.dot";
+        d.writeDotFile(filename, *module);
+    }
+        
+    GenLLVM genLLVM;
+    genLLVM.generateLLVM(*module);
+    llvm::Module& llvmModule = genLLVM.getModule();
 
     //Dispose old module
     if(module != NULL)
@@ -63,34 +63,34 @@ int Compile(char *fileName)
 
     llvmModule.dump();
 
-	if(gDebug.isOptimizing())
+    if(gDebug.isOptimizing())
     {
-		llvm::PassManager passMgr;
+        llvm::PassManager passMgr;
         //Analysis Passes
         passMgr.add(new DominanceTreeConstructor());
         passMgr.add(new DominanceFrontier());
 
         //Optimization Passes
-		passMgr.add(new ConstantFolder());
-		passMgr.run(llvmModule);
-	}
-	
-	if(gDebug.isDebuggable())
-		llvmModule.dump();
+        passMgr.add(new ConstantFolder());
+        passMgr.run(llvmModule);
+    }
+    
+    if(gDebug.isDebuggable())
+        llvmModule.dump();
 
-	std::string moduleStr;
-	llvm::raw_string_ostream string(moduleStr);
-	fstream moduleDumpFile;
-	moduleDumpFile.open("temp.ll", fstream::in | fstream::out | fstream::trunc);
-	if(moduleDumpFile.is_open())
+    std::string moduleStr;
+    llvm::raw_string_ostream string(moduleStr);
+    fstream moduleDumpFile;
+    moduleDumpFile.open("temp.ll", fstream::in | fstream::out | fstream::trunc);
+    if(moduleDumpFile.is_open())
     {
-		llvmModule.print(string, NULL);
-		moduleDumpFile<<moduleStr;
-		moduleDumpFile.close();
-	}
-	genExecutable();
-	
-	return 0;
+        llvmModule.print(string, NULL);
+        moduleDumpFile<<moduleStr;
+        moduleDumpFile.close();
+    }
+    genExecutable();
+    
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     gDebug.setDotGen(true);
     gDebug.setCodeOptimization(true); //we need to allow setting levels
 
-	gTrace<<"Verbose on!\n";
+    gTrace<<"Verbose on!\n";
     Compile(argv[1]);	
-	return 0;
+    return 0;
 }

@@ -24,7 +24,7 @@ char DominanceTreeConstructor::ID = 0;
 static Trace& gTrace = Trace::getInstance();
 
 bool DominanceTreeConstructor::runOnFunction(llvm::Function &F){
-	gTrace<<" Constructing Dominator Tree for "<<F.getName(); 
+    gTrace<<" Constructing Dominator Tree for "<<F.getName(); 
    
     // Keith D. Cooper's algorithm for computing dominators
     
@@ -74,7 +74,7 @@ bool DominanceTreeConstructor::runOnFunction(llvm::Function &F){
 
     //if debug
     domTree.print();
-	return false;
+    return false;
 }
 
 BasicBlock* DominanceTreeConstructor::intersect(BasicBlock* pred, BasicBlock* newIdom){

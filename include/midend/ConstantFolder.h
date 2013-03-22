@@ -12,14 +12,14 @@ using llvm::FunctionPass;
 class ConstantFolder : public FunctionPass 
 {
 public:
-	static char ID;
-	ConstantFolder() 
+    static char ID;
+    ConstantFolder() 
         : FunctionPass(ID) 
     {}
 
-	virtual bool doInitialization(llvm::Module &M) { return true; }
-	virtual bool runOnFunction(llvm::Function &F);
-	virtual bool doFinalization(llvm::Module &M) { return true; }
+    virtual bool doInitialization(llvm::Module &M) { return true; }
+    virtual bool runOnFunction(llvm::Function &F);
+    virtual bool doFinalization(llvm::Module &M) { return true; }
 };
 
 #endif //CONSTANT_FOLDER_H

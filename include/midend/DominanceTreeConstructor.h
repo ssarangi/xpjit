@@ -18,12 +18,12 @@ public:
     DominanceTreeConstructor() 
         : FunctionPass(ID)
     {
-       // ::initializeDominanceTreeConstructorPass(*llvm::PassRegistry::getPassRegistry());
+        // ::initializeDominanceTreeConstructorPass(*llvm::PassRegistry::getPassRegistry());
     }
 
     virtual bool doInitialization(llvm::Module &M){ return true; }
-	virtual bool runOnFunction(llvm::Function &F);
-	virtual bool doFinalization(llvm::Module &M){ return true; }
+    virtual bool runOnFunction(llvm::Function &F);
+    virtual bool doFinalization(llvm::Module &M){ return true; }
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const {    AU.setPreservesAll();  } //we need to preserve the data we created
 
     std::map<BasicBlock*, BasicBlock*>& getDoms() { return doms; }

@@ -1,8 +1,8 @@
 #include <stdio.h>
 extern "C" 
 {
-	void print(int x)
+    void print(int x)
     {
-		printf("%d\n",x);
-	}
+        printf("%d\n",x);
+    }
 }

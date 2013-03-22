@@ -7,6 +7,6 @@ char ConstantFolder::ID;
 
 bool ConstantFolder::runOnFunction(llvm::Function &F)
 {
-	gTrace<<"Constant Folding "<<F.getName();
-	return false;
+    gTrace<<"Constant Folding "<<F.getName();
+    return false;
 }

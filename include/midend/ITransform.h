@@ -6,7 +6,7 @@
 class ITransform 
 {
 public:
-	virtual void Execute(IcarusModule& ) = 0;
+    virtual void Execute(IcarusModule& ) = 0;
 };
 
 #endif //ITRANSFORM_H

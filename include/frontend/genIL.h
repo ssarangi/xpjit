@@ -8,21 +8,21 @@
 class GenIL 
 {
 public:
-	GenIL(IcarusModule &m)
+    GenIL(IcarusModule &m)
         : m_module(m)
         , m_astBuilder(*new ASTBuilder())
         , m_tempSeed(0) 
     {}
 
-	IcarusModule* generateIL();
-	ASTBuilder& getBuilder() { return m_astBuilder; }
-	Variable& getNextVariable();
+    IcarusModule* generateIL();
+    ASTBuilder& getBuilder() { return m_astBuilder; }
+    Variable& getNextVariable();
 private:
-	IcarusModule& m_module;
-	ASTBuilder& m_astBuilder;
-	unsigned long m_tempSeed;
-	//Prevent unintended C++ Synthesis
-	GenIL();
+    IcarusModule& m_module;
+    ASTBuilder& m_astBuilder;
+    unsigned long m_tempSeed;
+    //Prevent unintended C++ Synthesis
+    GenIL();
 };
 
 #endif

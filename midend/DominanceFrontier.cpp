@@ -23,7 +23,7 @@ static Trace& gTrace = Trace::getInstance();
 
 bool DominanceFrontier::runOnFunction(Function &F)
 {
-	gTrace<<" Calculating Dominator Frontier for "<<F.getName();
+    gTrace<<" Calculating Dominator Frontier for "<<F.getName();
 
     DominanceTreeConstructor& DT = getAnalysis<DominanceTreeConstructor>(); 
     std::map<BasicBlock*, BasicBlock*>& doms = DT.getDoms();
@@ -50,7 +50,7 @@ bool DominanceFrontier::runOnFunction(Function &F)
     }
     //if debug
     print();
-	return false;
+    return false;
 }
 
 void DominanceFrontier::print()

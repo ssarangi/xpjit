@@ -1,11 +1,11 @@
 #ifndef DOMINANCE_TREE
 #define DOMINANCE_TREE
 /* Dominator Tree
- * A tree
- * Each node is a basic block
- * Parent of a node is the immediate dominator of the node
- * Recusively iterating up the tree from the node gets the dominators of the node
- */
+* A tree
+* Each node is a basic block
+* Parent of a node is the immediate dominator of the node
+* Recusively iterating up the tree from the node gets the dominators of the node
+*/
 
 #include <set>
 #include <cstddef>
@@ -78,8 +78,8 @@ DominanceNode<T>* DominanceTree<T>::findNode(T* key){
             return node;
         std::set<DominanceNode<T>*>& children = node->getChildren();
         for(typename std::set<DominanceNode<T>*>::iterator iter = children.begin();
-                                          iter != children.end(); ++iter){
-            visitQ.push(*iter);
+            iter != children.end(); ++iter){
+                visitQ.push(*iter);
         }
     }
     return NULL;

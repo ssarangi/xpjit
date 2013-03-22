@@ -86,10 +86,12 @@
     <ClCompile Include="..\midend\PassManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\midend\include\ConstantFolder.h" />
-    <ClInclude Include="..\midend\include\DominanceFrontier.h" />
-    <ClInclude Include="..\midend\include\DominanceTree.h" />
-    <ClInclude Include="..\midend\include\DominanceTreeConstructor.h" />
+    <ClInclude Include="..\include\midend\ConstantFolder.h" />
+    <ClInclude Include="..\include\midend\DominanceFrontier.h" />
+    <ClInclude Include="..\include\midend\DominanceTree.h" />
+    <ClInclude Include="..\include\midend\DominanceTreeConstructor.h" />
+    <ClInclude Include="..\include\midend\ITransform.h" />
+    <ClInclude Include="..\include\midend\PassManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
