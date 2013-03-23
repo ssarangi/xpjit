@@ -10,6 +10,7 @@
 #include <map>
 #include <set>
 #include <queue>
+#include <iostream>
 
 using namespace llvm;
 char DominanceTreeConstructor::ID = 0;
@@ -43,27 +44,35 @@ bool DominanceTreeConstructor::runOnFunction(llvm::Function &F){
     //Assign depth first order numbering to each basic block
     int count = 0;
     for(df_iterator<BasicBlock*> dfIter = df_begin(startNode); dfIter != df_end(startNode); ++dfIter)
+    {
         uniq[*dfIter] = ++count;
+    }
 
     bool changed = true;
-    while(changed){
+    while(changed)
+    {
         changed = false;
         ReversePostOrderTraversal<Function*> RPOT(&F);
-        for(ReversePostOrderTraversal<Function*>::rpo_iterator rpoIter = RPOT.begin(); rpoIter != RPOT.end(); ++rpoIter){
-            if(*rpoIter != startNode){
+        for(ReversePostOrderTraversal<Function*>::rpo_iterator rpoIter = RPOT.begin(); rpoIter != RPOT.end(); ++rpoIter)
+        {
+            if(*rpoIter != startNode)
+            {
                 BasicBlock* newIdom = NULL;//first processed predecessor of rpoIter
                 for(pred_iterator predIter = pred_begin(*rpoIter); //for each of its predecessor
                                               predIter != pred_end(*rpoIter); 
-                                              ++predIter){
+                                              ++predIter)
+                {
                     BasicBlock* pred = *predIter;
-                    if(doms[pred] != NULL){
+                    if(doms[pred] != NULL)
+                    {
                         if(newIdom == NULL)
                             newIdom = pred;
                         else
                             newIdom = intersect(pred, newIdom);
                     }
                 }
-                if(newIdom != doms[*rpoIter]){
+                if(newIdom != doms[*rpoIter])
+                {
                     domTree.setIDom(*rpoIter, newIdom);
                     doms[*rpoIter] = newIdom;
                     changed = true;
@@ -77,12 +86,15 @@ bool DominanceTreeConstructor::runOnFunction(llvm::Function &F){
     return false;
 }
 
-BasicBlock* DominanceTreeConstructor::intersect(BasicBlock* pred, BasicBlock* newIdom){
+BasicBlock* DominanceTreeConstructor::intersect(BasicBlock* pred, BasicBlock* newIdom)
+{
     BasicBlock* finger1 = pred;
     BasicBlock* finger2 = newIdom;
-    while(uniq[finger1] != uniq[finger2]) {
+    while(uniq[finger1] != uniq[finger2])
+    {
         while(uniq[finger1] > uniq[finger2])
             finger1 = doms[finger1];
+    
         while(uniq[finger2] > uniq[finger1])
             finger2 = doms[finger2];
     }
@@ -90,25 +102,30 @@ BasicBlock* DominanceTreeConstructor::intersect(BasicBlock* pred, BasicBlock* ne
 }
 
 template<>
-void DominanceTree<BasicBlock>::print(){
+void DominanceTree<BasicBlock>::print()
+{
     gTrace<<"Printing dominance tree\n";
-    if(m_root == NULL){
+    if(m_root == NULL)
+    {
         gTrace<<"Graph is empty\n";
         return;
     }
+    
     std::queue<DominanceNode<BasicBlock>* > visitQ;
     visitQ.push(m_root);
-    while(!visitQ.empty()){
+    
+    while(!visitQ.empty())
+    {
         DominanceNode<BasicBlock>* node = visitQ.front();
         gTrace<<"*"<<node->getActualNode()->getName()<<" --> ";
         visitQ.pop();
         std::set<DominanceNode<BasicBlock>*>& children = node->getChildren();
         for(std::set<DominanceNode<BasicBlock>*>::iterator iter = children.begin();
-                                          iter != children.end(); ++iter){
+                                          iter != children.end(); ++iter)
+        {
             gTrace<<((DominanceNode<BasicBlock>*)(*iter))->getActualNode()->getName()<<" ";
             visitQ.push(*iter);
         }
         gTrace<<"\n";
     }
 }
-

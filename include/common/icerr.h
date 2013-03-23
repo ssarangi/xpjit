@@ -6,9 +6,9 @@
 
 enum IcErr
 {
-	eNoErr = 0,
-	eFunctionAlreadyDefined,
-	eProtoTypeAlreadyDefined
+    eNoErr = 0,
+    eFunctionAlreadyDefined,
+    eProtoTypeAlreadyDefined
 };
 
 extern std::string errMsg[];

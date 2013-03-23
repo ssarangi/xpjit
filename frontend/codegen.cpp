@@ -5,161 +5,161 @@
 
 BranchStatement::BranchStatement(Expression& condition)
 {
-	addBranch(condition);
+    addBranch(condition);
 }
 
 IcErr BranchStatement::addStatement(Statement& s)
 {
-	return m_currentBranch->addStatement(s);
+    return m_currentBranch->addStatement(s);
 }
 
 IcErr BranchStatement::addBranch(Expression& condition)
 {
-	m_currentBranch = new Branch(condition);
-	m_branches.push_back(m_currentBranch);
-	return eNoErr;
+    m_currentBranch = new Branch(condition);
+    m_branches.push_back(m_currentBranch);
+    return eNoErr;
 }
 
 bool BranchStatement::endCodeBlock()
 {
-	return m_currentBranch->endCodeBlock();
+    return m_currentBranch->endCodeBlock();
 }
 
 Statement* BranchStatement::getCurrentStatement()
 {
-	Statement* curStatement = m_currentBranch->getCurrentStatement();
-	if(curStatement == NULL)
-		return this;
+    Statement* curStatement = m_currentBranch->getCurrentStatement();
+    if(curStatement == NULL)
+        return this;
 }
 
 //----------Branch----------------------------------
 IcErr Branch::addStatement(Statement& s)
 {
-	if(m_currentInsertStatement == NULL)
+    if(m_currentInsertStatement == NULL)
     {
-		m_statementList.push_back(&s);
-		ControlFlowStatement* ctrlStmt = dynamic_cast<ControlFlowStatement*>(&s);
-		if(ctrlStmt != NULL)
-			m_currentInsertStatement = ctrlStmt;
-	} 
+        m_statementList.push_back(&s);
+        ControlFlowStatement* ctrlStmt = dynamic_cast<ControlFlowStatement*>(&s);
+        if(ctrlStmt != NULL)
+            m_currentInsertStatement = ctrlStmt;
+    } 
     else
-		m_currentInsertStatement->addStatement(s);	
-	return eNoErr;
+        m_currentInsertStatement->addStatement(s);	
+    return eNoErr;
 }
 
 Statement* Branch::getCurrentStatement()
 {
-	if(m_currentInsertStatement == NULL)
-		return NULL;
-	return m_currentInsertStatement->getCurrentStatement();	
+    if(m_currentInsertStatement == NULL)
+        return NULL;
+    return m_currentInsertStatement->getCurrentStatement();	
 }
 
 bool Branch::endCodeBlock()
 {
-	if(m_currentInsertStatement == NULL)
-		return false;
-	if(!m_currentInsertStatement->endCodeBlock())
-		m_currentInsertStatement = NULL;
-	return true;
+    if(m_currentInsertStatement == NULL)
+        return false;
+    if(!m_currentInsertStatement->endCodeBlock())
+        m_currentInsertStatement = NULL;
+    return true;
 }
 
 //---------------WhileStatement----------------
 IcErr WhileStatement::addStatement(Statement& s)
 {
-	if(m_currentInsertStatement == NULL)
+    if(m_currentInsertStatement == NULL)
     { //we are generating statements in the function
-		m_statementList.push_back(&s);
-		ControlFlowStatement* ctrlStmt = dynamic_cast<ControlFlowStatement*>(&s);
-		if(ctrlStmt != NULL)
-			m_currentInsertStatement = ctrlStmt;
-	} 
+        m_statementList.push_back(&s);
+        ControlFlowStatement* ctrlStmt = dynamic_cast<ControlFlowStatement*>(&s);
+        if(ctrlStmt != NULL)
+            m_currentInsertStatement = ctrlStmt;
+    } 
     else
-		m_currentInsertStatement->addStatement(s);	
-	return eNoErr;
+        m_currentInsertStatement->addStatement(s);	
+    return eNoErr;
 }
 
 //---------------ControlFlowStatement----------------
 bool ControlFlowStatement::endCodeBlock()
 {
-	if(m_currentInsertStatement == NULL)
-		return false;
-	if(!m_currentInsertStatement->endCodeBlock())
-		m_currentInsertStatement = NULL;
-	return true; //either the inner code block ended or we ended our codeblock just now.
+    if(m_currentInsertStatement == NULL)
+        return false;
+    if(!m_currentInsertStatement->endCodeBlock())
+        m_currentInsertStatement = NULL;
+    return true; //either the inner code block ended or we ended our codeblock just now.
 }
 
 Statement* ControlFlowStatement::getCurrentStatement()
 {
-	if(m_currentInsertStatement == NULL)
-		return this;
-	else
-		return m_currentInsertStatement->getCurrentStatement();	
+    if(m_currentInsertStatement == NULL)
+        return this;
+    else
+        return m_currentInsertStatement->getCurrentStatement();	
 }
 
 //--------------FunctionProtoType---------------
 bool FunctionProtoType::operator==(const FunctionProtoType& fpOther) const
 {
-	if(m_name != fpOther.m_name)
-		return false;
-	if(m_argTypeList.size() != fpOther.m_argTypeList.size())
-		return false;
-	unsigned int n = m_argTypeList.size();
-	
+    if(m_name != fpOther.m_name)
+        return false;
+    if(m_argTypeList.size() != fpOther.m_argTypeList.size())
+        return false;
+    unsigned int n = m_argTypeList.size();
+
     std::list<Type*>::const_iterator typeIter = m_argTypeList.begin();
-	std::list<Type*>::const_iterator otherTypeIter = fpOther.m_argTypeList.begin();
-	
+    std::list<Type*>::const_iterator otherTypeIter = fpOther.m_argTypeList.begin();
+
     for(unsigned int i = 0 ; i < n ; ++i, ++typeIter, ++otherTypeIter)
     {
-		if(*typeIter != *otherTypeIter)
-			return false;	
-	}
-	return true;
+        if(*typeIter != *otherTypeIter)
+            return false;	
+    }
+    return true;
 }
 
 //--------------Function------------------
 IcErr Function::addStatement(Statement& s)
 {
-	if(m_currentInsertStatement == NULL)
+    if(m_currentInsertStatement == NULL)
     { 
         //we are generating statements in the function
-		m_statementList.push_back(&s);
-		ControlFlowStatement* ctrlStmt = dynamic_cast<ControlFlowStatement*>(&s);
-		if(ctrlStmt != NULL)
-			m_currentInsertStatement = ctrlStmt;
-	} 
+        m_statementList.push_back(&s);
+        ControlFlowStatement* ctrlStmt = dynamic_cast<ControlFlowStatement*>(&s);
+        if(ctrlStmt != NULL)
+            m_currentInsertStatement = ctrlStmt;
+    } 
     else
-		m_currentInsertStatement->addStatement(s);
-	
-	return eNoErr;
+        m_currentInsertStatement->addStatement(s);
+
+    return eNoErr;
 }
 
 
 Statement* Function::getCurrentStatement()
 {
-	if(m_currentInsertStatement == NULL)
-		return NULL;
-	return m_currentInsertStatement->getCurrentStatement();
+    if(m_currentInsertStatement == NULL)
+        return NULL;
+    return m_currentInsertStatement->getCurrentStatement();
 }
 
 bool Function::endCodeBlock()
 {
-	if(m_currentInsertStatement == NULL)
-		return false;
-	if(!m_currentInsertStatement->endCodeBlock())
-		m_currentInsertStatement = NULL;
-	return true; //either the inner code block ended or we ended our codeblock just now.
+    if(m_currentInsertStatement == NULL)
+        return false;
+    if(!m_currentInsertStatement->endCodeBlock())
+        m_currentInsertStatement = NULL;
+    return true; //either the inner code block ended or we ended our codeblock just now.
 }
 
 std::ostream& operator<<(std::ostream& stream, const Function& f)
 {
-	stream<<"Function: "<<f.getName()<<endl;
-	//print the statements here
+    stream<<"Function: "<<f.getName()<<endl;
+    //print the statements here
     return stream;
 }
 
 IcErr Function::addSymbol(Symbol& sym)
 {
-	m_symbolTable.add(sym);
+    m_symbolTable.add(sym);
     return eNoErr;
 }
 
@@ -175,9 +175,9 @@ Function::~Function()
 
 IcErr SymbolTable::add(Symbol& sym)
 {
-	//do error handling later
-	m_symbols.push_back(&sym);
-	return eNoErr;
+    //do error handling later
+    m_symbols.push_back(&sym);
+    return eNoErr;
 }
 
 //---------------Module----------------
@@ -188,62 +188,62 @@ IcarusModule::IcarusModule(const std::string& name): m_name(name), m_symbolTable
 
 IcErr IcarusModule::addFunction(Function& func)
 {
-	//do error handling later
-	m_functionList.push_back(&func);
-	return eNoErr;
+    //do error handling later
+    m_functionList.push_back(&func);
+    return eNoErr;
 }
 
 IcErr IcarusModule::addSymbol(Symbol& sym)
 {
-	//do error handling later
-	return m_symbolTable.add(sym);
+    //do error handling later
+    return m_symbolTable.add(sym);
 }
 
 IcErr IcarusModule::addProtoType(FunctionProtoType& fp)
 {
-	//do error handling later
-	m_funcProtoList.push_back(&fp);
-	return eNoErr;
+    //do error handling later
+    m_funcProtoList.push_back(&fp);
+    return eNoErr;
 }
 
 FunctionProtoType* IcarusModule::getProtoType(const std::string name, std::list<Type*>& dataTypes)
 {
-	FunctionProtoType& fp = *new FunctionProtoType(name, dataTypes, *new Type(Type::IntegerTy)); //no need of return type for comparing prototypes
-	std::list<FunctionProtoType*>::const_iterator protoIter = m_funcProtoList.begin();
-	
+    FunctionProtoType& fp = *new FunctionProtoType(name, dataTypes, *new Type(Type::IntegerTy)); //no need of return type for comparing prototypes
+    std::list<FunctionProtoType*>::const_iterator protoIter = m_funcProtoList.begin();
+
     for(; protoIter != m_funcProtoList.end(); ++protoIter)
     {
-		if(**protoIter == fp)
-			return *protoIter;
-	}
-	return NULL; //not found
+        if(**protoIter == fp)
+            return *protoIter;
+    }
+    return NULL; //not found
 }
 
 FunctionProtoType* IcarusModule::getProtoType(const std::string name)
 {
-	std::list<FunctionProtoType*>::const_iterator protoIter = m_funcProtoList.begin();
-	for(; protoIter != m_funcProtoList.end(); ++protoIter)
+    std::list<FunctionProtoType*>::const_iterator protoIter = m_funcProtoList.begin();
+    for(; protoIter != m_funcProtoList.end(); ++protoIter)
     {
-		if((*protoIter)->getName() == name)
-			return *protoIter;
-	}
-	return NULL; //not found
+        if((*protoIter)->getName() == name)
+            return *protoIter;
+    }
+    return NULL; //not found
 }
 
 IcErr IcarusModule::insertStatement(Function& f, Statement& s)
 {
-	return f.addStatement(s);
+    return f.addStatement(s);
 }
 
 std::ostream& operator<<(std::ostream& stream, const IcarusModule& m)
 {
-	stream<<"Module: "<<m.m_name<<endl;
-	return stream;
+    stream<<"Module: "<<m.m_name<<endl;
+    return stream;
 }
 
 IcarusModule::~IcarusModule()
 {
-	delete &m_symbolTable;
+    delete &m_symbolTable;
     std::list<Function*>::iterator funcIter = m_functionList.begin();
     for(; funcIter != m_functionList.end(); ++funcIter)
     {
@@ -253,13 +253,13 @@ IcarusModule::~IcarusModule()
 
 Function* IcarusModule::getFunction(const std::string name)
 {
-	std::list<Function*>::const_iterator iter = m_functionList.begin();
-	for(; iter != m_functionList.end(); ++iter)
+    std::list<Function*>::const_iterator iter = m_functionList.begin();
+    for(; iter != m_functionList.end(); ++iter)
     {
-		if((*iter)->getName() == name)
-			return *iter;
-	}
-	return NULL;
+        if((*iter)->getName() == name)
+            return *iter;
+    }
+    return NULL;
 }
 
 //------------------Code generator methods
@@ -286,11 +286,11 @@ CompEA* FunctionCall::codegen()
 
 CompEA* Assignment::codegen()
 {
-	CompEA *right = m_lval.codegen();	
-	CompEA *left = m_rval.codegen();
-	cout<<"lea "<<right;
-	cout<<"mov "<<"["<<left<<"],"<<right;
-	return nullptr; //we wont use it anyway
+    CompEA *right = m_lval.codegen();	
+    CompEA *left = m_rval.codegen();
+    cout<<"lea "<<right;
+    cout<<"mov "<<"["<<left<<"],"<<right;
+    return nullptr; //we wont use it anyway
 }
 
 CompEA* ReturnStatement::codegen()
@@ -310,25 +310,25 @@ CompEA* BranchStatement::codegen()
 
 CompEA* Function::codegen()
 {
-	cout<<"Creating code for function"<<getName()<<endl;
-	std::list<Statement*> statementList = getStatements();
-	std::list<Statement*>::const_iterator iter = statementList.begin();
-	
+    cout<<"Creating code for function"<<getName()<<endl;
+    std::list<Statement*> statementList = getStatements();
+    std::list<Statement*>::const_iterator iter = statementList.begin();
+
     for(; iter != statementList.end(); ++iter)
     {
-		(*iter)->codegen();
-	}
+        (*iter)->codegen();
+    }
 
     return nullptr;
 }
 
 CompEA* IcarusModule::codegen()
 {
-	std::list<Function*>& funcList = getFunctions();
-	for(std::list<Function*>::const_iterator funcIter = funcList.begin(); funcIter != funcList.end() ; ++funcIter)
+    std::list<Function*>& funcList = getFunctions();
+    for(std::list<Function*>::const_iterator funcIter = funcList.begin(); funcIter != funcList.end() ; ++funcIter)
     {
-		(*funcIter)->codegen();
-	}
+        (*funcIter)->codegen();
+    }
 
     return nullptr;
 }
