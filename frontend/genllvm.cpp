@@ -1,12 +1,12 @@
 #include "frontend/genllvm.h"
 #include "frontend/codegen.h"
 
-#include <llvm/Module.h>
-#include <llvm/IRBuilder.h>
-#include <llvm/LLVMContext.h>
-#include <llvm/Instructions.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Instructions.h>
 #include <llvm/ADT/ArrayRef.h>
-#include <llvm/Constants.h>
+#include <llvm/IR/Constants.h>
 #include <llvm/ADT/APInt.h>
 #include <llvm/ADT/StringRef.h>
 

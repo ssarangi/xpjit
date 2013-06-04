@@ -6,8 +6,8 @@
 #include "frontend/CompEA.h"
 #include "frontend/Type.h"
 
-#include <llvm/Value.h>
-#include <llvm/Module.h>
+#include <llvm/IR/Value.h>
+#include <llvm/IR/Module.h>
 
 #include <list>
 #include <string>

@@ -2,7 +2,7 @@
 #define DOMINANCE_TREE_CONSTRUCTOR
 
 #include "llvm/Pass.h"
-#include "llvm/Function.h"
+#include "llvm/IR/Function.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/PassRegistry.h"
 #include "DominanceTree.h"

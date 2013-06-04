@@ -14,7 +14,7 @@
 #include <iostream>
 #include <cstdio>
 
-#include <llvm/Module.h>
+#include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/PassManager.h>
