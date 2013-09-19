@@ -58,7 +58,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(LLVM_DIR)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>LLVMAnalysis.lib;LLVMArchive.lib;LLVMAsmParser.lib;LLVMAsmPrinter.lib;LLVMBitReader.lib;LLVMBitWriter.lib;LLVMCodeGen.lib;LLVMCore.lib;LLVMDebugInfo.lib;LLVMExecutionEngine.lib;LLVMInstCombine.lib;LLVMInstrumentation.lib;LLVMInterpreter.lib;LLVMJIT.lib;LLVMLinker.lib;LLVMMC.lib;LLVMMCDisassembler.lib;LLVMMCJIT.lib;LLVMMCParser.lib;LLVMObject.lib;LLVMRuntimeDyld.lib;LLVMScalarOpts.lib;LLVMSelectionDAG.lib;LLVMSupport.lib;LLVMTableGen.lib;LLVMTarget.lib;LLVMTransformUtils.lib;LLVMVectorize.lib;LLVMX86AsmParser.lib;LLVMX86AsmPrinter.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Disassembler.lib;LLVMX86Info.lib;LLVMX86Utils.lib;LLVMipa.lib;LLVMipo.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>LLVMAnalysis.lib;LLVMAsmParser.lib;LLVMAsmPrinter.lib;LLVMBitReader.lib;LLVMBitWriter.lib;LLVMCodeGen.lib;LLVMCore.lib;LLVMDebugInfo.lib;LLVMExecutionEngine.lib;LLVMInstCombine.lib;LLVMInstrumentation.lib;LLVMInterpreter.lib;LLVMJIT.lib;LLVMLinker.lib;LLVMMC.lib;LLVMMCDisassembler.lib;LLVMMCJIT.lib;LLVMMCParser.lib;LLVMObject.lib;LLVMRuntimeDyld.lib;LLVMScalarOpts.lib;LLVMSelectionDAG.lib;LLVMSupport.lib;LLVMTableGen.lib;LLVMTarget.lib;LLVMTransformUtils.lib;LLVMVectorize.lib;LLVMX86AsmParser.lib;LLVMX86AsmPrinter.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Disassembler.lib;LLVMX86Info.lib;LLVMX86Utils.lib;LLVMipa.lib;LLVMipo.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
