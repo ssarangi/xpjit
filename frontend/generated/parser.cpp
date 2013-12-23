@@ -780,52 +780,52 @@ yyreduce:
 
 case 5:
 { 
-		gTrace<<"function declaration\n";
-		const std::string& string = yyvsp[-4].string;
-		IcErr err = builder->addProtoType(string, getType(yyvsp[-5].integer), NULL);
-		if(err != eNoErr)
-			yyerror(errMsg[err]);		
-	;
+        gTrace<<"function declaration\n";
+        const std::string& string = yyvsp[-4].string;
+        IcErr err = builder->addProtoType(string, getType(yyvsp[-5].integer), NULL);
+        if(err != eNoErr)
+            yyerror(errMsg[err]);		
+    ;
     break;}
 case 6:
 {
-		builder->pushDataType(&getType(yyvsp[-1].integer));
-		Symbol *sym = builder->addSymbol(yyvsp[0].string, getType(yyvsp[-1].integer));
-		builder->pushArgName(sym);
-	;
+        builder->pushDataType(&getType(yyvsp[-1].integer));
+        Symbol *sym = builder->addSymbol(yyvsp[0].string, getType(yyvsp[-1].integer));
+        builder->pushArgName(sym);
+    ;
     break;}
 case 7:
 {
-		builder->pushDataType(&getType(yyvsp[-1].integer));
-		Symbol *sym = builder->addSymbol(yyvsp[0].string, getType(yyvsp[-1].integer));
-		builder->pushArgName(sym);
-	;
+        builder->pushDataType(&getType(yyvsp[-1].integer));
+        Symbol *sym = builder->addSymbol(yyvsp[0].string, getType(yyvsp[-1].integer));
+        builder->pushArgName(sym);
+    ;
     break;}
 case 9:
 {
-		gTrace<<"function definition\n";
-		const std::string& string = yyvsp[-4].string;
-		FunctionProtoType* fp = builder->getProtoType(string);//use current dataTypeList
-		if(fp == NULL) //find the prototype in the module. if not found, add a new one
-			builder->addProtoType(string, getType(yyvsp[-5].integer), &fp);
-		IcErr err = builder->addFunction(*fp);
-		if(err != eNoErr)
-			yyerror(errMsg[err]);
-	;
+        gTrace<<"function definition\n";
+        const std::string& string = yyvsp[-4].string;
+        FunctionProtoType* fp = builder->getProtoType(string);//use current dataTypeList
+        if(fp == NULL) //find the prototype in the module. if not found, add a new one
+            builder->addProtoType(string, getType(yyvsp[-5].integer), &fp);
+        IcErr err = builder->addFunction(*fp);
+        if(err != eNoErr)
+            yyerror(errMsg[err]);
+    ;
     break;}
 case 10:
 {	//we should clear the m_curFunction after this, so that any global decl will not be a part of prev function's symtab
-		builder->endCodeBlock();	
-	;
+        builder->endCodeBlock();	
+    ;
     break;}
 case 14:
 { builder->insertStatement(*yyvsp[0].statement);;
     break;}
 case 15:
 { 
-		gTrace<<"expression\n";
-		builder->insertStatement(*new ExpressionStatement(*(Expression *)yyvsp[-1].value));
-	;
+        gTrace<<"expression\n";
+        builder->insertStatement(*new ExpressionStatement(*(Expression *)yyvsp[-1].value));
+    ;
     break;}
 case 16:
 { builder->insertStatement(*yyvsp[-1].statement);;
@@ -844,17 +844,17 @@ case 20:
     break;}
 case 21:
 {
-		gTrace<<"if statement ";
-		builder->insertStatement(*new BranchStatement(*(Expression*)yyvsp[-1].value));
-	;
+        gTrace<<"if statement ";
+        builder->insertStatement(*new BranchStatement(*(Expression*)yyvsp[-1].value));
+    ;
     break;}
 case 22:
 { gTrace<<"ending if block";  ;
     break;}
 case 24:
 {
-		builder->addBranch(*(Expression*)new Constant(1)); //a 'true' expression
-	;
+        builder->addBranch(*(Expression*)new Constant(1)); //a 'true' expression
+    ;
     break;}
 case 25:
 { gTrace<<"ending else block"; builder->endCodeBlock(); ;
@@ -891,12 +891,12 @@ case 37:
     break;}
 case 38:
 { 
-		gTrace<<"assignment";
-		Symbol *identifierSymbol = builder->getSymbol(yyvsp[-3].string);
-		if(identifierSymbol == NULL)
-			yyerror("Symbol Not Defined");
-		yyval.statement = new Assignment(*new Variable(*identifierSymbol), *yyvsp[-1].value);
-	;
+        gTrace<<"assignment";
+        Symbol *identifierSymbol = builder->getSymbol(yyvsp[-3].string);
+        if(identifierSymbol == NULL)
+            yyerror("Symbol Not Defined");
+        yyval.statement = new Assignment(*new Variable(*identifierSymbol), *yyvsp[-1].value);
+    ;
     break;}
 case 39:
 { yyval.statement = new ReturnStatement(yyvsp[0].value);;
@@ -909,12 +909,12 @@ case 41:
     break;}
 case 42:
 {
-		gTrace<<"identifier";
-		Symbol *identifierSymbol = builder->getSymbol(yyvsp[0].string);
-		if(identifierSymbol == NULL)			
-			yyerror("Symbol Not Defined");			
-		yyval.value = new Variable(*identifierSymbol);
-	;
+        gTrace<<"identifier";
+        Symbol *identifierSymbol = builder->getSymbol(yyvsp[0].string);
+        if(identifierSymbol == NULL)			
+            yyerror("Symbol Not Defined");			
+        yyval.value = new Variable(*identifierSymbol);
+    ;
     break;}
 case 43:
 { yyval.value = new BinopExpression(*yyvsp[-2].value, *yyvsp[0].value, BinopExpression::Add); ;
@@ -954,15 +954,15 @@ case 54:
     break;}
 case 55:
 {
-		gTrace<<"function called";
-		std::list<Type*> paramTypeList;
-		
-		FunctionProtoType* fp = builder->getFunctionProtoType(yyvsp[-3].string);
-		if(fp == NULL)
-			yyerror("Function not found");
-		yyval.value = new FunctionCall(*fp, parameterList);
-		parameterList.clear();
-	;
+        gTrace<<"function called";
+        std::list<Type*> paramTypeList;
+        
+        FunctionProtoType* fp = builder->getFunctionProtoType(yyvsp[-3].string);
+        if(fp == NULL)
+            yyerror("Function not found");
+        yyval.value = new FunctionCall(*fp, parameterList);
+        parameterList.clear();
+    ;
     break;}
 case 56:
 { parameterList.push_back(yyvsp[0].value); ;
@@ -1176,37 +1176,37 @@ void yyerror(string s) {
 }
 
 int yywrap (void ) {
-	return 1;
+    return 1;
 }
 
 Type& getType(int parsedType){
-	switch(parsedType){
-		case Type::IntegerTy:
-		case Type::FloatTy:
-		case Type::VoidTy:		
-			return *new Type((Type::TypeID)parsedType);
-			break;
-		default: yyerror("Unknown type in getType()");
-			break;
-	}
+    switch(parsedType){
+        case Type::IntegerTy:
+        case Type::FloatTy:
+        case Type::VoidTy:		
+            return *new Type((Type::TypeID)parsedType);
+            break;
+        default: yyerror("Unknown type in getType()");
+            break;
+    }
 }
 
 IcarusModule* ParseFile(const char *filename){
-	FILE* fp = fopen(filename, "r");
-	
-	if(!fp){
-		fprintf(stderr, "Oops! Couldn't open file %s\n!", filename);
-		return NULL;
-	}
-	
-	builder = new ASTBuilder(); //!!!Check for memory leak
-	yyrestart(fp);
-	if(gDebug.isYaccTraceOn())
-		yydebug = 1; //set it to 1 for text based debugging, 5 for graph based debugging
-	yyparse();
-	if(builder->hasErrors()){
-		fprintf(stderr, "Stopping compilation as we found some syntax errors in %s\n!", filename);
-		return NULL;
-	}
-	return &builder->getModule();	
+    FILE* fp = fopen(filename, "r");
+    
+    if(!fp){
+        fprintf(stderr, "Oops! Couldn't open file %s\n!", filename);
+        return NULL;
+    }
+    
+    builder = new ASTBuilder(); //!!!Check for memory leak
+    yyrestart(fp);
+    if(gDebug.isYaccTraceOn())
+        yydebug = 1; //set it to 1 for text based debugging, 5 for graph based debugging
+    yyparse();
+    if(builder->hasErrors()){
+        fprintf(stderr, "Stopping compilation as we found some syntax errors in %s\n!", filename);
+        return NULL;
+    }
+    return &builder->getModule();	
 }

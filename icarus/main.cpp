@@ -97,11 +97,11 @@ int main(int argc, char *argv[])
 {
     gDebug.setDebug(true);
     gDebug.setTrace(true);
-    gDebug.setYaccTrace(true);
+    gDebug.setYaccTrace(false);
     gDebug.setDotGen(true);
     gDebug.setCodeOptimization(true); //we need to allow setting levels
 
-    gTrace<<"Verbose on!\n";
-    Compile(argv[1]);	
+    gTrace << "Verbose on!\n";
+    Compile(argv[1]);
     return 0;
 }
