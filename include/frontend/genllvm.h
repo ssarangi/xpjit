@@ -12,7 +12,7 @@
 class GenLLVM 
 {
 public:
-    GenLLVM();	
+    GenLLVM();
     void generateLLVM(IcarusModule &);
     llvm::IRBuilder<>& getBuilder() { return m_irBuilder; }
     llvm::Module& getModule() { return m_module; }

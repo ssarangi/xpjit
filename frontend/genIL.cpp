@@ -106,9 +106,11 @@ IcaValue* BranchStatement::genIL(GenIL *g)
         }
         else
             builder.addBranch(condition);
+
         std::list<Statement*>::const_iterator stmtIter = branch->getStatements().begin();
+        
         for(; stmtIter != branch->getStatements().end(); ++stmtIter)
-            (*stmtIter)->genIL(g);		
+            (*stmtIter)->genIL(g);
     }
     builder.endCodeBlock();
     return branchStmt;

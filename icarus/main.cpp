@@ -5,9 +5,7 @@
 #include "frontend/genllvm.h"
 #include "unistd.h"
 #include "common/debug.h"
-#include "midend/ConstantFolder.h"
-#include "midend/DominanceTreeConstructor.h"
-#include "midend/DominanceFrontier.h"
+#include "midend/optimizeIR.h"
 
 #include <fstream>
 #include <cstdlib>
@@ -17,7 +15,6 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/PassManager.h>
 
 extern IcarusModule* ParseFile(const char *filename); //using this for now. need to create a standard header file for lex
 
@@ -60,19 +57,12 @@ int Compile(char *fileName)
         module = NULL;
     }
 
-
-    llvmModule.dump();
+    if (gDebug.isDebuggable())
+        llvmModule.dump();
 
     if(gDebug.isOptimizing())
     {
-        llvm::PassManager passMgr;
-        //Analysis Passes
-        passMgr.add(new DominanceTreeConstructor());
-        passMgr.add(new DominanceFrontier());
-
-        //Optimization Passes
-        passMgr.add(new ConstantFolder());
-        passMgr.run(llvmModule);
+        OptimizeIR(llvmModule);
     }
     
     if(gDebug.isDebuggable())
@@ -96,7 +86,7 @@ int Compile(char *fileName)
 int main(int argc, char *argv[])
 {
     gDebug.setDebug(true);
-    gDebug.setTrace(true);
+    gDebug.setTrace(false);
     gDebug.setYaccTrace(false);
     gDebug.setDotGen(true);
     gDebug.setCodeOptimization(true); //we need to allow setting levels

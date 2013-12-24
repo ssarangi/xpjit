@@ -32,7 +32,7 @@ llvm::Value* BinopExpression::genLLVM(GenLLVM* g)
 {
     llvm::IRBuilder<>& builder = g->getBuilder();
 
-    llvm::Value* leftValue = getLeftValue().genLLVM(g);	
+    llvm::Value* leftValue = getLeftValue().genLLVM(g);
     llvm::Value* rightValue = getRightValue().genLLVM(g);
 
     switch(getOperation())
@@ -41,10 +41,10 @@ llvm::Value* BinopExpression::genLLVM(GenLLVM* g)
         return builder.CreateAdd(leftValue, rightValue, "");
         break;
     case Sub:
-        return builder.CreateSub(leftValue, rightValue, "");			
+        return builder.CreateSub(leftValue, rightValue, "");
         break;
     case Mul:
-        return builder.CreateMul(leftValue, rightValue, "");			
+        return builder.CreateMul(leftValue, rightValue, "");
         break;
     case Div:
         return builder.CreateSDiv(leftValue, rightValue, "");
@@ -66,8 +66,7 @@ llvm::Value* BinopExpression::genLLVM(GenLLVM* g)
         break;
     case GTEQ:
         return builder.CreateICmpUGE(leftValue, rightValue, "");
-        break;		
-
+        break;
     }
 }
 

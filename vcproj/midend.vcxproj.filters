@@ -27,6 +27,9 @@
     <ClCompile Include="..\midend\PassManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\midend\optimizeIR.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\midend\ConstantFolder.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\midend\PassManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\midend\optimizeIR.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
