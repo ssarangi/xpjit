@@ -2,6 +2,7 @@ int global1, global2;
 int add(int x, int y)
 {
 	int z;
+    z = 10;
 	z = x+y*z-x;
 	return z;
 }

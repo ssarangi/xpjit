@@ -45,7 +45,7 @@ int Compile(char *fileName)
         std::string filename = "postgenIL.dot";
         d.writeDotFile(filename, *module);
     }
-        
+
     GenLLVM genLLVM;
     genLLVM.generateLLVM(*module);
     llvm::Module& llvmModule = genLLVM.getModule();
@@ -57,6 +57,9 @@ int Compile(char *fileName)
         module = NULL;
     }
 
+    std::cout << "-------------------------------------------------------------------" << std::endl;
+    std::cout << "Before Optimization" << std::endl;
+    std::cout << "-------------------------------------------------------------------" << std::endl;
     if (gDebug.isDebuggable())
         llvmModule.dump();
 
@@ -65,6 +68,9 @@ int Compile(char *fileName)
         OptimizeIR(llvmModule);
     }
     
+    std::cout << "-------------------------------------------------------------------" << std::endl;
+    std::cout << "After Optimization" << std::endl;
+    std::cout << "-------------------------------------------------------------------" << std::endl;
     if(gDebug.isDebuggable())
         llvmModule.dump();
 
@@ -93,5 +99,6 @@ int main(int argc, char *argv[])
 
     gTrace << "Verbose on!\n";
     Compile(argv[1]);
+    system("pause");
     return 0;
 }

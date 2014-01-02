@@ -402,10 +402,10 @@ static char *yy_last_accepting_cpos;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 1 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 #define INITIAL 0
 #define YY_STACK_USED 1
-#line 5 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 5 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 class IcaValue;
 class Statement;
 
@@ -567,7 +567,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 17 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 17 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 
 
 #line 574 "lexer.cpp"
@@ -655,97 +655,97 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 19 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 19 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return INTEGER; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 21 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 21 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return FLOAT; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 23 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 23 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return VOID; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 25 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 25 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return RETURN; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 27 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 27 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return IF; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 29 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 29 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return ELSE; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 31 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 31 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return WHILE; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 33 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 33 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return FOR; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 35 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 35 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return BREAK; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 37 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 37 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 ;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 39 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 39 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return EQUALS; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 41 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 41 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return NEQUALS; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 43 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 43 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return LESSTHAN; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 45 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 45 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return LESSTHANEQ; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 47 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 47 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return MORETHAN; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 49 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 49 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return MORETHANEQ; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 51 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 51 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { return *yytext; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 53 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 53 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { yylval.integer = atoi(yytext);  return NUMBER; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 55 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 55 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { 
 	yylval.string = (char*)calloc(yyleng+1, sizeof(char));
         strncpy(yylval.string, yytext, yyleng); // Remember you need to free this.
@@ -754,12 +754,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 61 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 61 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 ;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 62 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 62 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 ECHO;
 	YY_BREAK
 #line 766 "lexer.cpp"
@@ -1648,6 +1648,6 @@ int main()
 	return 0;
 	}
 #endif
-#line 62 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
+#line 62 "E:\\github_external\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 
 
