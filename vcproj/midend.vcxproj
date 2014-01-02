@@ -96,6 +96,11 @@
     <ClInclude Include="..\include\midend\optimizeIR.h" />
     <ClInclude Include="..\include\midend\PassManager.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\common\common.vcxproj">
+      <Project>{f6d04041-f2b5-4545-b66c-378651fcb8b0}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

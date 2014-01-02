@@ -82,7 +82,6 @@
   <ItemGroup>
     <ClInclude Include="common_include\icerr.h" />
     <ClInclude Include="icarus\Dot\dotwriter.h" />
-    <ClInclude Include="include\common\debug.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="icarus\debug.cpp" />
@@ -92,6 +91,12 @@
     <ClCompile Include="icarus\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="common\common.vcxproj">
+      <Project>{f6d04041-f2b5-4545-b66c-378651fcb8b0}</Project>
+    </ProjectReference>
+    <ProjectReference Include="vcproj\backend.vcxproj">
+      <Project>{e13928a6-bc8a-4b27-90ff-1f363fbba910}</Project>
+    </ProjectReference>
     <ProjectReference Include="vcproj\frontend.vcxproj">
       <Project>{c589f124-87be-4b78-b964-bee4f2e25340}</Project>
     </ProjectReference>

@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <vector>
+
 using namespace std;
 
 //Singleton debug class
@@ -46,6 +49,28 @@ private:
     bool m_isCodeOptimizing;
     static Debug* m_instance;
     Debug();
+};
+
+class OutputStreamSubscriber 
+{
+public:
+    OutputStreamSubscriber() {}
+    virtual void output(std::stringstream& stream) = 0;
+};
+
+class OutputStream
+{
+public:
+    OutputStream() {}
+    ~OutputStream() {}
+
+    void addOutputStreamSubscriber(OutputStreamSubscriber* pSubscriber);
+    void removeOutputStreamSubscriber(OutputStreamSubscriber* pSubscriber);
+
+    void output(std::stringstream& stream);
+
+private:
+    std::vector<OutputStreamSubscriber *> m_subscribers;
 };
 
 #endif //DEBUG_H
