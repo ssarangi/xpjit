@@ -9,10 +9,12 @@
     <ClInclude Include="..\backend\mips\MipsInst.h">
       <Filter>mips</Filter>
     </ClInclude>
+    <ClInclude Include="..\backend\backendcodegen.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\mips\MipsInst.cpp">
       <Filter>mips</Filter>
     </ClCompile>
+    <ClCompile Include="..\backend\backendcodegen.cpp" />
   </ItemGroup>
 </Project>

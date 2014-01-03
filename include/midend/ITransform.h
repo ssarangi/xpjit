@@ -1,7 +1,7 @@
 #ifndef ITRANSFORM_H
 #define ITRANSFORM_H
 
-#include "frontend/codegen.h"
+#include "frontend/irtranslation.h"
 
 class ITransform 
 {

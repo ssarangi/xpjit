@@ -1,8 +1,8 @@
 #ifndef ASTBUILDER_H
 #define ASTBUILDER_H
 
-#include "codegen.h"
-#include "Type.h"
+#include <frontend/irtranslation.h>
+#include <frontend/Type.h>
 
 class ASTBuilder
 { 

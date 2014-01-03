@@ -20,9 +20,6 @@
     <ClCompile Include="..\frontend\ASTBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\frontend\codegen.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\frontend\genIL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -38,6 +35,12 @@
     <ClCompile Include="..\frontend\generated\lexer.cpp">
       <Filter>generated</Filter>
     </ClCompile>
+    <ClCompile Include="..\frontend\findentryfunc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\frontend\irtranslation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\frontend\grammar\lexer.l">
@@ -52,9 +55,6 @@
       <Filter>generated</Filter>
     </ClInclude>
     <ClInclude Include="..\include\frontend\ASTBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\frontend\codegen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\frontend\CompEA.h">
@@ -79,6 +79,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\frontend\Type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\findentryfunc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\irtranslation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,7 +2,7 @@
 #define GENIL_H
 
 //#include "IClassVisitor.h" //just for the forward references
-#include "codegen.h"
+#include "irtranslation.h"
 #include "ASTBuilder.h"
 
 class GenIL 

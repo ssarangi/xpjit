@@ -84,7 +84,6 @@
     <ClInclude Include="icarus\Dot\dotwriter.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="icarus\debug.cpp" />
     <ClCompile Include="icarus\Dot\dotwriter.cpp" />
     <ClCompile Include="icarus\helper.cpp" />
     <ClCompile Include="icarus\icerr.cpp" />

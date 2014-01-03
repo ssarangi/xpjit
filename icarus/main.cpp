@@ -1,11 +1,15 @@
-#include "frontend/codegen.h"
-#include "frontend/PrintVisitor.h"
-#include "Dot/dotwriter.h"
-#include "frontend/genIL.h"
-#include "frontend/genllvm.h"
+#include <backend/codegenpublic.h>
+
+#include <frontend/irtranslation.h>
+#include <frontend/PrintVisitor.h>
+#include <frontend/genIL.h>
+#include <frontend/genllvm.h>
+#include <frontend/findentryfunc.h>
+
 #include "unistd.h"
-#include "common/debug.h"
-#include "midend/optimizeIR.h"
+#include <common/debug.h>
+#include <midend/optimizeIR.h>
+#include "Dot/dotwriter.h"
 
 #include <fstream>
 #include <cstdlib>
@@ -15,6 +19,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/PassManager.h>
 
 extern IcarusModule* ParseFile(const char *filename); //using this for now. need to create a standard header file for lex
 
@@ -24,37 +29,52 @@ static Debug& gDebug = Debug::getInstance();
 using namespace std;
 
 //global variables
-IcarusModule *module;
+IcarusModule *pIcarusModule;
 
-void genExecutable()
+llvm::Function* findEntryFunc(llvm::Module& M)
 {
+    llvm::PassManager mpm;
+    FindEntryFunc* pEntryFunc = new FindEntryFunc();
+    mpm.add(pEntryFunc);
+    mpm.run(M);
+    return pEntryFunc->GetEntryFunc();
+}
+
+void genExecutable(CodeGenModule& module)
+{
+    GenerateCode(module);
 }
 
 int Compile(char *fileName)
 {
     gTrace <<"Compiling file: " << fileName;
-    module = ParseFile(fileName);
-    if(module == NULL)
+    pIcarusModule = ParseFile(fileName);
+    
+    if(pIcarusModule == nullptr)
         return -1; //there was some syntax error. Hence we skip all other checks
-    GenIL *myILGen = new GenIL(*module);
-    module = myILGen->generateIL();
+
+    GenIL *myILGen = new GenIL(*pIcarusModule);
+    pIcarusModule = myILGen->generateIL();
 
     if(gDebug.isDotGen())
     {
         DotWriter d;
         std::string filename = "postgenIL.dot";
-        d.writeDotFile(filename, *module);
+        d.writeDotFile(filename, *pIcarusModule);
     }
 
     GenLLVM genLLVM;
-    genLLVM.generateLLVM(*module);
+    genLLVM.generateLLVM(*pIcarusModule);
     llvm::Module& llvmModule = genLLVM.getModule();
 
+    // Find the Entry Function
+    llvm::Function* pEntryFunc = findEntryFunc(llvmModule);
+
     //Dispose old module
-    if(module != NULL)
+    if(pIcarusModule != nullptr)
     {
-        delete module;
-        module = NULL;
+        delete pIcarusModule;
+        pIcarusModule = nullptr;
     }
 
     std::cout << "-------------------------------------------------------------------" << std::endl;
@@ -84,7 +104,12 @@ int Compile(char *fileName)
         moduleDumpFile<<moduleStr;
         moduleDumpFile.close();
     }
-    genExecutable();
+
+    CodeGenModule codeGenModule;
+    codeGenModule.setLLVMModule(&llvmModule);
+    codeGenModule.setLLVMEntryFunction(pEntryFunc);
+
+    genExecutable(codeGenModule);
     
     return 0;
 }

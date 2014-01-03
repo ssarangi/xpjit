@@ -1,5 +1,5 @@
 #include "frontend/genllvm.h"
-#include "frontend/codegen.h"
+#include "frontend/irtranslation.h"
 
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
@@ -256,7 +256,7 @@ void GenLLVM::generateLLVM(IcarusModule &m)
 }
 
 GenLLVM::GenLLVM() 
-    : m_module(*new llvm::Module("MyModule", getGlobalContext())), m_irBuilder(*new llvm::IRBuilder<>(getGlobalContext())) 
+    : m_module(*new llvm::Module("IcarusModule", getGlobalContext())), m_irBuilder(*new llvm::IRBuilder<>(getGlobalContext())) 
 {
 }
 

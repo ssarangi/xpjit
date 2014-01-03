@@ -24,7 +24,7 @@
 #define	IDENTIFIER	275
 
 
-#include "frontend/codegen.h"
+#include "frontend/irtranslation.h"
 #include "frontend/ASTBuilder.h"
 #include "common/debug.h"
 

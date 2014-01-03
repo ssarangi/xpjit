@@ -1,7 +1,7 @@
 #ifndef CONSTANT_FOLDER_H
 #define CONSTANT_FOLDER_H
 
-#include "frontend/codegen.h"
+#include "frontend/irtranslation.h"
 
 #include <llvm/Pass.h>
 #include <llvm/IR/Function.h>

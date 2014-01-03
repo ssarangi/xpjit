@@ -1,6 +1,6 @@
 #ifndef DOTWRITER_H
 #define DOTWRITER_H
-#include "frontend/codegen.h"
+#include "frontend/irtranslation.h"
 #include "frontend/IClassVisitor.h"
 #include <fstream>
 class DotWriter : IClassVisitor 
