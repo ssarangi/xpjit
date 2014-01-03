@@ -12,5 +12,9 @@ public:
     virtual std::ostream& operator<<(std::ostream& stream) = 0;
 };
 
+class LoadWord : public MipsInst
+{
+
+};
 
 #endif
