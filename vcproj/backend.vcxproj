@@ -79,6 +79,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\backend\backendcodegen.h" />
+    <ClInclude Include="..\backend\mipsinst.h" />
     <ClInclude Include="..\backend\mips\mipsreg.h" />
   </ItemGroup>
   <ItemGroup>

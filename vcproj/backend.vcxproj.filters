@@ -10,6 +10,9 @@
     <ClInclude Include="..\backend\mips\mipsreg.h">
       <Filter>mips</Filter>
     </ClInclude>
+    <ClInclude Include="..\backend\mipsinst.h">
+      <Filter>mips</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\backendcodegen.cpp" />

@@ -16,16 +16,16 @@ class A0Reg : public MipsReg
 {
     std::ostream& operator<<(std::ostream& stream)
     {
-        stream << "A0";
+        stream << "$a0";
         return stream;
     }
 };
 
-class TReg : public MipsReg
+class T1Reg : public MipsReg
 {
     std::ostream& operator<<(std::ostream& stream)
     {
-        stream << "T";
+        stream << "$t1";
         return stream;
     }
 };
@@ -34,7 +34,7 @@ class SPReg : public MipsReg
 {
     std::ostream& operator<<(std::ostream& stream)
     {
-        stream << "SP";
+        stream << "$sp";
         return stream;
     }
 };
