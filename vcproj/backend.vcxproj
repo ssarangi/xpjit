@@ -79,11 +79,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\backend\backendcodegen.h" />
-    <ClInclude Include="..\backend\mips\MipsInst.h" />
+    <ClInclude Include="..\backend\mips\mipsreg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\backendcodegen.cpp" />
-    <ClCompile Include="..\backend\mips\MipsInst.cpp" />
+    <ClCompile Include="..\backend\mips\mipsreg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\common\common.vcxproj">

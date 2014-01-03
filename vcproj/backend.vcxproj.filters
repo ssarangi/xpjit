@@ -6,15 +6,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\backend\mips\MipsInst.h">
+    <ClInclude Include="..\backend\backendcodegen.h" />
+    <ClInclude Include="..\backend\mips\mipsreg.h">
       <Filter>mips</Filter>
     </ClInclude>
-    <ClInclude Include="..\backend\backendcodegen.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\backend\mips\MipsInst.cpp">
+    <ClCompile Include="..\backend\backendcodegen.cpp" />
+    <ClCompile Include="..\backend\mips\mipsreg.cpp">
       <Filter>mips</Filter>
     </ClCompile>
-    <ClCompile Include="..\backend\backendcodegen.cpp" />
   </ItemGroup>
 </Project>

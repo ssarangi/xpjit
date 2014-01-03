@@ -1,24 +1,31 @@
-#ifndef MIPS_REG
-#define MIPS_REG
+#ifndef __MIPS_REGS__
+#define __MIPS_REGS__
 
-#include <llvm/Support/raw_ostream.h>
+#include <ostream>
 
-enum RegisterName
-{
-    A0 = 0, /// Accumulator
-    SP,
-};
-
-class Register final
+class MipsReg
 {
 public:
-    Register(RegisterName regName);
-    ~Register();
-    friend std::ostream& operator<<(std::ostream& os, const Register& reg);
-    RegisterName get_register_name() const { return m_regName; }
+    MipsReg() {}
+    ~MipsReg() {}
 
-private:
-    RegisterName m_regName;
+    virtual std::ostream& operator<<(std::ostream& stream) = 0;
+};
+
+class A0Reg : public MipsReg
+{
+    std::ostream& operator<<(std::ostream& stream)
+    {
+        stream << "A0";
+        return stream;
+    }
+
+    friend std::ostream &operator<<(std::ostream &output, 
+                                    const A0Reg &reg )
+    { 
+        output << "A0";
+        return output;
+    }
 };
 
 #endif
