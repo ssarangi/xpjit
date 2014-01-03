@@ -5,12 +5,14 @@
 
 #include <iostream>
 
-char CodeGenPass::ID = 0;
+char CodeGenPass::ID = 5;
 
 bool CodeGenPass::runOnFunction(llvm::Function& F)
 {
-    std::cout << "------------------ Dump --------------------------" << std::endl;
-    F.dump();
+    llvm::PostDominatorTree* PDT = nullptr;
+    if (!F.isDeclaration())
+        PDT = &getAnalysis<llvm::PostDominatorTree>(F);
+
     return false;
 }
 
