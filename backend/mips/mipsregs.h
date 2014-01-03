@@ -30,4 +30,18 @@ class TReg : public MipsReg
     }
 };
 
+class SPReg : public MipsReg
+{
+    std::ostream& operator<<(std::ostream& stream)
+    {
+        stream << "SP";
+        return stream;
+    }
+};
+
+class MipsRegMgr
+{
+
+};
+
 #endif
