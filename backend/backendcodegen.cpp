@@ -1,6 +1,6 @@
 #include <backend/codegenpublic.h>
 #include "backendcodegen.h"
-#include "mips/mipsreg.h"
+#include "mips/mipsregs.h"
 
 #include <llvm/PassManager.h>
 
