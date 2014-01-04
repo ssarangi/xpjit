@@ -1,6 +1,6 @@
 #include <frontend/findentryfunc.h>
 
-#include <llvm/Module.h>
+#include <llvm/IR/Module.h>
 
 char FindEntryFunc::ID = 0;
 
