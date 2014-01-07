@@ -13,11 +13,13 @@
     <ClInclude Include="..\backend\mips\mipsinst.h">
       <Filter>mips</Filter>
     </ClInclude>
+    <ClInclude Include="..\backend\LiveVariables.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\backendcodegen.cpp" />
     <ClCompile Include="..\backend\mips\mipsreg.cpp">
       <Filter>mips</Filter>
     </ClCompile>
+    <ClCompile Include="..\backend\LiveVariables.cpp" />
   </ItemGroup>
 </Project>

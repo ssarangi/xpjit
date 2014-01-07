@@ -79,11 +79,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\backend\backendcodegen.h" />
+    <ClInclude Include="..\backend\LiveVariables.h" />
     <ClInclude Include="..\backend\mips\mipsinst.h" />
     <ClInclude Include="..\backend\mips\mipsreg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\backendcodegen.cpp" />
+    <ClCompile Include="..\backend\LiveVariables.cpp" />
     <ClCompile Include="..\backend\mips\mipsreg.cpp" />
   </ItemGroup>
   <ItemGroup>
