@@ -12,41 +12,57 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Analysis/LiveValues.h"
-#include "llvm/Analysis/Dominators.h"
-#include "llvm/Analysis/LoopInfo.h"
+#include "LiveVariables.h"
+
+#include <llvm/Analysis/Dominators.h>
+#include <llvm/Analysis/LoopInfo.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/PassSupport.h>
 using namespace llvm;
 
-FunctionPass *llvm::createLiveValuesPass() { return new LiveValues(); }
+llvm::FunctionPass *createLiveValuesPass() { return new LiveVariables(); }
 
-char LiveValues::ID = 0;
-static RegisterPass<LiveValues>
+char LiveVariables::ID = 0;
+static RegisterPass<LiveVariables>
     X("live-values", "Value Liveness Analysis", false, true);
 
-LiveValues::LiveValues() : FunctionPass(&ID) {}
+INITIALIZE_PASS_BEGIN(LiveVariables, "LivenessAnalysis", false, true, true); // Is default Analysis Group implementation?
+INITIALIZE_PASS_DEPENDENCY(DominatorTree);
+INITIALIZE_PASS_DEPENDENCY(LoopInfo);
+INITIALIZE_PASS_END(LiveVariables, "LivenessAnalysis", false, true, true);
 
-void LiveValues::getAnalysisUsage(AnalysisUsage &AU) const {
-    AU.addRequired<DominatorTree>();
-    AU.addRequired<LoopInfo>();
+LiveVariables::LiveVariables() : llvm::FunctionPass(ID)
+{
+    llvm::initializeDominatorTreePass(*PassRegistry::getPassRegistry());
+    llvm::initializeLoopInfoPass(*PassRegistry::getPassRegistry());
+}
+
+void LiveVariables::getAnalysisUsage(AnalysisUsage &AU) const
+{
+    AU.addRequired<llvm::DominatorTree>();
+    AU.addRequired<llvm::LoopInfo>();
     AU.setPreservesAll();
 }
 
-bool LiveValues::runOnFunction(Function &F) {
-    DT = &getAnalysis<DominatorTree>();
-    LI = &getAnalysis<LoopInfo>();
+bool LiveVariables::runOnFunction(Function &F)
+{
+    DT = &getAnalysis<llvm::DominatorTree>();
+    LI = &getAnalysis<llvm::LoopInfo>();
 
     // This pass' values are computed lazily, so there's nothing to do here.
 
     return false;
 }
 
-void LiveValues::releaseMemory() {
+void LiveVariables::releaseMemory()
+{
     Memos.clear();
 }
 
 /// isUsedInBlock - Test if the given value is used in the given block.
 ///
-bool LiveValues::isUsedInBlock(const Value *V, const BasicBlock *BB) {
+bool LiveVariables::isUsedInBlock(const llvm::Value *V, const llvm::BasicBlock *BB)
+{
     Memo &M = getMemo(V);
     return M.Used.count(BB);
 }
@@ -57,10 +73,11 @@ bool LiveValues::isUsedInBlock(const Value *V, const BasicBlock *BB) {
 /// reachable from it that contains a use. This uses a conservative
 /// approximation that errs on the side of returning false.
 ///
-bool LiveValues::isLiveThroughBlock(const Value *V,
-                                    const BasicBlock *BB) {
-                                        Memo &M = getMemo(V);
-                                        return M.LiveThrough.count(BB);
+bool LiveVariables::isLiveThroughBlock(const llvm::Value *V,
+                                    const llvm::BasicBlock *BB)
+{
+    Memo &M = getMemo(V);
+    return M.LiveThrough.count(BB);
 }
 
 /// isKilledInBlock - Test if the given value is known to be killed in
@@ -68,7 +85,8 @@ bool LiveValues::isLiveThroughBlock(const Value *V,
 /// and no blocks reachable from the block contain a use. This uses a
 /// conservative approximation that errs on the side of returning false.
 ///
-bool LiveValues::isKilledInBlock(const Value *V, const BasicBlock *BB) {
+bool LiveVariables::isKilledInBlock(const Value *V, const BasicBlock *BB)
+{
     Memo &M = getMemo(V);
     return M.Killed.count(BB);
 }
@@ -76,7 +94,8 @@ bool LiveValues::isKilledInBlock(const Value *V, const BasicBlock *BB) {
 /// getMemo - Retrieve an existing Memo for the given value if one
 /// is available, otherwise compute a new one.
 ///
-LiveValues::Memo &LiveValues::getMemo(const Value *V) {
+LiveVariables::Memo &LiveVariables::getMemo(const Value *V)
+{
     DenseMap<const Value *, Memo>::iterator I = Memos.find(V);
     if (I != Memos.end())
         return I->second;
@@ -87,14 +106,16 @@ LiveValues::Memo &LiveValues::getMemo(const Value *V) {
 /// query that we need here.
 ///
 static const BasicBlock *getImmediateDominator(const BasicBlock *BB,
-                                               const DominatorTree *DT) {
-                                                   DomTreeNode *Node = DT->getNode(const_cast<BasicBlock *>(BB))->getIDom();
-                                                   return Node ? Node->getBlock() : 0;
+                                               const DominatorTree *DT)
+{
+    DomTreeNode *Node = DT->getNode(const_cast<BasicBlock *>(BB))->getIDom();
+    return Node ? Node->getBlock() : 0;
 }
 
 /// compute - Compute a new Memo for the given value.
 ///
-LiveValues::Memo &LiveValues::compute(const Value *V) {
+LiveVariables::Memo &LiveVariables::compute(const Value *V)
+{
     Memo &M = Memos[V];
 
     // Determine the block containing the definition.
@@ -123,61 +144,68 @@ LiveValues::Memo &LiveValues::compute(const Value *V) {
     bool LiveOutOfDefBB = false;
 
     // Examine each use of the value.
-    for (Value::use_const_iterator I = V->use_begin(), E = V->use_end();
-        I != E; ++I) {
-            const User *U = *I;
-            const BasicBlock *UseBB = cast<Instruction>(U)->getParent();
+    for (llvm::Value::const_use_iterator I = V->use_begin(), E = V->use_end();
+        I != E; ++I)
+    {
+        const User *U = *I;
+        const BasicBlock *UseBB = cast<Instruction>(U)->getParent();
 
-            // Note the block in which this use occurs.
-            M.Used.insert(UseBB);
+        // Note the block in which this use occurs.
+        M.Used.insert(UseBB);
 
-            // If the use block doesn't have successors, the value can be
-            // considered killed.
-            if (succ_begin(UseBB) == succ_end(UseBB))
-                M.Killed.insert(UseBB);
+        // If the use block doesn't have successors, the value can be
+        // considered killed.
+        if (succ_begin(UseBB) == succ_end(UseBB))
+            M.Killed.insert(UseBB);
 
-            // Observe whether the value is used outside of the loop in which
-            // it is defined. Switch to an enclosing loop if necessary.
-            for (; L; L = L->getParentLoop())
-                if (L->contains(UseBB))
-                    break;
+        // Observe whether the value is used outside of the loop in which
+        // it is defined. Switch to an enclosing loop if necessary.
+        for (; L; L = L->getParentLoop())
+            if (L->contains(UseBB))
+                break;
 
-            // Search for live-through blocks.
-            const BasicBlock *BB;
-            if (const PHINode *PHI = dyn_cast<PHINode>(U)) {
-                // For PHI nodes, start the search at the incoming block paired with the
-                // incoming value, which must be dominated by the definition.
-                unsigned Num = PHI->getIncomingValueNumForOperand(I.getOperandNo());
-                BB = PHI->getIncomingBlock(Num);
+        // Search for live-through blocks.
+        const llvm::BasicBlock *BB;
+        if (const llvm::PHINode *PHI = dyn_cast<llvm::PHINode>(U))
+        {
+            // For PHI nodes, start the search at the incoming block paired with the
+            // incoming value, which must be dominated by the definition.
+            unsigned Num = PHI->getIncomingValueNumForOperand(I.getOperandNo());
+            BB = PHI->getIncomingBlock(Num);
 
-                // A PHI-node use means the value is live-out of it's defining block
-                // even if that block also contains the only use.
-                LiveOutOfDefBB = true;
-            } else {
-                // Otherwise just start the search at the use.
-                BB = UseBB;
+            // A PHI-node use means the value is live-out of it's defining block
+            // even if that block also contains the only use.
+            LiveOutOfDefBB = true;
+        }
+        else
+        {
+            // Otherwise just start the search at the use.
+            BB = UseBB;
 
-                // Note if the use is outside the defining block.
-                LiveOutOfDefBB |= UseBB != DefBB;
-            }
+            // Note if the use is outside the defining block.
+            LiveOutOfDefBB |= UseBB != DefBB;
+        }
 
-            // Climb the immediate dominator tree from the use to the definition
-            // and mark all intermediate blocks as live-through. Don't do this if
-            // the user is a PHI because such users may not be dominated by the
-            // definition.
-            for (; BB != DefBB; BB = getImmediateDominator(BB, DT)) {
-                if (BB != UseBB && !M.LiveThrough.insert(BB))
-                    break;
-            }
+        // Climb the immediate dominator tree from the use to the definition
+        // and mark all intermediate blocks as live-through. Don't do this if
+        // the user is a PHI because such users may not be dominated by the
+        // definition.
+        for (; BB != DefBB; BB = getImmediateDominator(BB, DT))
+        {
+            if (BB != UseBB && !M.LiveThrough.insert(BB))
+                break;
+        }
     }
 
     // If the value is defined inside a loop and is not live outside
     // the loop, then each exit block of the loop in which the value
     // is used is a kill block.
-    if (L) {
+    if (L)
+    {
         SmallVector<BasicBlock *, 4> ExitingBlocks;
         L->getExitingBlocks(ExitingBlocks);
-        for (unsigned i = 0, e = ExitingBlocks.size(); i != e; ++i) {
+        for (unsigned i = 0, e = ExitingBlocks.size(); i != e; ++i)
+        {
             const BasicBlock *ExitingBlock = ExitingBlocks[i];
             if (M.Used.count(ExitingBlock))
                 M.Killed.insert(ExitingBlock);

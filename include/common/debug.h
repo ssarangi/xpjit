@@ -5,8 +5,17 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <assert.h>
+#include <exception>
 
 using namespace std;
+
+#if defined _DEBUG
+#define ICARUS_NOT_IMPLEMENTED(STR)      \
+{                                        \
+    throw std::exception((const char*)(STR)); \
+}
+#endif
 
 //Singleton debug class
 class Trace
