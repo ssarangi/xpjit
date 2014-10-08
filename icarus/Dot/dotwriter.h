@@ -13,12 +13,12 @@ public:
     virtual void Visit(BinopExpression&);
     virtual void Visit(FunctionCall&);
     virtual void Visit(Statement&);
-    virtual void Visit(ExpressionStatement&);	
+    virtual void Visit(ExpressionStatement&);
     virtual void Visit(Assignment&);
     virtual void Visit(ReturnStatement&);
     virtual void Visit(FunctionProtoType&);
     virtual void Visit(Function&);
-    virtual void Visit(SymbolTable&);	
+    virtual void Visit(SymbolTable&);
     virtual void Visit(Symbol& );
     virtual void Visit(IcarusModule& );
     void writeDotFile(std::string& filename, IcarusModule& m);

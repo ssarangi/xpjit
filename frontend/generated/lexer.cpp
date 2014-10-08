@@ -747,10 +747,10 @@ case 19:
 YY_RULE_SETUP
 #line 55 "C:\\dev\\icarus\\vcproj\\..\\frontend\\grammar\\lexer.l"
 { 
-	yylval.string = (char*)calloc(yyleng+1, sizeof(char));
+    yylval.string = (char*)calloc(yyleng+1, sizeof(char));
         strncpy(yylval.string, yytext, yyleng); // Remember you need to free this.
-	return IDENTIFIER; 
-	}
+    return IDENTIFIER; 
+    }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP

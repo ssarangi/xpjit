@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);$(LLVM_DIR)\include</IncludePath>
-    <IntDir>$(Configuration)\$(ProjectName)</IntDir>
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -81,8 +81,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="common_include\icerr.h" />
     <ClInclude Include="icarus\Dot\dotwriter.h" />
+    <ClInclude Include="include\common\icerr.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="icarus\Dot\dotwriter.cpp" />

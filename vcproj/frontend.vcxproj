@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);$(LLVM_DIR)\include</IncludePath>
-    <IntDir>$(Configuration)\$(ProjectName)</IntDir>
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -113,7 +113,7 @@ del $(SolutionDir)frontend\generated\parser.cpp.h
 
 del $(SolutionDir)frontend\generated\parser.cpp.output</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Executing Bison on %(FullPath)</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)generated\parser.cpp;$(ProjectDir)generated\parser.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)frontend\generated\parser.cpp;$(SolutionDir)frontend\generated\parser.h</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

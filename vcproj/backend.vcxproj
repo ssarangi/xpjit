@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);$(LLVM_DIR)\include</IncludePath>
-    <IntDir>$(Configuration)\$(ProjectName)</IntDir>
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -83,7 +83,7 @@
   <ItemGroup>
     <ClInclude Include="..\backend\backendcodegen.h" />
     <ClInclude Include="..\backend\mips\mipsinst.h" />
-    <ClInclude Include="..\backend\mips\mipsreg.h" />
+    <ClInclude Include="..\backend\mips\mipsregs.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\backendcodegen.cpp" />

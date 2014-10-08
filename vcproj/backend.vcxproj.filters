@@ -7,10 +7,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\backend\backendcodegen.h" />
-    <ClInclude Include="..\backend\mips\mipsreg.h">
+    <ClInclude Include="..\backend\mips\mipsinst.h">
       <Filter>mips</Filter>
     </ClInclude>
-    <ClInclude Include="..\backend\mips\mipsinst.h">
+    <ClInclude Include="..\backend\mips\mipsregs.h">
       <Filter>mips</Filter>
     </ClInclude>
   </ItemGroup>
