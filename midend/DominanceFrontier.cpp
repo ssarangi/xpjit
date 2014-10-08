@@ -9,7 +9,7 @@
 #include "midend/DominanceTreeConstructor.h"
 
 #include <llvm/ADT/DepthFirstIterator.h> //For iterating through the predecessors of the basic block
-#include <llvm/Support/CFG.h> //We need a specialization of the GraphTrait class 
+#include <llvm/IR/CFG.h> //We need a specialization of the GraphTrait class 
 #include <llvm/PassSupport.h>
 
 #include <map>

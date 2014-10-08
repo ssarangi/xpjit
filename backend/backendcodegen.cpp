@@ -16,14 +16,12 @@ bool CodeGenPass::runOnFunction(llvm::Function& F)
     //llvm::PostDominatorTree* PDT = nullptr;
     //if (!F.isDeclaration())
     //    PDT = &getAnalysis<llvm::PostDominatorTree>(F);
-    LiveVariables* pLV = &getAnalysis<LiveVariables>(F);
     for (llvm::po_iterator<llvm::BasicBlock*> I = llvm::po_begin(&F.getEntryBlock()),
                                               IE = llvm::po_end(&F.getEntryBlock());
                                               I != IE; ++I)
     {
         llvm::Value* V = I->begin();
         llvm::BasicBlock* BB = *I;
-        bool isKilled = pLV->isKilledInBlock(V, BB);
         llvm::outs() << "Code Generation for: " << F.getName() << "::" << I->getName() << "\n";
     }
 

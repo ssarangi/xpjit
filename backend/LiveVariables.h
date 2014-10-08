@@ -18,7 +18,7 @@
 #include <llvm/Pass.h>
 #include <llvm/ADT/DenseMap.h>
 #include <llvm/ADT/SmallPtrSet.h>
-#include <llvm/Analysis/Dominators.h>
+#include <llvm/IR/Dominators.h>
 #include <llvm/IR/Value.h>
 #include <llvm/Analysis/LoopInfo.h>
 

@@ -1,11 +1,9 @@
 #ifndef __CODEGEN__
 #define __CODEGEN__
 
-#include "LiveVariables.h"
-
 #include <llvm/Pass.h>
-#include <llvm/InstVisitor.h>
-#include <llvm/Analysis/Dominators.h>
+#include <llvm/IR/InstVisitor.h>
+#include <llvm/IR/Dominators.h>
 #include <llvm/Analysis/PostDominators.h>
 #include <llvm/Analysis/MemoryDependenceAnalysis.h>
 
@@ -23,7 +21,6 @@ public:
     {
         usage.setPreservesCFG();
         usage.addRequired<llvm::PostDominatorTree>();
-        usage.addRequired<LiveVariables>();
     }
 
     virtual bool runOnFunction(llvm::Function& F);

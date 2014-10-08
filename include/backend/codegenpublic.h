@@ -3,8 +3,8 @@
 
 namespace llvm
 {
-    extern class Function;
-    extern class Module;
+    class Function;
+    class Module;
 }
 
 class CodeGenModule

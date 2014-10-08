@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,13 +19,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -42,6 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);$(LLVM_DIR)\include</IncludePath>
+    <IntDir>$(Configuration)\$(ProjectName)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -59,7 +60,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(LLVM_DIR)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>LLVMAnalysis.lib;LLVMAsmParser.lib;LLVMAsmPrinter.lib;LLVMBitReader.lib;LLVMBitWriter.lib;LLVMCodeGen.lib;LLVMCore.lib;LLVMDebugInfo.lib;LLVMExecutionEngine.lib;LLVMInstCombine.lib;LLVMInstrumentation.lib;LLVMInterpreter.lib;LLVMJIT.lib;LLVMLinker.lib;LLVMMC.lib;LLVMMCDisassembler.lib;LLVMMCJIT.lib;LLVMMCParser.lib;LLVMObject.lib;LLVMRuntimeDyld.lib;LLVMScalarOpts.lib;LLVMSelectionDAG.lib;LLVMSupport.lib;LLVMTableGen.lib;LLVMTarget.lib;LLVMTransformUtils.lib;LLVMVectorize.lib;LLVMX86AsmParser.lib;LLVMX86AsmPrinter.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Disassembler.lib;LLVMX86Info.lib;LLVMX86Utils.lib;LLVMipa.lib;LLVMipo.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>LLVMAnalysis.lib;LLVMAsmParser.lib;LLVMAsmPrinter.lib;LLVMBitReader.lib;LLVMBitWriter.lib;LLVMCodeGen.lib;LLVMCore.lib;LLVMDebugInfo.lib;LLVMExecutionEngine.lib;LLVMInstCombine.lib;LLVMInstrumentation.lib;LLVMInterpreter.lib;LLVMLinker.lib;LLVMMC.lib;LLVMMCDisassembler.lib;LLVMMCJIT.lib;LLVMMCParser.lib;LLVMObject.lib;LLVMRuntimeDyld.lib;LLVMScalarOpts.lib;LLVMSelectionDAG.lib;LLVMSupport.lib;LLVMTableGen.lib;LLVMTarget.lib;LLVMTransformUtils.lib;LLVMVectorize.lib;LLVMX86AsmParser.lib;LLVMX86AsmPrinter.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Disassembler.lib;LLVMX86Info.lib;LLVMX86Utils.lib;LLVMipa.lib;LLVMipo.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
