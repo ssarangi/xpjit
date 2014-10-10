@@ -6,17 +6,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\backend\backendcodegen.h" />
     <ClInclude Include="..\backend\mips\mipsinst.h">
       <Filter>mips</Filter>
     </ClInclude>
     <ClInclude Include="..\backend\mips\mipsregs.h">
       <Filter>mips</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\backend\iarchcodegen.h" />
+    <ClInclude Include="..\include\backend\backendcodegen.h" />
+    <ClInclude Include="..\backend\mips\mipscodegen.h">
+      <Filter>mips</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\backendcodegen.cpp" />
     <ClCompile Include="..\backend\mips\mipsreg.cpp">
+      <Filter>mips</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backend\mips\mipscodegen.cpp">
       <Filter>mips</Filter>
     </ClCompile>
   </ItemGroup>

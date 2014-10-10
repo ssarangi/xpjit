@@ -7,6 +7,10 @@
 * Recusively iterating up the tree from the node gets the dominators of the node
 */
 
+#include <common/llvm_warnings_push.h>
+#include <llvm/IR/BasicBlock.h>
+#include <common/llvm_warnings_pop.h>
+
 #include <set>
 #include <cstddef>
 #include <queue>

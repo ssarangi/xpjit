@@ -1,13 +1,15 @@
 #ifndef CODEGEN_H
 #define CODEGEN_H
 
-#include "common/icerr.h"
-#include "frontend/IClassVisitor.h"
-#include "frontend/CompEA.h"
-#include "frontend/Type.h"
+#include <common/icerr.h>
+#include <frontend/IClassVisitor.h>
+#include <frontend/CompEA.h>
+#include <frontend/Type.h>
 
+#include <common/llvm_warnings_push.h>
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Module.h>
+#include <common/llvm_warnings_pop.h>
 
 #include <list>
 #include <string>

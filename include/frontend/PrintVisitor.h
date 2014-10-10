@@ -1,6 +1,6 @@
 #ifndef PRINTVISITOR_H
 #define PRINTVISITOR_H
-#include "IClassVisitor.h"
+#include <frontend/IClassVisitor.h>
 #include <iostream>
 
 class PrintVisitor : public IClassVisitor

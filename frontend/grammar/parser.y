@@ -30,10 +30,10 @@ std::list<IcaValue*> parameterList;
 
 %union
 {
-    char*	string;
-    int 	integer;
-    IcaValue*	value;
-    Statement* 	statement;
+    char*   string;
+    int     integer;
+    IcaValue*   value;
+    Statement*  statement;
 }
 
 %left EQUALS NEQUALS LESSTHAN LESSTHANEQ MORETHAN MORETHANEQ

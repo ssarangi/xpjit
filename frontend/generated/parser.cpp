@@ -54,10 +54,10 @@ std::list<IcaValue*> parameterList;
 
 typedef union
 {
-    char*	string;
-    int 	integer;
-    IcaValue*	value;
-    Statement* 	statement;
+    char*   string;
+    int     integer;
+    IcaValue*   value;
+    Statement*  statement;
 } YYSTYPE;
 
 #ifndef YYLTYPE

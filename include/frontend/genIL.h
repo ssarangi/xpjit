@@ -2,8 +2,8 @@
 #define GENIL_H
 
 //#include "IClassVisitor.h" //just for the forward references
-#include "irtranslation.h"
-#include "ASTBuilder.h"
+#include <frontend/irtranslation.h>
+#include <frontend/ASTBuilder.h>
 
 class GenIL 
 {

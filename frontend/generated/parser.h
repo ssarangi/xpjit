@@ -1,9 +1,9 @@
 typedef union
 {
-    char*	string;
-    int 	integer;
-    IcaValue*	value;
-    Statement* 	statement;
+    char*   string;
+    int     integer;
+    IcaValue*   value;
+    Statement*  statement;
 } YYSTYPE;
 #define	EQUALS	258
 #define	NEQUALS	259

@@ -1,9 +1,12 @@
 #ifndef DOMINANCE_FRONTIER
 #define DOMINANCE_FRONTIER
 
-#include "llvm/Pass.h"
-#include "llvm/IR/Function.h"
-#include "llvm/Support/raw_ostream.h"
+#include <common/llvm_warnings_push.h>
+#include <llvm/Pass.h>
+#include <llvm/IR/Function.h>
+#include <llvm/Support/raw_ostream.h>
+#include <common/llvm_warnings_pop.h>
+
 #include <set>
 #include <map>
 #include "DominanceTreeConstructor.h"

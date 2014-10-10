@@ -1,13 +1,17 @@
 #ifndef GENLLVM_H
 #define GENLLVM_H
 
-#include "IClassVisitor.h"
+#include <frontend/IClassVisitor.h>
+#include <frontend/Type.h>
+
+#include <common/llvm_warnings_push.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
+#include <common/llvm_warnings_pop.h>
+
 #include <map>
 #include <string>
-#include "Type.h"
 
 class GenLLVM 
 {

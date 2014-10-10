@@ -3,9 +3,11 @@
 
 #include "frontend/irtranslation.h"
 
+#include <common/llvm_warnings_push.h>
 #include <llvm/Pass.h>
 #include <llvm/IR/Function.h>
 #include <llvm/Support/raw_ostream.h>
+#include <common/llvm_warnings_pop.h>
 
 using llvm::FunctionPass;
 

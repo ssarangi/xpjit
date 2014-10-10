@@ -84,6 +84,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\common\debug.h" />
+    <ClInclude Include="..\include\common\llvm_warnings_pop.h" />
+    <ClInclude Include="..\include\common\llvm_warnings_push.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

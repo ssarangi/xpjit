@@ -16,10 +16,12 @@
 #include <iostream>
 #include <cstdio>
 
+#include <common/llvm_warnings_push.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/PassManager.h>
+#include <common/llvm_warnings_pop.h>
 
 extern IcarusModule* ParseFile(const char *filename); //using this for now. need to create a standard header file for lex
 
@@ -123,7 +125,12 @@ int main(int argc, char *argv[])
     gDebug.setCodeOptimization(true); //we need to allow setting levels
 
     gTrace << "Verbose on!\n";
-    Compile(argv[1]);
+
+    char *pfilename = argv[1];
+
+    assert(pfilename != nullptr && "No input file specified");
+
+    Compile(pfilename);
     system("pause");
     return 0;
 }

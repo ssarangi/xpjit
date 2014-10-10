@@ -3,9 +3,11 @@
 #include "common/debug.h"
 #include "midend/DominanceTree.h"
 
+#include <common/llvm_warnings_push.h>
 #include <llvm/ADT/DepthFirstIterator.h> //For iterating through the predecessors of the basic block
 #include <llvm/ADT/PostOrderIterator.h> //For iterating through the predecessors of the basic block
 #include <llvm/IR/CFG.h> //We need a specialization of the GraphTrait class 
+#include <common/llvm_warnings_pop.h>
 
 #include <map>
 #include <set>

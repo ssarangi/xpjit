@@ -1,18 +1,24 @@
 #ifndef __CODEGEN__
 #define __CODEGEN__
 
+#include <backend/iarchcodegen.h>
+
+#include <common/llvm_warnings_push.h>
 #include <llvm/Pass.h>
 #include <llvm/IR/InstVisitor.h>
 #include <llvm/IR/Dominators.h>
 #include <llvm/Analysis/PostDominators.h>
 #include <llvm/Analysis/MemoryDependenceAnalysis.h>
+#include <common/llvm_warnings_pop.h>
 
 class CodeGenPass : public llvm::ModulePass, public llvm::InstVisitor<CodeGenPass>
 {
     static char ID;
 
 public:
-    CodeGenPass() : llvm::ModulePass(ID)
+    CodeGenPass(IArchCodeGen *pArchCodeGen)
+        : llvm::ModulePass(ID)
+        , m_pArchCodeGen(pArchCodeGen)
     {
         llvm::initializePostDominatorTreePass(*llvm::PassRegistry::getPassRegistry());
     }
@@ -111,6 +117,9 @@ public:
     // Note that you MUST override this function if your return type is not void.
     //
     void visitInstruction(llvm::Instruction &I);
+
+private:
+    IArchCodeGen* m_pArchCodeGen;
 };
 
 #endif

@@ -1,0 +1,7 @@
+#ifndef __LLVM_WARNINGS_PUSH__
+#define __LLVM_WARNINGS_PUSH__
+
+#define LLVM_WARNINGS_POP
+#undef LLVM_WARNINGS_PUSH
+
+#endif

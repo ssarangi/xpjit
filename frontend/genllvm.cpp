@@ -1,6 +1,7 @@
 #include "frontend/genllvm.h"
 #include "frontend/irtranslation.h"
 
+#include <common/llvm_warnings_push.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
@@ -9,6 +10,7 @@
 #include <llvm/IR/Constants.h>
 #include <llvm/ADT/APInt.h>
 #include <llvm/ADT/StringRef.h>
+#include <common/llvm_warnings_pop.h>
 
 using llvm::BasicBlock;
 inline llvm::LLVMContext& getGlobalContext()

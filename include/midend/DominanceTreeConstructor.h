@@ -1,11 +1,15 @@
 #ifndef DOMINANCE_TREE_CONSTRUCTOR
 #define DOMINANCE_TREE_CONSTRUCTOR
 
-#include "llvm/Pass.h"
-#include "llvm/IR/Function.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/PassRegistry.h"
 #include "DominanceTree.h"
+
+#include <common/llvm_warnings_push.h>
+#include <llvm/Pass.h>
+#include <llvm/IR/Function.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/PassRegistry.h>
+#include <common/llvm_warnings_pop.h>
+
 #include <map>
 
 using llvm::FunctionPass;

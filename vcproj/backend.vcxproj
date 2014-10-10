@@ -81,12 +81,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\backend\backendcodegen.h" />
+    <ClInclude Include="..\backend\mips\mipscodegen.h" />
     <ClInclude Include="..\backend\mips\mipsinst.h" />
     <ClInclude Include="..\backend\mips\mipsregs.h" />
+    <ClInclude Include="..\include\backend\backendcodegen.h" />
+    <ClInclude Include="..\include\backend\iarchcodegen.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\backendcodegen.cpp" />
+    <ClCompile Include="..\backend\mips\mipscodegen.cpp" />
     <ClCompile Include="..\backend\mips\mipsreg.cpp" />
   </ItemGroup>
   <ItemGroup>

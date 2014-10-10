@@ -1,7 +1,9 @@
 #ifndef SSA_CONSTRUCTOR_H
 #define SSA_CONSTRUCTOR_H
 
+#include <common/llvm_warnings_push.h>
 #include <llvm/Pass.h>
+#include <common/llvm_warnings_pop.h>
 
 using llvm::FunctionPass;
 

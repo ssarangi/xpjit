@@ -1,6 +1,8 @@
 #include <frontend/findentryfunc.h>
 
+#include <common/llvm_warnings_push.h>
 #include <llvm/IR/Module.h>
+#include <common/llvm_warnings_pop.h>
 
 char FindEntryFunc::ID = 0;
 
