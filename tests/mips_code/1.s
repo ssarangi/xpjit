@@ -2,6 +2,6 @@
 .globl main
 
 main:
-	ori $8, $0, 0x2
-	ori $9, $0, 0x3
-	addu $10, $8, $9
+	li $t0, 10
+	li $t1, 20
+	add $t2, $t1, $t0
