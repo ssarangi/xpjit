@@ -14,8 +14,10 @@
 
 char CodeGenPass::ID = 5;
 
-bool CodeGenPass::runOnFunction(llvm::Function& F)
+bool CodeGenPass::runOnFunction(llvm::Function &F)
 {
+    m_pTempStackSize = &getAnalysis<TemporaryStackSize>(F);
+
     std::string funcName = F.getName();
     if (funcName == "main")
     {

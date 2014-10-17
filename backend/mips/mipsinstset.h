@@ -9,11 +9,13 @@ public:
     MipsInstSet() {}
     ~MipsInstSet() {}
     
-    void emitLoadWord();
-    void emitAdd();
-    void emitStoreWord();
-    void emitAddiu();
-    void emitLoadImmediate();
+    static void emitLoad(Register *pDstReg, int offset, Register *pSrcReg, std::ostream& s);
+    static void emitStore(Register *pDstReg, int offset, Register *pSrcReg, std::ostream& s);
+    static void emitLoadImm(Register *pDstReg, int val, std::ostream& s);
+    static void emitLoadAddress(Register *pDstReg, char* pAddress, std::ostream& s);
+    // static void emitLoadBool();
+    // static void emitLoadString();
+    static void emitMove(Register *pDstReg, Register *pSrcReg, std::ostream& s);
 };
 
 #endif

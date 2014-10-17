@@ -2,6 +2,8 @@
 #define __CODEGEN__
 
 #include <backend/iarchcodegen.h>
+#include "tempstacksize.h"
+#include "backendvar.h"
 
 #include <common/llvm_warnings_push.h>
 #include <llvm/Pass.h>
@@ -27,6 +29,7 @@ public:
     {
         usage.setPreservesCFG();
         usage.addRequired<llvm::PostDominatorTree>();
+        usage.addRequired<TemporaryStackSize>();
     }
 
     virtual bool runOnFunction(llvm::Function& F);
@@ -119,7 +122,8 @@ public:
     void visitInstruction(llvm::Instruction &I);
 
 private:
-    IArchCodeGen* m_pArchCodeGen;
+    TemporaryStackSize *m_pTempStackSize;
+    IArchCodeGen       *m_pArchCodeGen;
 };
 
 #endif
