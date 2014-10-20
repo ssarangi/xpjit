@@ -19,6 +19,7 @@ public:
     virtual void loadBaseVariable(BaseVariable *pVar, std::ostream &s);
 
     void emitPreInstructions(BaseVariable* pBaseVar);
+    void genCommentStr(llvm::Instruction *pI);
 
     virtual void visitFunction(llvm::Function& F, TemporaryStackSize *pTempStackSize);
     virtual void visitReturnInst(llvm::ReturnInst &I);

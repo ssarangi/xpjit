@@ -12,6 +12,14 @@ MipsRegister T2("$t2");
 MipsRegister SP("$sp");
 MipsRegister V0("$v0");
 
+#define COMMENT_STR(INSTR)                      \
+{                                               \
+    std::string str;                            \
+    llvm::raw_string_ostream os(str);           \
+    INSTR.print(os);                            \
+    m_ostream << "# " << os.str() << std::endl; \
+}
+
 void MipsCodeGen::storeTemporary(llvm::Instruction *pI)
 {
     // Store the temporary in the specified register.
@@ -372,6 +380,8 @@ void MipsCodeGen::visitCastInst(llvm::CastInst &I)
 
 void MipsCodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
 {
+    COMMENT_STR(I);
+
     llvm::Instruction *pInst = llvm::cast<llvm::Instruction>(&I);
 
     llvm::Value *pOp1 = I.getOperand(0);
