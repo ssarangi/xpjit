@@ -1,6 +1,8 @@
 #ifndef __ARCH_CODEGEN__
 #define __ARCH_CODEGEN__
 
+#include <backend/backendvar.h>
+
 #include <common/llvm_warnings_push.h>
 #include <llvm/IR/InstVisitor.h>
 #include <common/llvm_warnings_pop.h>
@@ -14,7 +16,19 @@ public:
     {
     }
 
+    ~IArchCodeGen()
+    {
+        for (auto pBaseVar : m_symbolTable)
+        {
+            delete pBaseVar;
+        }
+
+        m_symbolTable.clear();
+    }
+
     virtual void initializeAssembler(llvm::Function *pMainFunc) = 0;
+
+    virtual BaseVariable* getSymbol(llvm::Value *pV) = 0;
 
     virtual void visitFunction(llvm::Function &F) = 0;
     virtual void visitReturnInst(llvm::ReturnInst &I) = 0;
@@ -104,6 +118,7 @@ public:
 
 protected:
     std::stringstream m_ostream;
+    std::vector<BaseVariable*> m_symbolTable;
 };
 
 #endif

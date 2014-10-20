@@ -12,6 +12,11 @@ public:
 
     virtual void initializeAssembler(llvm::Function *pMainFunc);
 
+    virtual BaseVariable* getSymbol(llvm::Value* pV);
+    virtual void loadBaseVariable(BaseVariable *pVar, std::ostream &s);
+
+    void emitPreInstructions(BaseVariable* pBaseVar);
+
     virtual void visitFunction(llvm::Function& F);
     virtual void visitReturnInst(llvm::ReturnInst &I);
     virtual void visitBranchInst(llvm::BranchInst &I);

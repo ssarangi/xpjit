@@ -1,6 +1,8 @@
 #ifndef __CODEGEN_PUBLIC__
 #define __CODEGEN_PUBLIC__
 
+#include <string>
+
 namespace llvm
 {
     class Function;
@@ -24,6 +26,6 @@ private:
     llvm::Module*   m_pModule;
 };
 
-void GenerateCode(CodeGenModule& M);
+void GenerateCode(CodeGenModule& M, std::string outputFile);
 
 #endif

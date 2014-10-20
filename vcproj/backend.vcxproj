@@ -83,7 +83,6 @@
   <ItemGroup>
     <ClInclude Include="..\backend\mips\mipscodegen.h" />
     <ClInclude Include="..\backend\mips\mipsinstset.h" />
-    <ClInclude Include="..\backend\mips\mipsregs.h" />
     <ClInclude Include="..\backend\tempstacksize.h" />
     <ClInclude Include="..\include\backend\backendcodegen.h" />
     <ClInclude Include="..\include\backend\backendvar.h" />
@@ -93,7 +92,6 @@
     <ClCompile Include="..\backend\backendcodegen.cpp" />
     <ClCompile Include="..\backend\mips\mipscodegen.cpp" />
     <ClCompile Include="..\backend\mips\mipsinstset.cpp" />
-    <ClCompile Include="..\backend\mips\mipsreg.cpp" />
     <ClCompile Include="..\backend\tempstacksize.cpp" />
   </ItemGroup>
   <ItemGroup>

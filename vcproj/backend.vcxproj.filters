@@ -12,9 +12,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\backend\mips\mipsregs.h">
-      <Filter>mips</Filter>
-    </ClInclude>
     <ClInclude Include="..\backend\mips\mipscodegen.h">
       <Filter>mips</Filter>
     </ClInclude>
@@ -35,9 +32,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\backend\mips\mipsreg.cpp">
-      <Filter>mips</Filter>
-    </ClCompile>
     <ClCompile Include="..\backend\mips\mipscodegen.cpp">
       <Filter>mips</Filter>
     </ClCompile>

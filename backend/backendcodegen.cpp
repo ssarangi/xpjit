@@ -3,14 +3,15 @@
 
 #include <backend/backendcodegen.h>
 #include "mips/mipscodegen.h"
-#include "mips/mipsregs.h"
 
 #include <common/llvm_warnings_push.h>
 #include <llvm/PassManager.h>
 #include <llvm/ADT/PostOrderIterator.h>
+#include <llvm/IR/InstIterator.h>
 #include <common/llvm_warnings_pop.h>
 
 #include <iostream>
+#include <fstream>
 
 char CodeGenPass::ID = 5;
 
@@ -25,20 +26,9 @@ bool CodeGenPass::runOnFunction(llvm::Function &F)
         m_pArchCodeGen->initializeAssembler(&F);
     }
 
-    m_pArchCodeGen->visitFunction(F);
-    llvm::outs() << "Code Generation for: " << F.getName();
-    
+    visit(F);
 
-    for (llvm::po_iterator<llvm::BasicBlock*> I = llvm::po_begin(&F.getEntryBlock()),
-                                              IE = llvm::po_end(&F.getEntryBlock());
-                                              I != IE; ++I)
-    {
-        llvm::Value* V = I->begin();
-        llvm::BasicBlock* BB = *I;
-        
-    }
-
-    std::string assembly = m_pArchCodeGen->getAssembly();
+    m_assembly = m_pArchCodeGen->getAssembly();
 
     llvm::outs().flush();
 
@@ -57,12 +47,27 @@ bool CodeGenPass::runOnModule(llvm::Module &M)
 }
 
 
-void GenerateCode(CodeGenModule& M)
+void GenerateCode(CodeGenModule& M, std::string outputFile)
 {
     llvm::PassManager mpm;
     MipsCodeGen *pMipsCodeGen = new MipsCodeGen();
-    mpm.add(new CodeGenPass(pMipsCodeGen));
+    CodeGenPass *pCodeGenPass = new CodeGenPass(pMipsCodeGen);
+    mpm.add(pCodeGenPass);
     mpm.run(*M.getLLVMModule());
+
+    // Open the file and write into it.
+    std::ofstream file;
+    file.open(outputFile);
+
+    file.write(pCodeGenPass->getAssembly().c_str(), pCodeGenPass->getAssembly().length());
+    file.close();
+
+    delete pMipsCodeGen;
+}
+
+void CodeGenPass::visitFunction(llvm::Function &F)
+{
+    m_pArchCodeGen->visitFunction(F);
 }
 
 void CodeGenPass::visitReturnInst(llvm::ReturnInst &I)

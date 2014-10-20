@@ -1,5 +1,36 @@
 #include <common/debug.h>
 #include "mipscodegen.h"
+#include "mipsinstset.h"
+
+MipsRegister A0("$a0");
+MipsRegister T1("$t1");
+MipsRegister SP("$sp");
+MipsRegister V0("$v0");
+
+BaseVariable* MipsCodeGen::getSymbol(llvm::Value* pV)
+{
+    BaseVariable *pSymbol = nullptr;
+    // Check if the llvm value is a constant int
+    if (llvm::Constant *pC = llvm::dyn_cast<llvm::Constant>(pV))
+    {
+        // So this is a constant. So see which one.
+        if (llvm::ConstantInt *pCI = llvm::dyn_cast<llvm::ConstantInt>(pC))
+        {
+            pSymbol = new Immediate((int)pCI->getZExtValue());
+            m_symbolTable.push_back(pSymbol);
+        }
+    }
+
+    return pSymbol;
+}
+
+void MipsCodeGen::loadBaseVariable(BaseVariable *pVar, std::ostream &s)
+{
+    if (pVar->isInstanceOf(IMMEDIATE))
+    {
+        MipsInstSet::emitLoadImm(A0, *(Immediate*)pVar, s);
+    }
+}
 
 void MipsCodeGen::initializeAssembler(llvm::Function *pMainFunc)
 {
@@ -11,6 +42,15 @@ void MipsCodeGen::initializeAssembler(llvm::Function *pMainFunc)
     m_ostream << std::endl;
 }
 
+void MipsCodeGen::emitPreInstructions(BaseVariable* pBaseVar)
+{
+    if (pBaseVar->isInstanceOf(IMMEDIATE))
+    {
+        Immediate *pImm = static_cast<Immediate*>(pBaseVar);
+
+    }
+}
+
 void MipsCodeGen::visitFunction(llvm::Function& F)
 {
     m_ostream << F.getName().str() << ":" << std::endl;
@@ -18,7 +58,17 @@ void MipsCodeGen::visitFunction(llvm::Function& F)
 
 void MipsCodeGen::visitReturnInst(llvm::ReturnInst &I)
 {
-    ICARUS_NOT_IMPLEMENTED("Return Inst not implemented");
+    // Check if the current function is the main function. If so emit a 
+    // different instruction than if its a normal subroutine
+    if (I.getParent()->getParent()->getName() == "main")
+    {
+        MipsInstSet::emitSyscall(PRINT_INT, m_ostream);
+        MipsInstSet::emitSyscall(EXIT_WITH_RETVAL, m_ostream);
+    }
+    else
+    {
+        ICARUS_NOT_IMPLEMENTED("Return instruction for functions is not implemented");
+    }
 }
 
 void MipsCodeGen::visitBranchInst(llvm::BranchInst &I)
@@ -288,7 +338,39 @@ void MipsCodeGen::visitCastInst(llvm::CastInst &I)
 
 void MipsCodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
 {
-    ICARUS_NOT_IMPLEMENTED("Binary Operator Inst not implemented");
+    llvm::Instruction *pInst = llvm::cast<llvm::Instruction>(&I);
+
+    llvm::Value *pOp1 = I.getOperand(0);
+    llvm::Value *pOp2 = I.getOperand(1);
+
+    BaseVariable *pBop1 = getSymbol(pOp1);
+    BaseVariable *pBop2 = getSymbol(pOp2);
+
+    loadBaseVariable(pBop1, m_ostream);
+    MipsInstSet::emitPush(A0, m_ostream);
+
+    loadBaseVariable(pBop2, m_ostream);
+    MipsInstSet::emitLoad(T1, 4, SP, m_ostream);
+
+    switch (pInst->getOpcode())
+    {
+    case llvm::Instruction::Add:
+    case llvm::Instruction::FAdd:
+        MipsInstSet::emitAdd(A0, A0, T1, m_ostream);
+        break;
+    case llvm::Instruction::Sub:
+    case llvm::Instruction::FSub:
+        MipsInstSet::emitSub(A0, A0, T1, m_ostream);
+        break;
+    case llvm::Instruction::Mul:
+    case llvm::Instruction::FMul:
+        break;
+    case llvm::Instruction::FDiv:
+        break;
+    }
+
+    MipsInstSet::emitPop(SP, m_ostream);
+    std::string gg = m_ostream.str();
 }
 
 void MipsCodeGen::visitCmpInst(llvm::CmpInst &I)

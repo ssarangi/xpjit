@@ -41,6 +41,12 @@ public:
         return "CodeGenPass";
     }
 
+    std::string getAssembly() const
+    {
+        return m_assembly;
+    }
+    
+    void visitFunction(llvm::Function &F);
     void visitReturnInst(llvm::ReturnInst &I);
     void visitBranchInst(llvm::BranchInst &I);
     void visitSwitchInst(llvm::SwitchInst &I);
@@ -124,6 +130,7 @@ public:
 private:
     TemporaryStackSize *m_pTempStackSize;
     IArchCodeGen       *m_pArchCodeGen;
+    std::string         m_assembly;
 };
 
 #endif

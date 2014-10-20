@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstdio>
+#include <string>
 
 #include <common/llvm_warnings_push.h>
 #include <llvm/IR/Module.h>
@@ -42,12 +43,12 @@ llvm::Function* findEntryFunc(llvm::Module& M)
     return pEntryFunc->GetEntryFunc();
 }
 
-void genExecutable(CodeGenModule& module)
+void genExecutable(CodeGenModule& module, std::string filename)
 {
-    GenerateCode(module);
+    GenerateCode(module, filename);
 }
 
-int Compile(char *fileName)
+int Compile(char *fileName, char *pOutputFileName)
 {
     gTrace <<"Compiling file: " << fileName;
     pIcarusModule = ParseFile(fileName);
@@ -111,7 +112,7 @@ int Compile(char *fileName)
     codeGenModule.setLLVMModule(&llvmModule);
     codeGenModule.setLLVMEntryFunction(pEntryFunc);
 
-    genExecutable(codeGenModule);
+    genExecutable(codeGenModule, std::string(pOutputFileName));
     
     return 0;
 }
@@ -127,10 +128,12 @@ int main(int argc, char *argv[])
     gTrace << "Verbose on!\n";
 
     char *pfilename = argv[1];
+    char *pOutput = argv[2];
 
     assert(pfilename != nullptr && "No input file specified");
+    assert(pOutput != nullptr && "No output file specified");
 
-    Compile(pfilename);
+    Compile(pfilename, pOutput);
     system("pause");
     return 0;
 }

@@ -1,6 +1,8 @@
 #ifndef __BACKEND_VAR__
 #define __BACKEND_VAR__
 
+#include <ostream>
+
 enum VarType
 {
     BEGIN,
@@ -79,20 +81,34 @@ private:
 
     data m_data;
     DataType m_dataType;
+
+public:
+    data getData() { return m_data; }
+    
+    template <typename M>
+    M getValue()
+    {
+        if (m_dataType == I32)
+            return m_data.i32;
+        else if (m_dataType == F32)
+            return m_data.f32;
+        else
+            return m_data.u32;
+    }
 };
 
-class Register : public BaseVariable
+class MipsRegister : public BaseVariable
 {
 public:
-    Register(std::string regName)
+    MipsRegister(std::string regName)
         : m_regName(regName)
     {}
 
     setClassInstance1(VarType::REGISTER, BaseVariable);
 
-    friend std::ostream& operator<<(std::ostream& out, const Register& reg)
+    friend std::ostream& operator<<(std::ostream& out, const MipsRegister& reg)
     {
-        out << m_regName;
+        out << reg.m_regName.c_str();
         return out;
     }
 
