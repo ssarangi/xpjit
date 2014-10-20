@@ -29,7 +29,7 @@ void GenerateCode(CodeGenModule& M, std::string outputFile)
     file.close();
 
     g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
-    g_outputStream.stream() << "Code Generation" << std::endl;
+    g_outputStream.stream() << "                         Code Generation                           " << std::endl;
     g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
     g_outputStream.stream() << pCodeGenPass->getAssembly();
     g_outputStream.flush();

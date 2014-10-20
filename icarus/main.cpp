@@ -81,7 +81,7 @@ int Compile(char *fileName, char *pOutputFileName)
     }
 
     g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
-    g_outputStream.stream() << "Before Optimization" << std::endl;
+    g_outputStream.stream() << "                         Before Optimization                       " << std::endl;
     g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
     g_outputStream.flush();
     if (gDebug.isDebuggable())
@@ -96,7 +96,7 @@ int Compile(char *fileName, char *pOutputFileName)
     }
     
     g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
-    g_outputStream.stream() << "After Optimization" << std::endl;
+    g_outputStream.stream() << "                          After Optimization                       " << std::endl;
     g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
     g_outputStream.flush();
     if(gDebug.isDebuggable())
