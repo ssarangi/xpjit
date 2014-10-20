@@ -90,6 +90,10 @@ void OutputStream::flush_raw_stream()
         std::stringstream stream(m_pRawStringOStream->str());
         iter->output(stream);
     }
+
+    delete m_pRawStringOStream;
+    m_outputString = "";
+    m_pRawStringOStream = new llvm::raw_string_ostream(m_outputString);
 }
 
 void ConsoleStreamSubscriber::output(std::stringstream& stream)
