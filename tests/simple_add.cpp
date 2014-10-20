@@ -1,11 +1,11 @@
 int main()
 {
-	int a;
+	int a, b, c;
 	a = 10;
-	int b;
 	b = 20;
-
-	int c;
-	c = a + b;
+	c = 2;
+	a = a + b;
+	b = b * 5;
+	c = c * b + a;
 	return c;
 }

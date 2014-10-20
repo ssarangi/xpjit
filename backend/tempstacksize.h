@@ -20,6 +20,7 @@ public:
     {}
 
     virtual bool runOnFunction(llvm::Function &F);
+    int getNumTemporaries(llvm::Function *pFunc);
 
 private:
     llvm::DenseMap<llvm::Function*, unsigned int> m_numTemporaries;

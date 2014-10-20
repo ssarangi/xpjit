@@ -23,3 +23,9 @@ bool TemporaryStackSize::runOnFunction(llvm::Function &F)
 
     return false;
 }
+
+int TemporaryStackSize::getNumTemporaries(llvm::Function *pFunc)
+{
+    assert(m_numTemporaries.find(pFunc) != m_numTemporaries.end() && "No function entry for temporaries");
+    return m_numTemporaries[pFunc];
+}

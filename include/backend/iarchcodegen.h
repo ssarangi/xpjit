@@ -9,6 +9,8 @@
 
 #include <sstream>
 
+class TemporaryStackSize;
+
 class IArchCodeGen
 {
 public:
@@ -20,7 +22,7 @@ public:
     {
         for (auto pBaseVar : m_symbolTable)
         {
-            delete pBaseVar;
+            delete pBaseVar.second;
         }
 
         m_symbolTable.clear();
@@ -30,7 +32,7 @@ public:
 
     virtual BaseVariable* getSymbol(llvm::Value *pV) = 0;
 
-    virtual void visitFunction(llvm::Function &F) = 0;
+    virtual void visitFunction(llvm::Function &F, TemporaryStackSize *pTempStackSize) = 0;
     virtual void visitReturnInst(llvm::ReturnInst &I) = 0;
     virtual void visitBranchInst(llvm::BranchInst &I) = 0;
     virtual void visitSwitchInst(llvm::SwitchInst &I) = 0;
@@ -118,7 +120,7 @@ public:
 
 protected:
     std::stringstream m_ostream;
-    std::vector<BaseVariable*> m_symbolTable;
+    llvm::DenseMap<llvm::Value*, BaseVariable*> m_symbolTable;
 };
 
 #endif

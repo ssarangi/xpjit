@@ -1,15 +1,37 @@
 #include <common/debug.h>
 #include "mipscodegen.h"
 #include "mipsinstset.h"
+#include "../tempstacksize.h"
+
+#include <common/llvm_warnings_push.h>
+#include <common/llvm_warnings_pop.h>
 
 MipsRegister A0("$a0");
 MipsRegister T1("$t1");
+MipsRegister T2("$t2");
 MipsRegister SP("$sp");
 MipsRegister V0("$v0");
+
+void MipsCodeGen::storeTemporary(llvm::Instruction *pI)
+{
+    // Store the temporary in the specified register.
+    // Assumption is that the result is in A0.
+    MipsVariable *pMipsVar = new MipsVariable(m_temporaryLocationsUsed);
+    m_symbolTable[pI] = pMipsVar;
+    MipsInstSet::emitStore(A0, -(m_temporaryLocationsUsed * WORD_SIZE), T2, m_ostream);
+    ++m_temporaryLocationsUsed;
+}
 
 BaseVariable* MipsCodeGen::getSymbol(llvm::Value* pV)
 {
     BaseVariable *pSymbol = nullptr;
+    // Check if we already have a symbol in the symbol table. If not the create a symbol
+    if (m_symbolTable.find(pV) != m_symbolTable.end())
+    {
+        pSymbol = m_symbolTable[pV];
+        return pSymbol;
+    }
+
     // Check if the llvm value is a constant int
     if (llvm::Constant *pC = llvm::dyn_cast<llvm::Constant>(pV))
     {
@@ -17,7 +39,7 @@ BaseVariable* MipsCodeGen::getSymbol(llvm::Value* pV)
         if (llvm::ConstantInt *pCI = llvm::dyn_cast<llvm::ConstantInt>(pC))
         {
             pSymbol = new Immediate((int)pCI->getZExtValue());
-            m_symbolTable.push_back(pSymbol);
+            m_symbolTable[pV] = pSymbol;
         }
     }
 
@@ -29,6 +51,10 @@ void MipsCodeGen::loadBaseVariable(BaseVariable *pVar, std::ostream &s)
     if (pVar->isInstanceOf(IMMEDIATE))
     {
         MipsInstSet::emitLoadImm(A0, *(Immediate*)pVar, s);
+    }
+    else if (pVar->isInstanceOf(BACKEND_VARIABLE))
+    {
+        MipsInstSet::emitLoad(A0, -(((MipsVariable*)pVar)->getTempLocation() * WORD_SIZE), T2, s);
     }
 }
 
@@ -51,9 +77,17 @@ void MipsCodeGen::emitPreInstructions(BaseVariable* pBaseVar)
     }
 }
 
-void MipsCodeGen::visitFunction(llvm::Function& F)
+void MipsCodeGen::visitFunction(llvm::Function& F, TemporaryStackSize *pTempStackSize)
 {
     m_ostream << F.getName().str() << ":" << std::endl;
+    
+    int numTemporaries = pTempStackSize->getNumTemporaries(&F);
+    int stackOffset = numTemporaries * WORD_SIZE;
+
+    MipsInstSet::emitMove(T2, SP, m_ostream);
+
+    // Move the stack pointer by the number of temp variables we need
+    MipsInstSet::emitAddiu(SP, SP, -stackOffset, m_ostream);
 }
 
 void MipsCodeGen::visitReturnInst(llvm::ReturnInst &I)
@@ -364,13 +398,15 @@ void MipsCodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
         break;
     case llvm::Instruction::Mul:
     case llvm::Instruction::FMul:
+        MipsInstSet::emitMul(A0, A0, T1, m_ostream);
         break;
     case llvm::Instruction::FDiv:
+        MipsInstSet::emitDiv(A0, A0, T1, m_ostream);
         break;
     }
 
     MipsInstSet::emitPop(SP, m_ostream);
-    std::string gg = m_ostream.str();
+    storeTemporary(pInst);
 }
 
 void MipsCodeGen::visitCmpInst(llvm::CmpInst &I)

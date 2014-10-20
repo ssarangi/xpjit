@@ -16,7 +16,7 @@ MIPS Instructions
 #define LI " li "
 #define LA " la "
 
-#define MOV " mov "
+#define MOVE " move "
 #define NEG " neg "
 #define ADD " add "
 #define ADDI " addi "
@@ -61,6 +61,7 @@ enum MIPS_SYSCALLS
 
 extern MipsRegister A0;
 extern MipsRegister T1;
+extern MipsRegister T2;
 extern MipsRegister SP;
 extern MipsRegister V0;
 
@@ -79,12 +80,14 @@ public:
     static void emitLoadAddress(MipsRegister &dstReg, char* pAddress, std::ostream &s);
     // static void emitLoadBool();
     // static void emitLoadString();
-    static void emitMov(MipsRegister &dstReg, MipsRegister &srcReg, std::ostream &s);
+    static void emitMove(MipsRegister &dstReg, MipsRegister &srcReg, std::ostream &s);
 
     static void emitAddiu(MipsRegister &dstReg, MipsRegister &srcReg, int imm, std::ostream &s);
 
     static void emitAdd(MipsRegister &dstReg, MipsRegister &srcReg1, MipsRegister &srcReg2, std::ostream &s);
     static void emitSub(MipsRegister &dstReg, MipsRegister &srcReg1, MipsRegister &srcReg2, std::ostream &s);
+    static void emitMul(MipsRegister &dstReg, MipsRegister &srcReg1, MipsRegister &srcReg2, std::ostream &s);
+    static void emitDiv(MipsRegister &dstReg, MipsRegister &srcReg1, MipsRegister &srcReg2, std::ostream &s);
 
     static void emitPush(MipsRegister &reg, std::ostream &s);
     static void emitPop(MipsRegister &reg, std::ostream &s);

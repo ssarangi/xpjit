@@ -21,6 +21,7 @@ public:
     CodeGenPass(IArchCodeGen *pArchCodeGen)
         : llvm::ModulePass(ID)
         , m_pArchCodeGen(pArchCodeGen)
+        , m_pTempStackSize(nullptr)
     {
         llvm::initializePostDominatorTreePass(*llvm::PassRegistry::getPassRegistry());
     }

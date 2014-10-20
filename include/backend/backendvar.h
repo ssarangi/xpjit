@@ -6,6 +6,7 @@
 enum VarType
 {
     BEGIN,
+    BASE_VARIABLE,
     BACKEND_VARIABLE,
     IMMEDIATE,
     REGISTER,
@@ -34,7 +35,7 @@ enum DataType
 class BaseVariable
 {
 public:
-    setClassInstance(VarType::BACKEND_VARIABLE);
+    setClassInstance(VarType::BASE_VARIABLE);
 };
 
 class Immediate : public BaseVariable
@@ -95,6 +96,27 @@ public:
         else
             return m_data.u32;
     }
+};
+
+class MipsVariable : public BaseVariable
+{
+public:
+    MipsVariable(int location)
+        : m_tempLocation(location)
+    {}
+
+    setClassInstance1(VarType::BACKEND_VARIABLE, BaseVariable);
+
+    friend std::ostream& operator<<(std::ostream& out, const MipsVariable& var)
+    {
+        out << var.m_tempLocation;
+        return out;
+    }
+
+    int getTempLocation() const { return m_tempLocation; }
+
+private:
+    int m_tempLocation;
 };
 
 class MipsRegister : public BaseVariable

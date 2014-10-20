@@ -13,6 +13,24 @@
 #include <iostream>
 #include <fstream>
 
+void GenerateCode(CodeGenModule& M, std::string outputFile)
+{
+    llvm::PassManager mpm;
+    MipsCodeGen *pMipsCodeGen = new MipsCodeGen();
+    CodeGenPass *pCodeGenPass = new CodeGenPass(pMipsCodeGen);
+    mpm.add(pCodeGenPass);
+    mpm.run(*M.getLLVMModule());
+
+    // Open the file and write into it.
+    std::ofstream file;
+    file.open(outputFile);
+
+    file.write(pCodeGenPass->getAssembly().c_str(), pCodeGenPass->getAssembly().length());
+    file.close();
+
+    delete pMipsCodeGen;
+}
+
 char CodeGenPass::ID = 5;
 
 bool CodeGenPass::runOnFunction(llvm::Function &F)
@@ -46,28 +64,9 @@ bool CodeGenPass::runOnModule(llvm::Module &M)
     return true;
 }
 
-
-void GenerateCode(CodeGenModule& M, std::string outputFile)
-{
-    llvm::PassManager mpm;
-    MipsCodeGen *pMipsCodeGen = new MipsCodeGen();
-    CodeGenPass *pCodeGenPass = new CodeGenPass(pMipsCodeGen);
-    mpm.add(pCodeGenPass);
-    mpm.run(*M.getLLVMModule());
-
-    // Open the file and write into it.
-    std::ofstream file;
-    file.open(outputFile);
-
-    file.write(pCodeGenPass->getAssembly().c_str(), pCodeGenPass->getAssembly().length());
-    file.close();
-
-    delete pMipsCodeGen;
-}
-
 void CodeGenPass::visitFunction(llvm::Function &F)
 {
-    m_pArchCodeGen->visitFunction(F);
+    m_pArchCodeGen->visitFunction(F, m_pTempStackSize);
 }
 
 void CodeGenPass::visitReturnInst(llvm::ReturnInst &I)

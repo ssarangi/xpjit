@@ -31,9 +31,9 @@ void MipsInstSet::emitAddiu(MipsRegister &dstReg, MipsRegister &srcReg, int imm,
     s << ADDIU << dstReg << " " << srcReg << " " << imm << std::endl;
 }
 
-void MipsInstSet::emitMov(MipsRegister &dstReg, MipsRegister &srcReg, std::ostream &s)
+void MipsInstSet::emitMove(MipsRegister &dstReg, MipsRegister &srcReg, std::ostream &s)
 {
-    s << MOV << dstReg << " " << srcReg << std::endl;
+    s << MOVE << dstReg << " " << srcReg << std::endl;
 }
 
 void MipsInstSet::emitPush(MipsRegister &reg, std::ostream& s)
@@ -61,4 +61,14 @@ void MipsInstSet::emitAdd(MipsRegister &dstReg, MipsRegister &srcReg1, MipsRegis
 void MipsInstSet::emitSub(MipsRegister &dstReg, MipsRegister &srcReg1, MipsRegister &srcReg2, std::ostream &s)
 {
     s << SUB << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
+}
+
+void MipsInstSet::emitMul(MipsRegister &dstReg, MipsRegister &srcReg1, MipsRegister &srcReg2, std::ostream &s)
+{
+    s << MUL << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
+}
+
+void MipsInstSet::emitDiv(MipsRegister &dstReg, MipsRegister &srcReg1, MipsRegister &srcReg2, std::ostream &s)
+{
+    s << DIV << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
 }

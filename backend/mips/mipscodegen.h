@@ -3,10 +3,13 @@
 
 #include <backend/iarchcodegen.h>
 
+class TemporaryStackSize;
+
 class MipsCodeGen : public IArchCodeGen
 {
 public:
     MipsCodeGen()
+        : m_temporaryLocationsUsed(0)
     {
     }
 
@@ -17,7 +20,7 @@ public:
 
     void emitPreInstructions(BaseVariable* pBaseVar);
 
-    virtual void visitFunction(llvm::Function& F);
+    virtual void visitFunction(llvm::Function& F, TemporaryStackSize *pTempStackSize);
     virtual void visitReturnInst(llvm::ReturnInst &I);
     virtual void visitBranchInst(llvm::BranchInst &I);
     virtual void visitSwitchInst(llvm::SwitchInst &I);
@@ -97,6 +100,12 @@ public:
     // Note that you MUST override this function if your return type is not void.
     //
     virtual void visitInstruction(llvm::Instruction &I);
+
+private:
+    void storeTemporary(llvm::Instruction *pI);
+
+private:
+    unsigned int m_temporaryLocationsUsed;
 };
 
 
