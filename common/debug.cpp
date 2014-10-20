@@ -1,7 +1,12 @@
 #include <common/debug.h>
 
+#include <windows.h>
 #include <string>
 #include <iostream>
+
+ConsoleStreamSubscriber g_consoleStreamSubscriber;
+OutputDebugStringSubscriber g_outputDebugStringSubscriber;
+OutputStream g_outputStream;
 
 Trace* Trace::m_instance = NULL;
 Debug* Debug::m_instance = NULL;
@@ -68,10 +73,31 @@ void OutputStream::removeOutputStreamSubscriber(OutputStreamSubscriber* pSubscri
     m_subscribers.erase(m_subscribers.begin() + found_index);
 }
 
-void OutputStream::output(std::stringstream& stream)
+void OutputStream::flush()
 {
     for (auto iter : m_subscribers)
     {
+        iter->output(m_stringStream);
+    }
+
+    m_stringStream.str(std::string());
+}
+
+void OutputStream::flush_raw_stream()
+{
+    for (auto iter : m_subscribers)
+    {
+        std::stringstream stream(m_pRawStringOStream->str());
         iter->output(stream);
     }
+}
+
+void ConsoleStreamSubscriber::output(std::stringstream& stream)
+{
+    std::cout << stream.str();
+}
+
+void OutputDebugStringSubscriber::output(std::stringstream& stream)
+{
+    OutputDebugString(stream.str().c_str());
 }

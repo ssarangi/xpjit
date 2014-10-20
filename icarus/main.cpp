@@ -80,22 +80,30 @@ int Compile(char *fileName, char *pOutputFileName)
         pIcarusModule = nullptr;
     }
 
-    std::cout << "-------------------------------------------------------------------" << std::endl;
-    std::cout << "Before Optimization" << std::endl;
-    std::cout << "-------------------------------------------------------------------" << std::endl;
+    g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
+    g_outputStream.stream() << "Before Optimization" << std::endl;
+    g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
+    g_outputStream.flush();
     if (gDebug.isDebuggable())
-        llvmModule.dump();
+    {
+        llvmModule.print(g_outputStream.raw_stream(), nullptr);
+        g_outputStream.flush_raw_stream();
+    }
 
     if(gDebug.isOptimizing())
     {
         OptimizeIR(llvmModule);
     }
     
-    std::cout << "-------------------------------------------------------------------" << std::endl;
-    std::cout << "After Optimization" << std::endl;
-    std::cout << "-------------------------------------------------------------------" << std::endl;
+    g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
+    g_outputStream.stream() << "After Optimization" << std::endl;
+    g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
+    g_outputStream.flush();
     if(gDebug.isDebuggable())
-        llvmModule.dump();
+    {
+        llvmModule.print(g_outputStream.raw_stream(), nullptr);
+        g_outputStream.flush_raw_stream();
+    }
 
     std::string moduleStr;
     llvm::raw_string_ostream string(moduleStr);
@@ -126,6 +134,9 @@ int main(int argc, char *argv[])
     gDebug.setCodeOptimization(true); //we need to allow setting levels
 
     gTrace << "Verbose on!\n";
+
+    g_outputStream.addOutputStreamSubscriber(&g_consoleStreamSubscriber);
+    g_outputStream.addOutputStreamSubscriber(&g_outputDebugStringSubscriber);
 
     char *pfilename = argv[1];
     char *pOutput = argv[2];

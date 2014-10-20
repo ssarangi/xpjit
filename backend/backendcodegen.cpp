@@ -28,6 +28,11 @@ void GenerateCode(CodeGenModule& M, std::string outputFile)
     file.write(pCodeGenPass->getAssembly().c_str(), pCodeGenPass->getAssembly().length());
     file.close();
 
+    g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
+    g_outputStream.stream() << "Code Generation" << std::endl;
+    g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
+    g_outputStream.stream() << pCodeGenPass->getAssembly();
+    g_outputStream.flush();
     delete pMipsCodeGen;
 }
 

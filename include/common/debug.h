@@ -8,6 +8,10 @@
 #include <assert.h>
 #include <exception>
 
+#include <common/llvm_warnings_push.h>
+#include <llvm/Support/raw_ostream.h>
+#include <common/llvm_warnings_pop.h>
+
 using namespace std;
 
 #if defined _DEBUG
@@ -67,19 +71,56 @@ public:
     virtual void output(std::stringstream& stream) = 0;
 };
 
+class ConsoleStreamSubscriber : public OutputStreamSubscriber
+{
+public:
+    ConsoleStreamSubscriber()
+        : OutputStreamSubscriber()
+    {}
+
+    virtual void output(std::stringstream& stream);
+};
+
+class OutputDebugStringSubscriber : public OutputStreamSubscriber
+{
+public:
+    OutputDebugStringSubscriber()
+        : OutputStreamSubscriber()
+    {}
+
+    virtual void output(std::stringstream& stream);
+};
+
 class OutputStream
 {
 public:
-    OutputStream() {}
-    ~OutputStream() {}
+    OutputStream()
+    {
+        m_pRawStringOStream = new llvm::raw_string_ostream(m_outputString);
+    }
+    
+    ~OutputStream()
+    {
+        delete m_pRawStringOStream;
+    }
 
     void addOutputStreamSubscriber(OutputStreamSubscriber* pSubscriber);
     void removeOutputStreamSubscriber(OutputStreamSubscriber* pSubscriber);
 
-    void output(std::stringstream& stream);
+    void flush();
+    void flush_raw_stream();
+    std::stringstream& stream() { return m_stringStream; }
+    llvm::raw_ostream& raw_stream() { return *m_pRawStringOStream; }
 
 private:
     std::vector<OutputStreamSubscriber *> m_subscribers;
+    std::stringstream m_stringStream;
+    std::string m_outputString;
+    llvm::raw_string_ostream *m_pRawStringOStream;
 };
+
+extern ConsoleStreamSubscriber g_consoleStreamSubscriber;
+extern OutputDebugStringSubscriber g_outputDebugStringSubscriber;
+extern OutputStream g_outputStream;
 
 #endif //DEBUG_H

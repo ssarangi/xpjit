@@ -1,5 +1,5 @@
 
-/*  A Bison parser, made from c:\dev\icarus\frontend\grammar\parser.y with Bison version GNU Bison version 1.24
+/*  A Bison parser, made from e:\github_external\icarus\frontend\grammar\parser.y with Bison version GNU Bison version 1.24
   */
 
 #define YYBISON 1  /* Identify Bison output.  */
