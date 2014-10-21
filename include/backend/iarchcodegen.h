@@ -73,6 +73,7 @@ public:
     virtual BaseVariable* getSymbol(llvm::Value *pV) = 0;
 
     virtual void visitFunction(llvm::Function &F) = 0;
+    virtual void visitBasicBlock(llvm::BasicBlock &BB) = 0;
     virtual void visitReturnInst(llvm::ReturnInst &I) = 0;
     virtual void visitBranchInst(llvm::BranchInst &I) = 0;
     virtual void visitSwitchInst(llvm::SwitchInst &I) = 0;

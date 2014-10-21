@@ -22,6 +22,7 @@ public:
     void genCommentStr(llvm::Instruction *pI);
 
     virtual void visitFunction(llvm::Function& F);
+    virtual void visitBasicBlock(llvm::BasicBlock &BB);
     virtual void visitReturnInst(llvm::ReturnInst &I);
     virtual void visitBranchInst(llvm::BranchInst &I);
     virtual void visitSwitchInst(llvm::SwitchInst &I);

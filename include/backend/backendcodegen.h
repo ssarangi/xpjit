@@ -48,6 +48,7 @@ public:
     }
     
     void visitFunction(llvm::Function &F);
+    void visitBasicBlock(llvm::BasicBlock &BB);
     void visitReturnInst(llvm::ReturnInst &I);
     void visitBranchInst(llvm::BranchInst &I);
     void visitSwitchInst(llvm::SwitchInst &I);

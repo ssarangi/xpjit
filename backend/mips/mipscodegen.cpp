@@ -143,6 +143,12 @@ void MipsCodeGen::visitFunction(llvm::Function& F)
     MipsInstSet::emitAddiu(SP, SP, -stackOffset, m_ostream);
 }
 
+void MipsCodeGen::visitBasicBlock(llvm::BasicBlock &BB)
+{
+    // ICARUS_NOT_IMPLEMENTED("Basic block code not implemented");
+    std::string bb_name = BB.getName();
+}
+
 void MipsCodeGen::visitReturnInst(llvm::ReturnInst &I)
 {
     // Check if the current function is the main function. If so emit a 
@@ -172,7 +178,7 @@ void MipsCodeGen::visitReturnInst(llvm::ReturnInst &I)
 
 void MipsCodeGen::visitBranchInst(llvm::BranchInst &I)
 {
-    ICARUS_NOT_IMPLEMENTED("Branch Inst not implemented");
+    // ICARUS_NOT_IMPLEMENTED("Branch Inst not implemented");
 }
 
 void MipsCodeGen::visitSwitchInst(llvm::SwitchInst &I)

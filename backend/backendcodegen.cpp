@@ -75,6 +75,11 @@ void CodeGenPass::visitFunction(llvm::Function &F)
     m_pArchCodeGen->visitFunction(F);
 }
 
+void CodeGenPass::visitBasicBlock(llvm::BasicBlock &BB)
+{
+    m_pArchCodeGen->visitBasicBlock(BB);
+}
+
 void CodeGenPass::visitReturnInst(llvm::ReturnInst &I)
 {
     m_pArchCodeGen->visitReturnInst(I);
