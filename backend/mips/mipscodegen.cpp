@@ -6,13 +6,21 @@
 #include <common/llvm_warnings_push.h>
 #include <common/llvm_warnings_pop.h>
 
+#include <stack>
+
 MipsRegister A0("$a0");
 MipsRegister T1("$t1");
-MipsRegister T2("$t2");
+MipsRegister FP("$fp");
 MipsRegister SP("$sp");
 MipsRegister V0("$v0");
+MipsRegister RA("$ra");
 
-#define COMMENT_STR(INSTR)                      \
+#define COMMENT_STR(STR)                        \
+{                                               \
+    m_ostream << "# " << STR << std::endl;      \
+}
+
+#define COMMENT_STR_WITH_INSTR(INSTR)           \
 {                                               \
     std::string str;                            \
     llvm::raw_string_ostream os(str);           \
@@ -24,19 +32,19 @@ void MipsCodeGen::storeTemporary(llvm::Instruction *pI)
 {
     // Store the temporary in the specified register.
     // Assumption is that the result is in A0.
-    MipsVariable *pMipsVar = new MipsVariable(m_temporaryLocationsUsed);
-    m_symbolTable[pI] = pMipsVar;
-    MipsInstSet::emitStore(A0, -(m_temporaryLocationsUsed * WORD_SIZE), T2, m_ostream);
-    ++m_temporaryLocationsUsed;
+    MipsVariable *pMipsVar = new MipsVariable(m_temporaryBytesUsed);
+    m_symbolTables[m_pCurrentFunction]->set(pI, pMipsVar);
+    MipsInstSet::emitStore(A0, -(m_temporaryBytesUsed), FP, m_ostream);
+    m_temporaryBytesUsed += 4;
 }
 
 BaseVariable* MipsCodeGen::getSymbol(llvm::Value* pV)
 {
     BaseVariable *pSymbol = nullptr;
     // Check if we already have a symbol in the symbol table. If not the create a symbol
-    if (m_symbolTable.find(pV) != m_symbolTable.end())
+    if (m_symbolTables[m_pCurrentFunction]->get(pV) != nullptr)
     {
-        pSymbol = m_symbolTable[pV];
+        pSymbol = m_symbolTables[m_pCurrentFunction]->get(pV);
         return pSymbol;
     }
 
@@ -47,7 +55,7 @@ BaseVariable* MipsCodeGen::getSymbol(llvm::Value* pV)
         if (llvm::ConstantInt *pCI = llvm::dyn_cast<llvm::ConstantInt>(pC))
         {
             pSymbol = new Immediate((int)pCI->getZExtValue());
-            m_symbolTable[pV] = pSymbol;
+            m_symbolTables[m_pCurrentFunction]->set(pV, pSymbol);
         }
     }
 
@@ -62,7 +70,7 @@ void MipsCodeGen::loadBaseVariable(BaseVariable *pVar, std::ostream &s)
     }
     else if (pVar->isInstanceOf(BACKEND_VARIABLE))
     {
-        MipsInstSet::emitLoad(A0, -(((MipsVariable*)pVar)->getTempLocation() * WORD_SIZE), T2, s);
+        MipsInstSet::emitLoad(A0, (((MipsVariable*)pVar)->getTempLocation()), FP, s);
     }
 }
 
@@ -72,7 +80,7 @@ void MipsCodeGen::initializeAssembler(llvm::Function *pMainFunc)
     m_ostream << ".data" << std::endl;
     m_ostream << std::endl;
     m_ostream << ".text" << std::endl;
-    m_ostream << ".globl main" << std::endl;
+    m_ostream << ".globl main_entry" << std::endl;
     m_ostream << std::endl;
 }
 
@@ -85,16 +93,52 @@ void MipsCodeGen::emitPreInstructions(BaseVariable* pBaseVar)
     }
 }
 
-void MipsCodeGen::visitFunction(llvm::Function& F, TemporaryStackSize *pTempStackSize)
+void MipsCodeGen::visitFunction(llvm::Function& F)
 {
-    m_ostream << F.getName().str() << ":" << std::endl;
+    std::string comment = std::string("Entry Code: ") + std::string(F.getName().str());
+    COMMENT_STR(comment);
     
-    int numTemporaries = pTempStackSize->getNumTemporaries(&F);
-    int stackOffset = numTemporaries * WORD_SIZE;
+    m_ostream << F.getName().str() << "_entry:" << std::endl;
 
-    MipsInstSet::emitMove(T2, SP, m_ostream);
+    // Initialize the symbol table for this function
+    int activationRecordSizeInBytes = F.getArgumentList().size() * 4 + 8;
+    m_symbolTables[&F] = new MipsSymbolTable(activationRecordSizeInBytes);
+    m_pCurrentFunction = &F;
 
+    // Reset the temporary bytes used
+    m_temporaryBytesUsed = 0;
+    MipsInstSet::emitMove(FP, SP, m_ostream);
+    m_temporaryBytesUsed += 4; // Increment by 4 bytes since FP is stored
+
+    // Now increment the temporaries because the arguments will be stored.
+    int numArgs = F.getArgumentList().size();
+
+    std::stack<llvm::Value*> reverse_args;
+    for (llvm::Function::arg_iterator ai = F.args().begin(), ae = F.args().end(); ai != ae; ++ai)
+    {
+        reverse_args.push(ai);
+    }
+
+    while (!reverse_args.empty())
+    {
+        llvm::Value *pArg = reverse_args.top();
+        reverse_args.pop();
+
+        // Start from right to left.
+        MipsVariable *pMipsVar = new MipsVariable(m_temporaryBytesUsed);
+        m_symbolTables[m_pCurrentFunction]->set(pArg, pMipsVar);
+        m_temporaryBytesUsed += 4;
+    }
+
+    COMMENT_STR("Generated Code for RA")
+    // MipsInstSet::emitStore(RA, 0, SP, m_ostream);
+    MipsInstSet::emitPush(RA, m_ostream);
+    m_temporaryBytesUsed += 4; // This is for the RA
+
+    COMMENT_STR("Generated Code for Temporaries")
     // Move the stack pointer by the number of temp variables we need
+    int numTemporaries = m_pTempStackSize->getNumTemporaries(&F);
+    int stackOffset = numTemporaries * WORD_SIZE;
     MipsInstSet::emitAddiu(SP, SP, -stackOffset, m_ostream);
 }
 
@@ -109,7 +153,17 @@ void MipsCodeGen::visitReturnInst(llvm::ReturnInst &I)
     }
     else
     {
-        ICARUS_NOT_IMPLEMENTED("Return instruction for functions is not implemented");
+        // Size of Activation record.
+        llvm::Function *pF = I.getParent()->getParent();
+
+        int size_of_ar = 4 * pF->getArgumentList().size() + 8;
+        int numTemporaries = m_pTempStackSize->getNumTemporaries(I.getParent()->getParent());
+        int stackOffset = numTemporaries * WORD_SIZE;
+        // To get to RA we also need to subtract the temporaries that we have defined.
+        MipsInstSet::emitLoad(RA, stackOffset + 4, SP, m_ostream);
+        MipsInstSet::emitPop(SP, -size_of_ar, m_ostream);
+        MipsInstSet::emitLoad(FP, 0, SP, m_ostream);
+        MipsInstSet::emitJR(RA, m_ostream);
     }
 }
 
@@ -360,7 +414,23 @@ void MipsCodeGen::visitIntrinsicInst(llvm::IntrinsicInst &I)
 // a generic CallSite visitor.
 void MipsCodeGen::visitCallInst(llvm::CallInst &I)
 {
-    ICARUS_NOT_IMPLEMENTED("Call Inst not implemented");
+    COMMENT_STR_WITH_INSTR(I);
+
+    MipsInstSet::emitPush(FP, m_ostream);
+
+    llvm::Function *pCalledFunc = I.getCalledFunction();
+    int num_args = I.getNumArgOperands();
+    for (int i = 0; i < num_args; ++i)
+    {
+        llvm::Value *pllArg = I.getArgOperand(i);
+        BaseVariable *pArg = getSymbol(pllArg);
+        loadBaseVariable(pArg, m_ostream);
+        MipsInstSet::emitPush(A0, m_ostream);
+    }
+
+    std::string label_name = std::string(pCalledFunc->getName()) + std::string("_entry");
+    MipsInstSet::emitJAL(label_name, m_ostream);
+    storeTemporary(&I);
 }
 
 void MipsCodeGen::visitInvokeInst(llvm::InvokeInst &I)
@@ -380,7 +450,7 @@ void MipsCodeGen::visitCastInst(llvm::CastInst &I)
 
 void MipsCodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
 {
-    COMMENT_STR(I);
+    COMMENT_STR_WITH_INSTR(I);
 
     llvm::Instruction *pInst = llvm::cast<llvm::Instruction>(&I);
 

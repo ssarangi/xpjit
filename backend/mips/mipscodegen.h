@@ -9,7 +9,7 @@ class MipsCodeGen : public IArchCodeGen
 {
 public:
     MipsCodeGen()
-        : m_temporaryLocationsUsed(0)
+        : m_temporaryBytesUsed(0)
     {
     }
 
@@ -21,7 +21,7 @@ public:
     void emitPreInstructions(BaseVariable* pBaseVar);
     void genCommentStr(llvm::Instruction *pI);
 
-    virtual void visitFunction(llvm::Function& F, TemporaryStackSize *pTempStackSize);
+    virtual void visitFunction(llvm::Function& F);
     virtual void visitReturnInst(llvm::ReturnInst &I);
     virtual void visitBranchInst(llvm::BranchInst &I);
     virtual void visitSwitchInst(llvm::SwitchInst &I);
@@ -106,7 +106,7 @@ private:
     void storeTemporary(llvm::Instruction *pI);
 
 private:
-    unsigned int m_temporaryLocationsUsed;
+    unsigned int m_temporaryBytesUsed;
 };
 
 

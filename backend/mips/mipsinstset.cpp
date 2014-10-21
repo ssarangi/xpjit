@@ -1,6 +1,8 @@
 #include "mipsinstset.h"
 #include <backend/backendvar.h>
 
+#include <assert.h>
+
 void MipsInstSet::emitLoad(MipsRegister &dstReg, int offset, MipsRegister &srcReg, std::ostream& s)
 {
     s << LW << dstReg << " " << offset << "(" << srcReg << ")" << std::endl;
@@ -42,15 +44,37 @@ void MipsInstSet::emitPush(MipsRegister &reg, std::ostream& s)
     emitAddiu(SP, SP, -4, s);
 }
 
+void MipsInstSet::emitPush(MipsRegister &reg, int offset, std::ostream &s)
+{
+    assert(offset < 0);
+    emitStore(reg, 0, SP, s);
+    emitAddiu(SP, SP, offset, s);
+}
+
 void MipsInstSet::emitPop(MipsRegister &reg, std::ostream &s)
 {
-    emitAddiu(SP, SP, 4, s);
+    emitAddiu(reg, reg, 4, s);
+}
+
+void MipsInstSet::emitPop(MipsRegister &reg, int offset, std::ostream &s)
+{
+    emitAddiu(reg, reg, offset, s);
 }
 
 void MipsInstSet::emitSyscall(MIPS_SYSCALLS syscall_code, std::ostream &s)
 {
     emitLoadImm(V0, (int)syscall_code, s);
     s << "syscall" << std::endl;
+}
+
+void MipsInstSet::emitJR(MipsRegister &reg, std::ostream &s)
+{
+    s << JR << reg << std::endl;
+}
+
+void MipsInstSet::emitJAL(std::string label, std::ostream &s)
+{
+    s << JAL << label.c_str() << std::endl;
 }
 
 void MipsInstSet::emitAdd(MipsRegister &dstReg, MipsRegister &srcReg1, MipsRegister &srcReg2, std::ostream &s)

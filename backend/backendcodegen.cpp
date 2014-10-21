@@ -41,6 +41,7 @@ char CodeGenPass::ID = 5;
 bool CodeGenPass::runOnFunction(llvm::Function &F)
 {
     m_pTempStackSize = &getAnalysis<TemporaryStackSize>(F);
+    m_pArchCodeGen->setTempStackSize(m_pTempStackSize);
 
     std::string funcName = F.getName();
     if (funcName == "main")
@@ -71,7 +72,7 @@ bool CodeGenPass::runOnModule(llvm::Module &M)
 
 void CodeGenPass::visitFunction(llvm::Function &F)
 {
-    m_pArchCodeGen->visitFunction(F, m_pTempStackSize);
+    m_pArchCodeGen->visitFunction(F);
 }
 
 void CodeGenPass::visitReturnInst(llvm::ReturnInst &I)

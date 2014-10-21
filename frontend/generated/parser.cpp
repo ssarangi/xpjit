@@ -1,5 +1,5 @@
 
-/*  A Bison parser, made from e:\github_external\icarus\frontend\grammar\parser.y with Bison version GNU Bison version 1.24
+/*  A Bison parser, made from c:\dev\icarus\frontend\grammar\parser.y with Bison version GNU Bison version 1.24
   */
 
 #define YYBISON 1  /* Identify Bison output.  */
@@ -165,9 +165,9 @@ static const short yyrline[] = { 0,
     57,    58,    59,    60,    63,    73,    79,    85,    89,   101,
    107,   107,   109,   110,   111,   116,   117,   118,   119,   120,
    123,   128,   130,   132,   135,   136,   141,   142,   145,   146,
-   149,   151,   153,   154,   157,   158,   159,   162,   171,   172,
-   175,   176,   183,   184,   185,   186,   187,   188,   189,   190,
-   191,   192,   193,   194,   197,   209,   210,   211
+   149,   151,   153,   154,   157,   158,   159,   162,   174,   175,
+   178,   179,   189,   190,   191,   192,   193,   194,   195,   196,
+   197,   198,   199,   200,   203,   215,   216,   217
 };
 
 static const char * const yytname[] = {   "$","error","$undefined.","EQUALS",
@@ -894,7 +894,10 @@ case 38:
         gTrace<<"assignment";
         Symbol *identifierSymbol = builder->getSymbol(yyvsp[-3].string);
         if(identifierSymbol == NULL)
-            yyerror("Symbol Not Defined");
+        {
+            std::string error = std::string("Symbol not defined: ") + std::string(yyvsp[-3].string);
+            yyerror(error.c_str());
+        }
         yyval.statement = new Assignment(*new Variable(*identifierSymbol), *yyvsp[-1].value);
     ;
     break;}
@@ -911,8 +914,11 @@ case 42:
 {
         gTrace<<"identifier";
         Symbol *identifierSymbol = builder->getSymbol(yyvsp[0].string);
-        if(identifierSymbol == NULL)			
-            yyerror("Symbol Not Defined");			
+        if(identifierSymbol == NULL)
+        {
+            std::string error = std::string("Symbol not defined: ") + std::string(yyvsp[0].string);
+            yyerror(error.c_str());
+        }
         yyval.value = new Variable(*identifierSymbol);
     ;
     break;}

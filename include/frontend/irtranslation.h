@@ -283,7 +283,7 @@ class SymbolTable
 {
 public:
     //Getter-Setters
-    IcErr add(Symbol& sym);	
+    IcErr add(Symbol& sym);
     std::list<Symbol*>& getSymbols() { return m_symbols; }	
 
     //Visitors

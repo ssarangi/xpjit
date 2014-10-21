@@ -33,6 +33,9 @@ MIPS Instructions
 #define BLT " blt "
 #define BGT " bgt "
 
+#define JR " jr "
+#define JAL " jal "
+
 enum MIPS_SYSCALLS
 {
     PRINT_INT = 1,
@@ -61,9 +64,10 @@ enum MIPS_SYSCALLS
 
 extern MipsRegister A0;
 extern MipsRegister T1;
-extern MipsRegister T2;
+extern MipsRegister FP;
 extern MipsRegister SP;
 extern MipsRegister V0;
+extern MipsRegister RA;
 
 class MipsInstSet
 {
@@ -90,8 +94,12 @@ public:
     static void emitDiv(MipsRegister &dstReg, MipsRegister &srcReg1, MipsRegister &srcReg2, std::ostream &s);
 
     static void emitPush(MipsRegister &reg, std::ostream &s);
+    static void emitPush(MipsRegister &reg, int offset, std::ostream &s);
     static void emitPop(MipsRegister &reg, std::ostream &s);
+    static void emitPop(MipsRegister &reg, int offset, std::ostream &s);
     static void emitSyscall(MIPS_SYSCALLS syscall_code, std::ostream &s);
+    static void emitJR(MipsRegister &reg, std::ostream &s);
+    static void emitJAL(std::string label, std::ostream &s);
 };
 
 #endif

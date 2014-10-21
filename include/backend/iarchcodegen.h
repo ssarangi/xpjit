@@ -11,28 +11,68 @@
 
 class TemporaryStackSize;
 
+struct MipsSymbolTable
+{
+public:
+    MipsSymbolTable(int activtionRecordSizeInBytes)
+        : m_activationRecordSizeInBytes(activtionRecordSizeInBytes)
+    {}
+
+    ~MipsSymbolTable()
+    {
+        for (auto pBaseVar : m_symbols)
+        {
+            delete pBaseVar.second;
+        }
+
+        m_symbols.clear();
+    }
+
+    BaseVariable* get(llvm::Value *pVal)
+    {
+        if (m_symbols.find(pVal) == m_symbols.end())
+            return nullptr;
+
+        return m_symbols[pVal];
+    }
+
+    void set(llvm::Value *pVal, BaseVariable *pBaseVar)
+    {
+        m_symbols[pVal] = pBaseVar;
+    }
+
+    void setActivationRecordSize(int size) { m_activationRecordSizeInBytes = size; }
+    int getActivationRecordSize() { return m_activationRecordSizeInBytes; }
+
+private:
+    llvm::DenseMap<llvm::Value*, BaseVariable*> m_symbols;
+    int m_activationRecordSizeInBytes;
+};
+
 class IArchCodeGen
 {
 public:
     IArchCodeGen()
+        : m_pCurrentFunction(nullptr)
+        , m_pTempStackSize(nullptr)
     {
     }
 
     ~IArchCodeGen()
     {
-        for (auto pBaseVar : m_symbolTable)
+        for (auto keyvalpair : m_symbolTables)
         {
-            delete pBaseVar.second;
+            delete keyvalpair.second;
         }
 
-        m_symbolTable.clear();
+        m_symbolTables.clear();
     }
 
     virtual void initializeAssembler(llvm::Function *pMainFunc) = 0;
 
     virtual BaseVariable* getSymbol(llvm::Value *pV) = 0;
 
-    virtual void visitFunction(llvm::Function &F, TemporaryStackSize *pTempStackSize) = 0;
+    virtual void visitFunction(llvm::Function &F) = 0;
     virtual void visitReturnInst(llvm::ReturnInst &I) = 0;
     virtual void visitBranchInst(llvm::BranchInst &I) = 0;
     virtual void visitSwitchInst(llvm::SwitchInst &I) = 0;
@@ -118,9 +158,13 @@ public:
         return m_ostream.str();
     }
 
+    void setTempStackSize(TemporaryStackSize *pTempStackSize) { m_pTempStackSize = pTempStackSize; }
+
 protected:
     std::stringstream m_ostream;
-    llvm::DenseMap<llvm::Value*, BaseVariable*> m_symbolTable;
+    llvm::DenseMap<llvm::Function*, MipsSymbolTable*> m_symbolTables;
+    llvm::Function *m_pCurrentFunction;
+    TemporaryStackSize *m_pTempStackSize;
 };
 
 #endif

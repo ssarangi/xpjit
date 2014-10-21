@@ -159,12 +159,15 @@ datatype: INTEGER 	{ gTrace<<"int "; $$ = currentType = Type::IntegerTy; }
     | VOID		{ gTrace<<"void "; $$ = currentType = Type::VoidTy; }
     ;
     
-assignment: IDENTIFIER '=' expression ';'	
+assignment: IDENTIFIER '=' expression ';'
     { 
         gTrace<<"assignment";
         Symbol *identifierSymbol = builder->getSymbol($1);
         if(identifierSymbol == NULL)
-            yyerror("Symbol Not Defined");
+        {
+            std::string error = std::string("Symbol not defined: ") + std::string($1);
+            yyerror(error.c_str());
+        }
         $$ = new Assignment(*new Variable(*identifierSymbol), *$3);
     }
 
@@ -176,8 +179,11 @@ expression: NUMBER { $$ = new Constant($1); }
     | IDENTIFIER {
         gTrace<<"identifier";
         Symbol *identifierSymbol = builder->getSymbol($1);
-        if(identifierSymbol == NULL)			
-            yyerror("Symbol Not Defined");			
+        if(identifierSymbol == NULL)
+        {
+            std::string error = std::string("Symbol not defined: ") + std::string($1);
+            yyerror(error.c_str());
+        }
         $$ = new Variable(*identifierSymbol);
     }
     | expression '+' expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::Add); }
