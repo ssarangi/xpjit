@@ -70,7 +70,7 @@ void MipsCodeGen::loadBaseVariable(BaseVariable *pVar, std::ostream &s)
     }
     else if (pVar->isInstanceOf(BACKEND_VARIABLE))
     {
-        MipsInstSet::emitLoad(A0, (((MipsVariable*)pVar)->getTempLocation()), FP, s);
+        MipsInstSet::emitLoad(A0, -(((MipsVariable*)pVar)->getTempLocation()), FP, s);
     }
 }
 
@@ -124,8 +124,9 @@ void MipsCodeGen::visitFunction(llvm::Function& F)
         llvm::Value *pArg = reverse_args.top();
         reverse_args.pop();
 
-        // Start from right to left.
-        MipsVariable *pMipsVar = new MipsVariable(m_temporaryBytesUsed);
+        // Start from right to left. Also the offsets are negative because we are looking at the opposite direction from fp.
+        // i.e. going up onto higher addresses since we are moving from the current frame pointer.
+        MipsVariable *pMipsVar = new MipsVariable(-m_temporaryBytesUsed);
         m_symbolTables[m_pCurrentFunction]->set(pArg, pMipsVar);
         m_temporaryBytesUsed += 4;
     }
@@ -156,12 +157,14 @@ void MipsCodeGen::visitReturnInst(llvm::ReturnInst &I)
         // Size of Activation record.
         llvm::Function *pF = I.getParent()->getParent();
 
-        int size_of_ar = 4 * pF->getArgumentList().size() + 8;
         int numTemporaries = m_pTempStackSize->getNumTemporaries(I.getParent()->getParent());
         int stackOffset = numTemporaries * WORD_SIZE;
+
         // To get to RA we also need to subtract the temporaries that we have defined.
         MipsInstSet::emitLoad(RA, stackOffset + 4, SP, m_ostream);
-        MipsInstSet::emitPop(SP, -size_of_ar, m_ostream);
+
+        int size_of_ar = 4 * pF->getArgumentList().size() + 8 + stackOffset;
+        MipsInstSet::emitPop(SP, size_of_ar, m_ostream);
         MipsInstSet::emitLoad(FP, 0, SP, m_ostream);
         MipsInstSet::emitJR(RA, m_ostream);
     }
@@ -460,6 +463,7 @@ void MipsCodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
     BaseVariable *pBop1 = getSymbol(pOp1);
     BaseVariable *pBop2 = getSymbol(pOp2);
 
+    I.dump();
     loadBaseVariable(pBop1, m_ostream);
     MipsInstSet::emitPush(A0, m_ostream);
 
