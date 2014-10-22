@@ -43,11 +43,15 @@ void MipsPatternMatch::markAsUsed(llvm::Instruction *pI)
 
 bool MipsPatternMatch::needInstruction(llvm::Instruction *pI)
 {
+    /*
     if (instHasPhiUse(pI) || instHasSideEffects(pI) || instIsDbgInst(pI) ||
-        (m_usedInstructions.find(pI) != m_usedInstructions.end()))
-        return true;
+    (m_usedInstructions.find(pI) != m_usedInstructions.end()))
+    return true;
 
     return false;
+    */
+
+    return true;
 }
 
 void MipsPatternMatch::setPatternRoot(llvm::Instruction *pI)
@@ -86,7 +90,7 @@ void MipsPatternMatch::codeGenBlock(llvm::BasicBlock *pBB)
     for (i = instructionList.rbegin(), e = instructionList.rend(); i != e; ++i)
     {
         llvm::Instruction& inst = (*i);
-
+        inst.dump();
         if (needInstruction(&inst))
         {
             setPatternRoot(&inst);

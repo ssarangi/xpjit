@@ -35,7 +35,6 @@ void GenerateCode(CodeGenModule& M, std::string outputFile)
     g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
     g_outputStream.stream() << pMipsCodeGen->getAssembly();
     g_outputStream.flush();
-    delete pMipsCodeGen;
 }
 
 //char CodeGenPass::ID = 5;

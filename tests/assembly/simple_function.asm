@@ -1,8 +1,3 @@
-.data
-
-.text
-.globl main_entry
-
 # Entry Code: main
 main_entry:
  move $fp $sp
