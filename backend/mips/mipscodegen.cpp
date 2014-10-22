@@ -147,6 +147,10 @@ void MipsCodeGen::visitBasicBlock(llvm::BasicBlock &BB)
 {
     // ICARUS_NOT_IMPLEMENTED("Basic block code not implemented");
     std::string bb_name = BB.getName();
+    if (bb_name == "entry")
+        return;
+
+    m_ostream << m_pCurrentFunction->getName().str() << "_" << bb_name << ":" << std::endl;
 }
 
 void MipsCodeGen::visitReturnInst(llvm::ReturnInst &I)
@@ -178,7 +182,8 @@ void MipsCodeGen::visitReturnInst(llvm::ReturnInst &I)
 
 void MipsCodeGen::visitBranchInst(llvm::BranchInst &I)
 {
-    // ICARUS_NOT_IMPLEMENTED("Branch Inst not implemented");
+    std::string label = m_pCurrentFunction->getName().str() + I.getName().str();
+    MipsInstSet::emitJAL(label, m_ostream);
 }
 
 void MipsCodeGen::visitSwitchInst(llvm::SwitchInst &I)
