@@ -83,6 +83,7 @@
   <ItemGroup>
     <ClInclude Include="..\backend\mips\mipscodegen.h" />
     <ClInclude Include="..\backend\mips\mipsinstset.h" />
+    <ClInclude Include="..\backend\mips\mipspatternmatch.h" />
     <ClInclude Include="..\backend\tempstacksize.h" />
     <ClInclude Include="..\include\backend\backendcodegen.h" />
     <ClInclude Include="..\include\backend\backendvar.h" />
@@ -92,6 +93,7 @@
     <ClCompile Include="..\backend\backendcodegen.cpp" />
     <ClCompile Include="..\backend\mips\mipscodegen.cpp" />
     <ClCompile Include="..\backend\mips\mipsinstset.cpp" />
+    <ClCompile Include="..\backend\mips\mipspatternmatch.cpp" />
     <ClCompile Include="..\backend\tempstacksize.cpp" />
   </ItemGroup>
   <ItemGroup>

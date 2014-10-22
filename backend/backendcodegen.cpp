@@ -3,6 +3,7 @@
 
 #include <backend/backendcodegen.h>
 #include "mips/mipscodegen.h"
+#include "mips/mipspatternmatch.h"
 
 #include <common/llvm_warnings_push.h>
 #include <llvm/PassManager.h>
@@ -18,6 +19,7 @@ void GenerateCode(CodeGenModule& M, std::string outputFile)
     llvm::PassManager mpm;
     MipsCodeGen *pMipsCodeGen = new MipsCodeGen();
     CodeGenPass *pCodeGenPass = new CodeGenPass(pMipsCodeGen);
+    mpm.add(new MipsPatternMatch());
     mpm.add(pCodeGenPass);
     mpm.run(*M.getLLVMModule());
 

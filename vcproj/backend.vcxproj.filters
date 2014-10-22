@@ -30,6 +30,9 @@
     <ClInclude Include="..\include\backend\backendvar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\backend\mips\mipspatternmatch.h">
+      <Filter>mips</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\mips\mipscodegen.cpp">
@@ -43,6 +46,9 @@
     </ClCompile>
     <ClCompile Include="..\backend\tempstacksize.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backend\mips\mipspatternmatch.cpp">
+      <Filter>mips</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
