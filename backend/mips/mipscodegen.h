@@ -2,15 +2,26 @@
 #define __MIPS_CODE_GEN__
 
 #include <backend/iarchcodegen.h>
+#include "mipspatternmatch.h"
+#include "../tempstacksize.h"
 
-class TemporaryStackSize;
-
-class MipsCodeGen : public IArchCodeGen
+class MipsCodeGen : public IArchCodeGen, public llvm::ModulePass, public llvm::InstVisitor<MipsCodeGen>
 {
 public:
     MipsCodeGen()
-        : m_temporaryBytesUsed(0)
+        : llvm::ModulePass(ID)
+        , m_temporaryBytesUsed(0)
+        , m_pMipsPatternMatch(nullptr)
     {
+    }
+
+    ~MipsCodeGen() { }
+
+    virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
+    {
+        AU.addRequired<MipsPatternMatch>();
+        AU.addRequired<TemporaryStackSize>();
+        AU.setPreservesAll();
     }
 
     virtual void initializeAssembler(llvm::Function *pMainFunc);
@@ -18,8 +29,11 @@ public:
     virtual BaseVariable* getSymbol(llvm::Value* pV);
     virtual void loadBaseVariable(BaseVariable *pVar, std::ostream &s);
 
-    void emitPreInstructions(BaseVariable* pBaseVar);
     void genCommentStr(llvm::Instruction *pI);
+
+    virtual bool runOnModule(llvm::Module& M);
+
+    virtual void createLabel(std::string label);
 
     virtual void visitFunction(llvm::Function& F);
     virtual void visitBasicBlock(llvm::BasicBlock &BB);
@@ -108,6 +122,10 @@ private:
 
 private:
     unsigned int m_temporaryBytesUsed;
+    MipsPatternMatch *m_pMipsPatternMatch;
+
+public:
+    static char ID;
 };
 
 

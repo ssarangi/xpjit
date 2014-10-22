@@ -28,6 +28,8 @@ MipsRegister RA("$ra");
     m_ostream << "# " << os.str() << std::endl; \
 }
 
+char MipsCodeGen::ID = 0;
+
 void MipsCodeGen::storeTemporary(llvm::Instruction *pI)
 {
     // Store the temporary in the specified register.
@@ -84,13 +86,37 @@ void MipsCodeGen::initializeAssembler(llvm::Function *pMainFunc)
     m_ostream << std::endl;
 }
 
-void MipsCodeGen::emitPreInstructions(BaseVariable* pBaseVar)
+void MipsCodeGen::createLabel(std::string label)
 {
-    if (pBaseVar->isInstanceOf(IMMEDIATE))
-    {
-        Immediate *pImm = static_cast<Immediate*>(pBaseVar);
+    m_ostream << label << std::endl;
+}
 
+bool MipsCodeGen::runOnModule(llvm::Module& M)
+{
+    m_pMipsPatternMatch = &getAnalysis<MipsPatternMatch>();
+
+    for (llvm::Module::iterator f = M.begin(), fe = M.end(); f != fe; ++f)
+    {
+        m_pTempStackSize = &getAnalysis<TemporaryStackSize>(*f);
+        visitFunction(*f);
+
+        PM_FuncBasicBlock* pFuncBlock = m_pMipsPatternMatch->getFuncBlock(f);
+        for (unsigned int i = 0; i < pFuncBlock->m_blocks.size(); ++i)
+        {
+            PM_BasicBlock* pBlock = pFuncBlock->m_blocks[i];
+
+            // Create a label for this id
+            if (pBlock->getName() != "entry")
+                createLabel(pBlock->getName());
+
+            for (auto i = pBlock->m_dags.rbegin(), e = pBlock->m_dags.rend(); i != e; ++i)
+            {
+                i->m_pPattern->emit(this);
+            }
+        }
     }
+
+    return false;
 }
 
 void MipsCodeGen::visitFunction(llvm::Function& F)
