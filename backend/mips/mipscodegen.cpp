@@ -566,3 +566,17 @@ void MipsCodeGen::visitInstruction(llvm::Instruction &I)
     I.dump();
     ICARUS_NOT_IMPLEMENTED("Instruction not implemented");
 }
+
+
+void MipsCodeGen::emitBrWithCmpInstruction(llvm::BranchInst *pBrInst, llvm::CmpInst *pCmpInst)
+{
+    if (llvm::ICmpInst *pICmpInst = llvm::dyn_cast<llvm::ICmpInst>(pCmpInst))
+    {
+        // Get the Predicate
+        llvm::ICmpInst::Predicate predicate = pICmpInst->getPredicate();
+        llvm::Value *pLHS = pICmpInst->getOperand(0);
+        llvm::Value *pRHS = pICmpInst->getOperand(1);
+
+        int a = 10;
+    }
+}

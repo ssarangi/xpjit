@@ -51,7 +51,10 @@ bool MipsPatternMatch::needInstruction(llvm::Instruction *pI)
     return false;
     */
 
-    return true;
+    if (m_usedInstructions.find(pI) == m_usedInstructions.end())
+        return true;
+
+    return false;
 }
 
 void MipsPatternMatch::setPatternRoot(llvm::Instruction *pI)
@@ -90,7 +93,7 @@ void MipsPatternMatch::codeGenBlock(llvm::BasicBlock *pBB)
     for (i = instructionList.rbegin(), e = instructionList.rend(); i != e; ++i)
     {
         llvm::Instruction& inst = (*i);
-        inst.dump();
+
         if (needInstruction(&inst))
         {
             setPatternRoot(&inst);
@@ -155,6 +158,48 @@ bool MipsPatternMatch::matchSingleInstruction(llvm::Instruction* pI)
     return true;
 }
 
+bool MipsPatternMatch::matchBrWithCmpInstruction(llvm::Instruction *pI)
+{
+    struct BrWithCmpInstPattern : public Pattern
+    {
+        llvm::BranchInst *pBrInst;
+        llvm::CmpInst *pCmpInst;
+
+        virtual void emit(MipsCodeGen *pCodeGen)
+        {
+            pCodeGen->emitBrWithCmpInstruction(pBrInst, pCmpInst);
+        }
+    };
+
+    llvm::BranchInst *pBrInst = llvm::cast<llvm::BranchInst>(pI);
+    if (pBrInst->isUnconditional())
+        return false;
+
+    llvm::Value* pCond = pBrInst->getCondition();
+
+    llvm::CmpInst *pCmpInst = nullptr;
+    bool match = false;
+
+    if (pCmpInst = llvm::cast<llvm::ICmpInst>(pCond))
+    {
+        match = true;
+    }
+
+    if (match)
+    {
+        markAsUsed(llvm::cast<llvm::Instruction>(pCond));
+
+        BrWithCmpInstPattern *pBrWithCmpInstPattern = new BrWithCmpInstPattern();
+        //pBrWithCmpInstPattern->pBrInst = pI;
+        //pBrWithCmpInstPattern->pCmpInst = llvm::cast<llvm::Instruction>(pCond);
+
+        addPattern(pBrWithCmpInstPattern);
+        return true;
+    }
+    
+    return false;
+}
+
 void MipsPatternMatch::visitReturnInst(llvm::ReturnInst &I)
 {
     matchSingleInstruction(&I);
@@ -162,7 +207,8 @@ void MipsPatternMatch::visitReturnInst(llvm::ReturnInst &I)
 
 void MipsPatternMatch::visitBranchInst(llvm::BranchInst &I)
 {
-    matchSingleInstruction(&I);
+    bool match = matchBrWithCmpInstruction(&I) ||
+                 matchSingleInstruction(&I);
 }
 
 void MipsPatternMatch::visitSwitchInst(llvm::SwitchInst &I)

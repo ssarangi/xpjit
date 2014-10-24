@@ -96,7 +96,8 @@ private:
     void setPatternRoot(llvm::Instruction *pI);
     
     Pattern* match(llvm::Instruction *pI);
-    bool matchSingleInstruction(llvm::Instruction* pI);
+    bool matchSingleInstruction(llvm::Instruction *pI);
+    bool matchBrWithCmpInstruction(llvm::Instruction *pI);
     void markAsUsed(llvm::Instruction *pI);
     
     void addPattern(Pattern *pPattern)

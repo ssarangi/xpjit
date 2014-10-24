@@ -3,6 +3,11 @@
 
 #include <assert.h>
 
+//std::string MipsInstSet::getCmpPredicateString(llvm::CmpInst::Predicate predicate)
+//{
+//
+//}
+
 void MipsInstSet::emitLoad(MipsRegister &dstReg, int offset, MipsRegister &srcReg, std::ostream& s)
 {
     s << LW << dstReg << " " << offset << "(" << srcReg << ")" << std::endl;

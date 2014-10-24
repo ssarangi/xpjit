@@ -100,6 +100,8 @@ public:
     static void emitSyscall(MIPS_SYSCALLS syscall_code, std::ostream &s);
     static void emitJR(MipsRegister &reg, std::ostream &s);
     static void emitJAL(std::string label, std::ostream &s);
+
+    // static std::string getCmpPredicateString(llvm::CmpInst::Predicate predicate);
 };
 
 #endif

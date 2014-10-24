@@ -117,6 +117,8 @@ public:
     //
     virtual void visitInstruction(llvm::Instruction &I);
 
+    void emitBrWithCmpInstruction(llvm::BranchInst *pBrInst, llvm::CmpInst *pCmpInst);
+
 private:
     void storeTemporary(llvm::Instruction *pI);
 
