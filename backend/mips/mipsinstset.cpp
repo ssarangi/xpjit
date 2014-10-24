@@ -3,10 +3,17 @@
 
 #include <assert.h>
 
-//std::string MipsInstSet::getCmpPredicateString(llvm::CmpInst::Predicate predicate)
-//{
-//
-//}
+std::string MipsInstSet::getBrCmpPredicateString(llvm::CmpInst::Predicate predicate)
+{
+    std::string predicate_str = "";
+    switch (predicate)
+    {
+    case llvm::CmpInst::ICMP_EQ: return "beq";
+    default: assert("Predicate enum not found");
+    }
+
+    return predicate_str;
+}
 
 void MipsInstSet::emitLoad(MipsRegister &dstReg, int offset, MipsRegister &srcReg, std::ostream& s)
 {
@@ -70,6 +77,16 @@ void MipsInstSet::emitSyscall(MIPS_SYSCALLS syscall_code, std::ostream &s)
 {
     emitLoadImm(V0, (int)syscall_code, s);
     s << "syscall" << std::endl;
+}
+
+void MipsInstSet::emitBEQ(MipsRegister &lhs, MipsRegister &rhs, std::string label, std::ostream &s)
+{
+    s << " beq " << lhs << " " << rhs << " " << label << std::endl;
+}
+
+void MipsInstSet::emitJ(std::string label, std::ostream &s)
+{
+    s << " j " << label << std::endl;
 }
 
 void MipsInstSet::emitJR(MipsRegister &reg, std::ostream &s)

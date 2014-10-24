@@ -33,7 +33,7 @@ public:
 
     virtual bool runOnModule(llvm::Module& M);
 
-    virtual void createLabel(std::string label);
+    virtual void createLabel(llvm::BasicBlock *pBlock);
 
     virtual void visitFunction(llvm::Function& F);
     virtual void visitBasicBlock(llvm::BasicBlock &BB);

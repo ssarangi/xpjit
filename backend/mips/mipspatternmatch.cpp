@@ -190,8 +190,8 @@ bool MipsPatternMatch::matchBrWithCmpInstruction(llvm::Instruction *pI)
         markAsUsed(llvm::cast<llvm::Instruction>(pCond));
 
         BrWithCmpInstPattern *pBrWithCmpInstPattern = new BrWithCmpInstPattern();
-        //pBrWithCmpInstPattern->pBrInst = pI;
-        //pBrWithCmpInstPattern->pCmpInst = llvm::cast<llvm::Instruction>(pCond);
+        pBrWithCmpInstPattern->pBrInst = pBrInst;
+        pBrWithCmpInstPattern->pCmpInst = pCmpInst;
 
         addPattern(pBrWithCmpInstPattern);
         return true;

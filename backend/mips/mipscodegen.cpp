@@ -86,9 +86,11 @@ void MipsCodeGen::initializeAssembler(llvm::Function *pMainFunc)
     m_ostream << std::endl;
 }
 
-void MipsCodeGen::createLabel(std::string label)
+void MipsCodeGen::createLabel(llvm::BasicBlock *pBlock)
 {
-    m_ostream << label << std::endl;
+    std::string label = pBlock->getParent()->getName().str() + "_" + pBlock->getName().str();
+
+    m_ostream << label << ":" << std::endl;
 }
 
 bool MipsCodeGen::runOnModule(llvm::Module& M)
@@ -101,13 +103,15 @@ bool MipsCodeGen::runOnModule(llvm::Module& M)
         visitFunction(*f);
 
         PM_FuncBasicBlock* pFuncBlock = m_pMipsPatternMatch->getFuncBlock(f);
+        pFuncBlock->m_pFunction = f;
+
         for (unsigned int i = 0; i < pFuncBlock->m_blocks.size(); ++i)
         {
             PM_BasicBlock* pBlock = pFuncBlock->m_blocks[i];
 
             // Create a label for this id
             if (pBlock->getName() != "entry")
-                createLabel(pBlock->getName());
+                createLabel(pBlock->pBB);
 
             for (auto i = pBlock->m_dags.rbegin(), e = pBlock->m_dags.rend(); i != e; ++i)
             {
@@ -208,8 +212,8 @@ void MipsCodeGen::visitReturnInst(llvm::ReturnInst &I)
 
 void MipsCodeGen::visitBranchInst(llvm::BranchInst &I)
 {
-    std::string label = m_pCurrentFunction->getName().str() + I.getName().str();
-    MipsInstSet::emitJAL(label, m_ostream);
+    //std::string label = m_pCurrentFunction->getName().str() + I.getName().str();
+    //MipsInstSet::emitJAL(label, m_ostream);
 }
 
 void MipsCodeGen::visitSwitchInst(llvm::SwitchInst &I)
@@ -500,7 +504,6 @@ void MipsCodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
     BaseVariable *pBop1 = getSymbol(pOp1);
     BaseVariable *pBop2 = getSymbol(pOp2);
 
-    I.dump();
     loadBaseVariable(pBop1, m_ostream);
     MipsInstSet::emitPush(A0, m_ostream);
 
@@ -576,7 +579,22 @@ void MipsCodeGen::emitBrWithCmpInstruction(llvm::BranchInst *pBrInst, llvm::CmpI
         llvm::ICmpInst::Predicate predicate = pICmpInst->getPredicate();
         llvm::Value *pLHS = pICmpInst->getOperand(0);
         llvm::Value *pRHS = pICmpInst->getOperand(1);
+        
+        std::string brInst = MipsInstSet::getBrCmpPredicateString(predicate);
 
-        int a = 10;
+        BaseVariable *pBaseLHS = getSymbol(pLHS);
+        BaseVariable *pBaseRHS = getSymbol(pRHS);
+
+        loadBaseVariable(pBaseLHS, m_ostream);
+        MipsInstSet::emitPush(A0, m_ostream);
+
+        loadBaseVariable(pBaseRHS, m_ostream);
+        MipsInstSet::emitLoad(T1, 4, SP, m_ostream);
+
+        std::string true_label = pBrInst->getParent()->getParent()->getName().str() + "_" + pBrInst->getSuccessor(0)->getName().str();
+        std::string false_label = pBrInst->getParent()->getParent()->getName().str() + "_" + pBrInst->getSuccessor(1)->getName().str();
+
+        MipsInstSet::emitBEQ(A0, T1, true_label, m_ostream);
+        MipsInstSet::emitJ(false_label, m_ostream);
     }
 }

@@ -53,6 +53,8 @@ struct PM_FuncBasicBlock
     std::vector<PM_BasicBlock*> m_blocks;
     llvm::DenseMap<llvm::BasicBlock*, PM_BasicBlock*> m_blockMap;
 
+    llvm::Function *m_pFunction;
+
     void addBlock(unsigned int id, llvm::BasicBlock* pBB, PM_BasicBlock* pPMBB)
     {
         pPMBB->id = id;

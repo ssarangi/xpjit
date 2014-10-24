@@ -6,24 +6,34 @@ fib_entry:
  addiu $sp $sp -4
 # Generated Code for Temporaries
  addiu $sp $sp -28
- jal fib
-condblock
-codeblock
+fib_condblock:
+ lw $a0 4($fp)
+ sw $a0 0($sp)
+ addiu $sp $sp -4
+ li $a0 0
+ lw $t1 4($sp)
+ beq $a0 $t1 fib_codeblock
+ j fib_postif
+fib_codeblock:
  lw $ra 32($sp)
  addiu $sp $sp 40
  lw $fp 0($sp)
  jr $ra
- jal fib
-postif
- jal fib
-condblock1
-codeblock2
+fib_postif:
+fib_condblock1:
+ lw $a0 4($fp)
+ sw $a0 0($sp)
+ addiu $sp $sp -4
+ li $a0 1
+ lw $t1 4($sp)
+ beq $a0 $t1 fib_codeblock2
+ j fib_postif3
+fib_codeblock2:
  lw $ra 32($sp)
  addiu $sp $sp 40
  lw $fp 0($sp)
  jr $ra
- jal fib
-postif3
+fib_postif3:
 #   %2 = sub i32 %x, 1
  lw $a0 4($fp)
  sw $a0 0($sp)
@@ -79,10 +89,10 @@ main_entry:
  addiu $sp $sp -4
 # Generated Code for Temporaries
  addiu $sp $sp -4
-#   %0 = call i32 @fib(i32 1)
+#   %0 = call i32 @fib(i32 6)
  sw $fp 0($sp)
  addiu $sp $sp -4
- li $a0 1
+ li $a0 6
  sw $a0 0($sp)
  addiu $sp $sp -4
  jal fib_entry

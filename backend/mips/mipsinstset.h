@@ -3,6 +3,10 @@
 
 #include <backend/backendvar.h>
 
+#include "common/llvm_warnings_push.h"
+#include <llvm/IR/InstrTypes.h>
+#include "common/llvm_warnings_pop.h"
+
 #include <ostream>
 
 /*
@@ -98,10 +102,14 @@ public:
     static void emitPop(MipsRegister &reg, std::ostream &s);
     static void emitPop(MipsRegister &reg, int offset, std::ostream &s);
     static void emitSyscall(MIPS_SYSCALLS syscall_code, std::ostream &s);
+
+    static void emitBEQ(MipsRegister &lhs, MipsRegister &rhs, std::string label, std::ostream &s);
+
+    static void emitJ(std::string label, std::ostream &s);
     static void emitJR(MipsRegister &reg, std::ostream &s);
     static void emitJAL(std::string label, std::ostream &s);
 
-    // static std::string getCmpPredicateString(llvm::CmpInst::Predicate predicate);
+    static std::string getBrCmpPredicateString(llvm::CmpInst::Predicate predicate);
 };
 
 #endif

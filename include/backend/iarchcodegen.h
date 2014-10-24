@@ -69,7 +69,7 @@ public:
     }
 
     virtual void initializeAssembler(llvm::Function *pMainFunc) = 0;
-    virtual void createLabel(std::string label) = 0;
+    virtual void createLabel(llvm::BasicBlock *pBlock) = 0;
 
     virtual BaseVariable* getSymbol(llvm::Value *pV) = 0;
 
