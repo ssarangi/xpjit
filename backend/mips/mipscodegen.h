@@ -24,7 +24,7 @@ public:
         AU.setPreservesAll();
     }
 
-    virtual void initializeAssembler(llvm::Function *pMainFunc);
+    virtual void initializeAssembler();
 
     virtual BaseVariable* getSymbol(llvm::Value* pV);
     virtual void loadBaseVariable(BaseVariable *pVar, std::ostream &s);

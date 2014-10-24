@@ -76,7 +76,7 @@ void MipsCodeGen::loadBaseVariable(BaseVariable *pVar, std::ostream &s)
     }
 }
 
-void MipsCodeGen::initializeAssembler(llvm::Function *pMainFunc)
+void MipsCodeGen::initializeAssembler()
 {
     // First output the data section
     m_ostream << ".data" << std::endl;
@@ -96,6 +96,8 @@ void MipsCodeGen::createLabel(llvm::BasicBlock *pBlock)
 bool MipsCodeGen::runOnModule(llvm::Module& M)
 {
     m_pMipsPatternMatch = &getAnalysis<MipsPatternMatch>();
+
+    initializeAssembler();
 
     for (llvm::Module::iterator f = M.begin(), fe = M.end(); f != fe; ++f)
     {

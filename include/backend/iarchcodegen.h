@@ -68,7 +68,7 @@ public:
         m_symbolTables.clear();
     }
 
-    virtual void initializeAssembler(llvm::Function *pMainFunc) = 0;
+    virtual void initializeAssembler() = 0;
     virtual void createLabel(llvm::BasicBlock *pBlock) = 0;
 
     virtual BaseVariable* getSymbol(llvm::Value *pV) = 0;

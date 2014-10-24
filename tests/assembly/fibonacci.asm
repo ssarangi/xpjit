@@ -1,3 +1,8 @@
+.data
+
+.text
+.globl main_entry
+
 # Entry Code: fib
 fib_entry:
  move $fp $sp
