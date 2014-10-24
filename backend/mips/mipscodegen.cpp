@@ -84,6 +84,7 @@ void MipsCodeGen::initializeAssembler()
     m_ostream << ".text" << std::endl;
     m_ostream << ".globl main_entry" << std::endl;
     m_ostream << std::endl;
+    MipsInstSet::emitJ("main_entry", m_ostream);
 }
 
 void MipsCodeGen::createLabel(llvm::BasicBlock *pBlock)
@@ -516,18 +517,18 @@ void MipsCodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
     {
     case llvm::Instruction::Add:
     case llvm::Instruction::FAdd:
-        MipsInstSet::emitAdd(A0, A0, T1, m_ostream);
+        MipsInstSet::emitAdd(A0, T1, A0, m_ostream);
         break;
     case llvm::Instruction::Sub:
     case llvm::Instruction::FSub:
-        MipsInstSet::emitSub(A0, A0, T1, m_ostream);
+        MipsInstSet::emitSub(A0, T1, A0, m_ostream);
         break;
     case llvm::Instruction::Mul:
     case llvm::Instruction::FMul:
-        MipsInstSet::emitMul(A0, A0, T1, m_ostream);
+        MipsInstSet::emitMul(A0, T1, A0, m_ostream);
         break;
     case llvm::Instruction::FDiv:
-        MipsInstSet::emitDiv(A0, A0, T1, m_ostream);
+        MipsInstSet::emitDiv(A0, T1, A0, m_ostream);
         break;
     }
 
@@ -595,6 +596,8 @@ void MipsCodeGen::emitBrWithCmpInstruction(llvm::BranchInst *pBrInst, llvm::CmpI
 
         std::string true_label = pBrInst->getParent()->getParent()->getName().str() + "_" + pBrInst->getSuccessor(0)->getName().str();
         std::string false_label = pBrInst->getParent()->getParent()->getName().str() + "_" + pBrInst->getSuccessor(1)->getName().str();
+
+        MipsInstSet::emitPop(SP, m_ostream);
 
         MipsInstSet::emitBEQ(A0, T1, true_label, m_ostream);
         MipsInstSet::emitJ(false_label, m_ostream);

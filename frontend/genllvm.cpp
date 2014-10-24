@@ -161,20 +161,22 @@ llvm::Value* BreakStatement::genLLVM(GenLLVM* g)
 //Generation should be 
 llvm::Value* BranchStatement::genLLVM(GenLLVM* g)
 {
-    llvm::IRBuilder<>& builder = g->getBuilder();	
+    llvm::IRBuilder<>& builder = g->getBuilder();
 
     BasicBlock* curBlock = builder.GetInsertBlock();
-    llvm::Function *func = curBlock->getParent();	
+    llvm::Function *func = curBlock->getParent();
 
     llvm::Value* zeroConst = llvm::ConstantInt::get(getGlobalContext(), llvm::APInt(32 /*bits*/, 0 /*value*/, false /*isSigned*/));
 
     //Create basic blocks for each
     unsigned int size = getBranches().size();
-    std::vector<BasicBlock*> basicBlocks(size*2+1);	
-    for(unsigned int i = 0 ; i < size*2; i+=2){
+    std::vector<BasicBlock*> basicBlocks(size*2+1);
+    for(unsigned int i = 0 ; i < size*2; i+=2)
+    {
         basicBlocks[i] = BasicBlock::Create(getGlobalContext(), "condblock", func);
         basicBlocks[i+1] = BasicBlock::Create(getGlobalContext(), "codeblock", func);
     }
+    
     BasicBlock *postIfElseBB = BasicBlock::Create(getGlobalContext(),"postif", func);
     basicBlocks[size*2] = postIfElseBB;
 
@@ -184,9 +186,9 @@ llvm::Value* BranchStatement::genLLVM(GenLLVM* g)
     unsigned int i = 0;
     for(; branchIter != getBranches().end(); ++branchIter, i+=2)
     {
-        Branch* branch = *branchIter;		
+        Branch* branch = *branchIter;
 
-        builder.SetInsertPoint(basicBlocks[i]);	
+        builder.SetInsertPoint(basicBlocks[i]);
         llvm::Value* condition = branch->getCondition().genLLVM(g);
         llvm::Type* conditionType = condition->getType();
         if(!conditionType->isIntegerTy(1)) //bool type
@@ -198,7 +200,9 @@ llvm::Value* BranchStatement::genLLVM(GenLLVM* g)
         std::list<Statement*>::const_iterator stmtIter = statements.begin();
         for(; stmtIter != statements.end(); ++stmtIter)
             (*stmtIter)->genLLVM(g);
-        builder.CreateBr(postIfElseBB); //Jump to end of if-else after completing this codeblock
+
+        if (curBlock->getTerminator() == nullptr)
+            builder.CreateBr(postIfElseBB); //Jump to end of if-else after completing this codeblock
     }
 
     builder.SetInsertPoint(postIfElseBB);
@@ -254,7 +258,7 @@ llvm::Value* IcarusModule::genLLVM(GenLLVM* g)
 
 void GenLLVM::generateLLVM(IcarusModule &m)
 {
-    m.genLLVM(this);	
+    m.genLLVM(this);
 }
 
 GenLLVM::GenLLVM() 
