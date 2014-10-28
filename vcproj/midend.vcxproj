@@ -86,6 +86,7 @@
     <ClCompile Include="..\midend\ConstantFolder.cpp" />
     <ClCompile Include="..\midend\DominanceFrontier.cpp" />
     <ClCompile Include="..\midend\DominanceTreeConstructor.cpp" />
+    <ClCompile Include="..\midend\Liveness.cpp" />
     <ClCompile Include="..\midend\optimizeIR.cpp" />
     <ClCompile Include="..\midend\PassManager.cpp" />
   </ItemGroup>
@@ -97,6 +98,7 @@
     <ClInclude Include="..\include\midend\ITransform.h" />
     <ClInclude Include="..\include\midend\optimizeIR.h" />
     <ClInclude Include="..\include\midend\PassManager.h" />
+    <ClInclude Include="..\midend\Liveness.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\common\common.vcxproj">

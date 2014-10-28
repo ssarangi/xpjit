@@ -100,7 +100,7 @@ main_entry:
 #   %0 = call i32 @fib(i32 7)
  sw $fp 0($sp)
  addiu $sp $sp -4
- li $a0 8
+ li $a0 7
  sw $a0 0($sp)
  addiu $sp $sp -4
  jal fib_entry
