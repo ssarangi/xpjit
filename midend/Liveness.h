@@ -30,19 +30,26 @@ using namespace llvm;
 
 class Liveness : public FunctionPass
 {
-private:
-
 public:
     static char ID; // Pass identification, replacement for typeid
     Liveness() : FunctionPass(ID) {}
 
     virtual bool runOnFunction(llvm::Function &F);
 
+    void search(llvm::BasicBlock *pNode);
+    bool isLive(const llvm::Value *pQuery, const llvm::Instruction *pInstNode);
+    bool isLiveInBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock);
+    bool isLiveOutBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock);
+
     virtual void getAnalysisUsage(AnalysisUsage &AU) const
     {
         AU.addRequired<llvm::DominatorTreeWrapperPass>();
     };
 
+private:
+    llvm::DenseMap<llvm::BasicBlock*, llvm::BasicBlock*> m_backEdges;
+    llvm::DenseMap<llvm::BasicBlock*, llvm::BasicBlock*> m_Rv;
+    llvm::DominatorTree *m_pDT;
 };
 
 Liveness *createNewLivenessPass();

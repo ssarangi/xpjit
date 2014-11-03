@@ -1,5 +1,6 @@
 
 #include "Liveness.h"
+#include "common/debug.h"
 
 char Liveness::ID = 0;
 
@@ -16,30 +17,62 @@ Liveness *createNewLivenessPass()
     return pL;
 }
 
+void Liveness::search(llvm::BasicBlock *pNode)
+{
+    for (llvm::succ_iterator succ = llvm::succ_begin(pNode), succEnd = llvm::succ_end(pNode); succ != succEnd; ++succ)
+    {
+        if (m_pDT->dominates(*succ, pNode))
+            m_backEdges[pNode] = *succ;
+        else
+            m_Rv[pNode] = *succ;
+    }
+}
+
+bool Liveness::isLive(const llvm::Value *pQuery, const llvm::Instruction *pInstNode)
+{
+
+}
+
+bool Liveness::isLiveInBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock)
+{
+
+}
+
+bool Liveness::isLiveOutBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock)
+{
+
+}
+
 bool Liveness::runOnFunction(llvm::Function &F)
 {
     llvm::DominatorTreeWrapperPass *pDTW = &getAnalysis<llvm::DominatorTreeWrapperPass>();
-    llvm::DominatorTree *pDT = &pDTW->getDomTree();
+    m_pDT = &pDTW->getDomTree();
 
-    std::set<llvm::Instruction*> back_edges;
+    // Algorithm:
+    // 1) Figure out the back edges
+    //     a) If a node's successor dominates the node then it's a backedge
 
-    // Iterate over the basic blocks and find out the branch labels from it.
     for (llvm::Function::iterator bb = F.begin(), bbend = F.end(); bb != bbend; ++bb)
-    {
-        if (llvm::BranchInst *pBr = llvm::dyn_cast<llvm::BranchInst>(bb->getTerminator()))
-        {
-            // Get the number of successors of this terminator instruction
-            int numSucc = pBr->getNumSuccessors();
-            for (uint32_t i = 0; i < numSucc; ++i)
-            {
-                llvm::BasicBlock *pSucc = pBr->getSuccessor(i);
+        search(bb);
 
-                // Now if this basic block is a dominator of the original block then it is a back edge.
-                if (pDT->dominates(pSucc, &(*bb)))
-                    back_edges.insert(pBr);
-            }
-        }
+    // Display the edges which have been identified as the backedges
+    g_outputStream.stream() << "--------------- BackEdges ----------------" << std::endl;
+    for (auto backedges : m_backEdges)
+    {
+        std::string str = backedges.first->getName().str() + ": " + backedges.second->getName().str();
+        g_outputStream.stream() << str << std::endl;
     }
+    g_outputStream.stream() << "--------------- BackEdges ----------------" << std::endl;
+
+    g_outputStream.stream() << "--------------- ForwardEdges ----------------" << std::endl;
+    for (auto edges : m_Rv)
+    {
+        std::string str = edges.first->getName().str() + ": " + edges.second->getName().str();
+        g_outputStream.stream() << str << std::endl;
+    }
+    g_outputStream.stream() << "--------------- ForwardEdges ----------------" << std::endl;
+
+    g_outputStream.flush();
 
     return false;
 }
