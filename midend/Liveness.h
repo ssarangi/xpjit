@@ -1,9 +1,13 @@
 #ifndef __LIVENESS__
 #define __LIVENESS__
 
+/*
+Based on the paper - Fast Liveness Checking for SSA-Form Programs
+by Benoit Boissinot , Sebastian Hack , Benoît Dupont De Dinechin , Daniel Grund , Fabrice Rastello
+*/
 
-#define DEBUG_TYPE "printCode"
 
+#include "common/llvm_warnings_push.h"
 #include <llvm/Pass.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Function.h>
@@ -18,63 +22,36 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/IR/CFG.h>
+#include <llvm/IR/Dominators.h>
+#include "common/llvm_warnings_pop.h"
 
+using namespace llvm;
 #include <set>
 
-extern llvm::DenseMap<const llvm::Instruction*, int> instMap;
-
-void print_elem(const llvm::Instruction* i);
-
-class genKill
+class Liveness : public FunctionPass
 {
-public:
-    std::set<const llvm::Instruction*> gen;
-    std::set<const llvm::Instruction*> kill;
-};
-
-class beforeAfter
-{
-public:
-    std::set<const llvm::Instruction*> before;
-    std::set<const llvm::Instruction*> after;
-};
-
-class Liveness : public llvm::FunctionPass
-{
-private:
-
-    void addToMap(llvm::Function &F);
-
-    void computeBBGenKill(llvm::Function &F, llvm::DenseMap<const llvm::BasicBlock*, genKill> &bbMap);
-
-    // Do this using a work-list algorithm (where the items in the work-list are basic blocks).
-    void computeBBBeforeAfter(
-        llvm::Function &F,
-        llvm::DenseMap<const llvm::BasicBlock*, genKill> &bbGKMap,
-        llvm::DenseMap<const llvm::BasicBlock*, beforeAfter> &bbBAMap);
-
-    void computeIBeforeAfter(
-        llvm::Function &F,
-        llvm::DenseMap<const llvm::BasicBlock*, beforeAfter> &bbBAMap,
-        llvm::DenseMap<const llvm::Instruction*, beforeAfter> &iBAMap);
-
 public:
     static char ID; // Pass identification, replacement for typeid
-    Liveness()
-        : llvm::FunctionPass(ID)
-    {}
+    Liveness() : FunctionPass(ID) {}
 
     virtual bool runOnFunction(llvm::Function &F);
 
-    virtual void print(std::ostream &O, const llvm::Module *M) const
-    {
-        O << "This is printCode.\n";
-    }
+    void search(llvm::BasicBlock *pNode);
+    bool isLive(llvm::Value *pQuery, llvm::Instruction *pInstNode);
+    bool isLiveInBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock);
+    bool isLiveOutBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock);
 
-    virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
+    virtual void getAnalysisUsage(AnalysisUsage &AU) const
     {
+        AU.addRequired<llvm::DominatorTreeWrapperPass>();
     };
 
+private:
+    llvm::DenseMap<llvm::BasicBlock*, llvm::BasicBlock*> m_backEdges;
+    llvm::DenseMap<llvm::BasicBlock*, llvm::SmallVector<llvm::BasicBlock*, 4> > m_Rv;
+    llvm::DominatorTree *m_pDT;
 };
+
+Liveness *createNewLivenessPass();
 
 #endif
