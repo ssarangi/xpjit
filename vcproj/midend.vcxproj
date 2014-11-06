@@ -84,11 +84,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\midend\ConstantFolder.cpp" />
+    <ClCompile Include="..\midend\dataflow.cpp" />
     <ClCompile Include="..\midend\DominanceFrontier.cpp" />
     <ClCompile Include="..\midend\DominanceTreeConstructor.cpp" />
     <ClCompile Include="..\midend\Liveness.cpp" />
     <ClCompile Include="..\midend\optimizeIR.cpp" />
     <ClCompile Include="..\midend\PassManager.cpp" />
+    <ClCompile Include="..\midend\reaching-definitions.cpp" />
+    <ClCompile Include="..\midend\util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\midend\ConstantFolder.h" />
@@ -98,7 +101,10 @@
     <ClInclude Include="..\include\midend\ITransform.h" />
     <ClInclude Include="..\include\midend\optimizeIR.h" />
     <ClInclude Include="..\include\midend\PassManager.h" />
+    <ClInclude Include="..\midend\dataflow.h" />
     <ClInclude Include="..\midend\Liveness.h" />
+    <ClInclude Include="..\midend\reaching-definitions.h" />
+    <ClInclude Include="..\midend\util.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\common\common.vcxproj">

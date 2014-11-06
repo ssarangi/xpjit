@@ -1,15 +1,13 @@
+// 15-745 S14 Assignment 2: liveness.cpp
+// Group: akbhanda, zheq
+///////////////////////////////////////////////////////////////////////////////
 
-#include "Liveness.h"
-#include "common/debug.h"
+#include "liveness.h"
 
-char Liveness::ID = 0;
 
-// register the printCode class: 
-//  - give it a command-line argument
-//  - a name
-//  - a flag saying that we don't modify the CFG
-//  - a flag saying this is not an analysis pass
-RegisterPass<Liveness> X("liveVars", "Live vars analysis", false, false);
+using std::cout;
+using std::endl;
+
 
 Liveness *createNewLivenessPass()
 {
@@ -17,62 +15,47 @@ Liveness *createNewLivenessPass()
     return pL;
 }
 
-void Liveness::search(llvm::BasicBlock *pNode)
+Liveness::Liveness() : DataFlowPass(ID, NONE, UNION, BACKWARDS) { };
+
+
+//
+// Override generate function of DataFlowPass to use uses().
+//
+Assignments Liveness::generate(const llvm::BasicBlock& block)
 {
-    for (llvm::succ_iterator succ = llvm::succ_begin(pNode), succEnd = llvm::succ_end(pNode); succ != succEnd; ++succ)
-    {
-        if (m_pDT->dominates(*succ, pNode))
-            m_backEdges[pNode] = *succ;
-        else
-            m_Rv[pNode] = *succ;
-    }
+  return DataFlowUtil::uses(block);
 }
 
-bool Liveness::isLive(const llvm::Value *pQuery, const llvm::Instruction *pInstNode)
-{
 
+//
+// Override generate function of DataFlowPass to use defines().
+// Notation and naming may change later.
+//
+Assignments Liveness::kill(const llvm::BasicBlock& block)
+{
+  return DataFlowUtil::defines(block);
 }
 
-bool Liveness::isLiveInBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock)
-{
 
+//
+// Subclasses override the transfer function.
+// More transparent way to provide function pointers.
+//
+void Liveness::transferFn(
+    const Assignments& generate,
+    const Assignments& kill,
+    const Assignments& input,
+    Assignments& output)
+{
+  output = input;
+  DataFlowUtil::setSubtract(output, kill);
+  meetFunction(generate, output);
 }
 
-bool Liveness::isLiveOutBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock)
-{
 
-}
+//
+// Do the following to meet the FunctionPass API
+//
+char Liveness::ID = 0;
+llvm::RegisterPass<Liveness> X("live", "15745 Liveness");
 
-bool Liveness::runOnFunction(llvm::Function &F)
-{
-    llvm::DominatorTreeWrapperPass *pDTW = &getAnalysis<llvm::DominatorTreeWrapperPass>();
-    m_pDT = &pDTW->getDomTree();
-
-    // Algorithm:
-    // 1) Figure out the back edges
-    //     a) If a node's successor dominates the node then it's a backedge
-
-    for (llvm::Function::iterator bb = F.begin(), bbend = F.end(); bb != bbend; ++bb)
-        search(bb);
-
-    // Display the edges which have been identified as the backedges
-    g_outputStream.stream() << "--------------- BackEdges ----------------" << std::endl;
-    for (auto backedges : m_backEdges)
-    {
-        std::string str = backedges.first->getName().str() + ": " + backedges.second->getName().str();
-        g_outputStream.stream() << str << std::endl;
-    }
-    g_outputStream.stream() << "--------------- BackEdges ----------------" << std::endl;
-
-    g_outputStream.stream() << "--------------- ForwardEdges ----------------" << std::endl;
-    for (auto edges : m_Rv)
-    {
-        std::string str = edges.first->getName().str() + ": " + edges.second->getName().str();
-        g_outputStream.stream() << str << std::endl;
-    }
-    g_outputStream.stream() << "--------------- ForwardEdges ----------------" << std::endl;
-
-    g_outputStream.flush();
-
-    return false;
-}

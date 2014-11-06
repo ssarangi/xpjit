@@ -33,6 +33,15 @@
     <ClCompile Include="..\midend\Liveness.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\midend\reaching-definitions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midend\util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midend\dataflow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\midend\ConstantFolder.h">
@@ -57,6 +66,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\midend\Liveness.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midend\dataflow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midend\reaching-definitions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midend\util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
