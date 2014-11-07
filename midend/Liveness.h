@@ -53,12 +53,12 @@ public:
     };
 
 private:
-    llvm::DenseMap<llvm::BasicBlock*, llvm::BasicBlock*> m_backEdges;
     llvm::DenseMap<llvm::BasicBlock*, unsigned int> m_blockToId;
     llvm::DenseMap<unsigned int, llvm::BasicBlock*> m_idToBlock;
 
     llvm::DominatorTree *m_pDT;
     AdjMatrixTy m_adjacencyMatrix;
+    AdjMatrixTy m_backEdgesMatrix;
     AdjMatrixTy m_transitiveClosure;
 };
 

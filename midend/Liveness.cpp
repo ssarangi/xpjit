@@ -87,7 +87,26 @@ void Liveness::computeWarshallTransitiveClosure(llvm::Function &F)
             for (unsigned int j = 0; j < numBlocks; ++j)
             {
                 Rcurr[i][j] = Rprev[i][j] | (Rprev[i][k] & Rprev[k][j]);
+
+                // Now remove all the back-edges.
+                llvm::BasicBlock *pBB1 = m_idToBlock[i];
+                llvm::BasicBlock *pBB2 = m_idToBlock[j];
+
+                // If the target dominates the source, then this is a back edge. So remove it.
+                if (m_pDT->dominates(pBB2, pBB1))
+                    Rcurr[i][j] = 0;
             }
+
+            llvm::BasicBlock *pBB1 = m_idToBlock[k];
+            llvm::BasicBlock *pBB2 = m_idToBlock[i];
+
+            std::string bb1 = pBB1->getName();
+            std::string bb2 = pBB2->getName();
+
+            // Adjacency matrix check to see if there is a direct path or not.
+            // Dominator tree to see if its the back-edge
+            if (m_pDT->dominates(pBB2, pBB1) && m_adjacencyMatrix[k][i])
+                m_backEdgesMatrix[k][i] = 1;
         }
 
         Rprev = Rcurr;
@@ -117,6 +136,7 @@ bool Liveness::runOnFunction(llvm::Function &F)
     llvm::DominatorTreeWrapperPass *pDTW = &getAnalysis<llvm::DominatorTreeWrapperPass>();
     m_pDT = &pDTW->getDomTree();
 
+    m_backEdgesMatrix = initialize2DMatrix(F.size());
     initializeAdjacencyMatrix(F);
     computeWarshallTransitiveClosure(F);
 
@@ -126,6 +146,11 @@ bool Liveness::runOnFunction(llvm::Function &F)
     g_outputStream.flush();
 
     printMatrix(m_transitiveClosure);
+
+    g_outputStream.stream() << "-------------------------------------- Back Edges ------------------------------------\n";
+    g_outputStream.flush();
+
+    printMatrix(m_backEdgesMatrix);
 
     return false;
 }
