@@ -14,5 +14,18 @@ bool RegAlloc::runOnFunction(llvm::Function &F)
 {
     m_pLiveness = &getAnalysis<Liveness>();
 
+    llvm::BasicBlock *pDefBlock = nullptr;
+    llvm::BasicBlock *pQueryBlock = nullptr;
+    for (llvm::Function::iterator bb = F.begin(), be = F.end(); bb != be; ++bb)
+    {
+        if (bb->getName() == "whileblock2")
+            pQueryBlock = bb;
+
+        if (bb->getName() == "whilecond")
+            pDefBlock = bb;
+    }
+
+    m_pLiveness->isLiveInBlock(pDefBlock, pQueryBlock);
+
     return false;
 }

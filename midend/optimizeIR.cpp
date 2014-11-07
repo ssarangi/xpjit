@@ -23,6 +23,5 @@ void OptimizeIR(llvm::Module& llvmModule)
     //Optimization Passes
     passMgr.add(new ConstantFolder());
     passMgr.add(llvm::createPromoteMemoryToRegisterPass());
-    passMgr.add(new Liveness());
     passMgr.run(llvmModule);
 }

@@ -9,12 +9,38 @@ char Liveness::ID = 0;
 //  - a name
 //  - a flag saying that we don't modify the CFG
 //  - a flag saying this is not an analysis pass
-llvm::RegisterPass<Liveness> X("liveVars", "Live vars analysis", false, false);
+llvm::RegisterPass<Liveness> X("LivenessAnalysis", "Live vars analysis", false, false);
 
 Liveness *createNewLivenessPass()
 {
     Liveness *pL = new Liveness();
     return pL;
+}
+
+AdjMatrixTy initialize2DMatrix(int size)
+{
+    AdjMatrixTy matrix2d;
+    matrix2d.resize(size);
+
+    for (unsigned int i = 0; i < size; ++i)
+        matrix2d[i].resize(size);
+
+    return matrix2d;
+}
+
+AdjMatrixTy CopyFromArray(unsigned int matrix[11][11], int size)
+{
+    AdjMatrixTy vecMatrix = initialize2DMatrix(size);
+
+    for (int i = 0; i < size; ++i)
+    {
+        for (int j = 0; j < size; ++j)
+        {
+            vecMatrix[i][j] = matrix[i][j];
+        }
+    }
+
+    return vecMatrix;
 }
 
 void printMatrix(AdjMatrixTy& matrix)
@@ -34,17 +60,6 @@ void printMatrix(AdjMatrixTy& matrix)
     }
 
     g_outputStream.flush();
-}
-
-AdjMatrixTy initialize2DMatrix(int size)
-{
-    AdjMatrixTy matrix2d;
-    matrix2d.resize(size);
-
-    for (unsigned int i = 0; i < size; ++i)
-        matrix2d[i].resize(size);
-
-    return matrix2d;
 }
 
 void Liveness::initializeAdjacencyMatrix(llvm::Function &F)
@@ -160,19 +175,17 @@ bool Liveness::isLive(llvm::Value *pQueryValue, llvm::Instruction *pQueryPoint)
     return true;
 }
 
-bool Liveness::isLiveInBlock(llvm::Value *pQueryValue, llvm::BasicBlock *pQueryBB)
+bool Liveness::isLiveInBlock(llvm::BasicBlock *pDefBB, llvm::BasicBlock *pQueryBB)
 {
     // The algorithm is as follows.
     // 1) Find the query block
     // 2) Find all the reduced reachable nodes from this query block.
 
-    llvm::BasicBlock *pDefBlock = llvm::cast<llvm::Instruction>(pQueryValue)->getParent();
-
     unsigned int queryBBId = m_blockToId[pQueryBB];
-    unsigned int defBBId = m_blockToId[pDefBlock];
+    unsigned int defBBId = m_blockToId[pDefBB];
 
     // Find out all the reduced reachable nodes for the query BB
-    AdjMatrixTy reachabilityMatrix = m_adjacencyMatrix;
+    AdjMatrixTy reachabilityMatrix = m_transitiveClosure;
 
     addRelevantBackEdges(reachabilityMatrix, queryBBId, defBBId);
 
@@ -191,8 +204,30 @@ bool Liveness::runOnFunction(llvm::Function &F)
 
     // Compute the Reduced reachable set for each node of the CFG.
     m_backEdgesMatrix = initialize2DMatrix(F.size());
+    
     initializeAdjacencyMatrix(F);
+
+    //unsigned int adjmatrix[11][11] = {
+    //    { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    //    { 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1 },
+    //    { 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0 },
+    //    { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
+    //    { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
+    //    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+    //    { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    //    { 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },
+    //    { 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0 },
+    //    { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 },
+    //    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    //};
+
+    //// Copy adjMatrix for testing.
+    //m_adjacencyMatrix = CopyFromArray(adjmatrix, 11);
+
     computeWarshallTransitiveClosure(F);
+
+    g_outputStream.stream() << "-------------------------------------- Adjacency Matrix ------------------------------------\n";
+    g_outputStream.flush();
 
     printMatrix(m_adjacencyMatrix);
 
