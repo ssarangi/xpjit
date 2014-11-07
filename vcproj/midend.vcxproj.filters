@@ -33,6 +33,9 @@
     <ClCompile Include="..\midend\Analysis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\midend\LivenessHangs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\midend\Liveness.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -60,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\midend\Analysis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midend\LivenessHangs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\midend\Liveness.h">

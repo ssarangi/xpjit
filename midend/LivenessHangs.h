@@ -39,7 +39,7 @@ public:
     std::set<const llvm::Instruction*> after;
 };
 
-class Liveness : public llvm::FunctionPass
+class LivenessHangs : public llvm::FunctionPass
 {
 private:
 
@@ -60,7 +60,7 @@ private:
 
 public:
     static char ID; // Pass identification, replacement for typeid
-    Liveness()
+    LivenessHangs()
         : llvm::FunctionPass(ID)
     {}
 

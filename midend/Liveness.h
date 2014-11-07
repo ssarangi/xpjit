@@ -25,31 +25,41 @@ by Benoit Boissinot , Sebastian Hack , Benoît Dupont De Dinechin , Daniel Grund 
 #include <llvm/IR/Dominators.h>
 #include "common/llvm_warnings_pop.h"
 
-using namespace llvm;
 #include <set>
 
-class Liveness : public FunctionPass
+typedef llvm::SmallVector<llvm::SmallVector<unsigned int, 20>, 20> AdjMatrixTy;
+
+class Liveness : public llvm::FunctionPass
 {
 public:
     static char ID; // Pass identification, replacement for typeid
-    Liveness() : FunctionPass(ID) {}
+    Liveness()
+        : llvm::FunctionPass(ID)
+        , m_pDT(nullptr)
+    {}
 
     virtual bool runOnFunction(llvm::Function &F);
 
-    void search(llvm::BasicBlock *pNode);
     bool isLive(llvm::Value *pQuery, llvm::Instruction *pInstNode);
     bool isLiveInBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock);
     bool isLiveOutBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock);
 
-    virtual void getAnalysisUsage(AnalysisUsage &AU) const
+    void initializeAdjacencyMatrix(llvm::Function &F);
+    void computeWarshallTransitiveClosure(llvm::Function &F);
+
+    virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
     {
         AU.addRequired<llvm::DominatorTreeWrapperPass>();
     };
 
 private:
     llvm::DenseMap<llvm::BasicBlock*, llvm::BasicBlock*> m_backEdges;
-    llvm::DenseMap<llvm::BasicBlock*, llvm::SmallVector<llvm::BasicBlock*, 4> > m_Rv;
+    llvm::DenseMap<llvm::BasicBlock*, unsigned int> m_blockToId;
+    llvm::DenseMap<unsigned int, llvm::BasicBlock*> m_idToBlock;
+
     llvm::DominatorTree *m_pDT;
+    AdjMatrixTy m_adjacencyMatrix;
+    AdjMatrixTy m_transitiveClosure;
 };
 
 Liveness *createNewLivenessPass();

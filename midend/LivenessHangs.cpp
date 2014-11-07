@@ -1,16 +1,16 @@
-#include "Liveness.h"
+#include "LivenessHangs.h"
 
-char Liveness::ID = 0;
+char LivenessHangs::ID = 0;
 
 // register the printCode class: 
 //  - give it a command-line argument
 //  - a name
 //  - a flag saying that we don't modify the CFG
 //  - a flag saying this is not an analysis pass
-llvm::RegisterPass<Liveness> X("liveVars", "Live vars analysis",
+llvm::RegisterPass<LivenessHangs> X("liveVars", "Live vars analysis",
     false, true);
 
-void Liveness::addToMap(llvm::Function &F)
+void LivenessHangs::addToMap(llvm::Function &F)
 {
     static int id = 1;
     for (llvm::inst_iterator i = inst_begin(F), E = inst_end(F); i != E; ++i, ++id)
@@ -18,7 +18,7 @@ void Liveness::addToMap(llvm::Function &F)
         instMap.insert(std::make_pair(&*i, id));
 }
 
-void Liveness::computeBBGenKill(llvm::Function &F, llvm::DenseMap<const llvm::BasicBlock*, genKill> &bbMap)
+void LivenessHangs::computeBBGenKill(llvm::Function &F, llvm::DenseMap<const llvm::BasicBlock*, genKill> &bbMap)
 {
     for (llvm::Function::iterator b = F.begin(), e = F.end(); b != e; ++b)
     {
@@ -50,7 +50,7 @@ void Liveness::computeBBGenKill(llvm::Function &F, llvm::DenseMap<const llvm::Ba
     }
 }
 
-void Liveness::computeBBBeforeAfter(
+void LivenessHangs::computeBBBeforeAfter(
     llvm::Function &F,
     llvm::DenseMap<const llvm::BasicBlock*, genKill> &bbGKMap,
     llvm::DenseMap<const llvm::BasicBlock*, beforeAfter> &bbBAMap)
@@ -90,7 +90,7 @@ void Liveness::computeBBBeforeAfter(
     }
 }
 
-void Liveness::computeIBeforeAfter(
+void LivenessHangs::computeIBeforeAfter(
     llvm::Function &F,
     llvm::DenseMap<const llvm::BasicBlock*, beforeAfter> &bbBAMap,
     llvm::DenseMap<const llvm::Instruction*, beforeAfter> &iBAMap)
@@ -127,7 +127,7 @@ void Liveness::computeIBeforeAfter(
     }
 }
 
-bool Liveness::runOnFunction(llvm::Function &F)
+bool LivenessHangs::runOnFunction(llvm::Function &F)
 {
     // Iterate over the instructions in F, creating a map from instruction address to unique integer.
     addToMap(F);
