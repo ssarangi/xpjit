@@ -41,8 +41,8 @@ public:
     virtual bool runOnFunction(llvm::Function &F);
 
     bool isLive(llvm::Value *pQuery, llvm::Instruction *pInstNode);
-    bool isLiveInBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock);
-    bool isLiveOutBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock);
+    bool isLiveInBlock(llvm::Value *pQuery, llvm::BasicBlock *pBlock);
+    bool isLiveOutBlock(llvm::Value *pQuery, llvm::BasicBlock *pBlock);
 
     void initializeAdjacencyMatrix(llvm::Function &F);
     void computeWarshallTransitiveClosure(llvm::Function &F);
@@ -51,6 +51,9 @@ public:
     {
         AU.addRequired<llvm::DominatorTreeWrapperPass>();
     };
+
+private:
+    void addRelevantBackEdges(AdjMatrixTy& reachabilityMatrix, unsigned int queryBBId, unsigned int defBBId);
 
 private:
     llvm::DenseMap<llvm::BasicBlock*, unsigned int> m_blockToId;

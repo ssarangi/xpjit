@@ -1,6 +1,6 @@
 
-#include "Liveness.h"
-#include "common/debug.h"
+#include <midend/Liveness.h>
+#include <common/debug.h>
 
 char Liveness::ID = 0;
 
@@ -116,19 +116,72 @@ void Liveness::computeWarshallTransitiveClosure(llvm::Function &F)
     m_transitiveClosure = Rprev;
 }
 
-bool Liveness::isLive(llvm::Value *pQuery, llvm::Instruction *pInstNode)
+void Liveness::addRelevantBackEdges(AdjMatrixTy& reachabilityMatrix, unsigned int queryBBId, unsigned int defBBId)
 {
-    return false;
+    // Look at the backedges present in the entire graph and add them relevant to this query.
+    int size = reachabilityMatrix.size();
+    llvm::BasicBlock *pDefBlock = m_idToBlock[defBBId];
+
+    for (int i = 0; i < size; ++i)
+    {
+        if (m_backEdgesMatrix[queryBBId][i])
+        {
+            // This means a back edge is present.
+            // Condition to add it is that the target of the backedge should be dominated strictly by the def block
+            llvm::BasicBlock *pTarget = m_idToBlock[i];
+            if (defBBId != i && m_pDT->dominates(pDefBlock, pTarget))
+            {
+                // Add this to the reachability matrix
+                reachabilityMatrix[queryBBId][i] = 1;
+
+                // Now recursively find all the child nodes from this node
+                addRelevantBackEdges(reachabilityMatrix, i, defBBId);
+
+                int newTargetAdded = i;
+
+                // Now add the reachable nodes for the newly added target to all the predecessors
+                for (int target_predecessor = 0; target_predecessor < size; ++target_predecessor)
+                {
+                    // If there was already a path from the predecessor to the target then update the reachability matrix of
+                    // predecessor
+                    if (reachabilityMatrix[target_predecessor][newTargetAdded])
+                    {
+                        for (int reaches = 0; reaches < size; ++reaches)
+                            reachabilityMatrix[target_predecessor][reaches] |= reachabilityMatrix[newTargetAdded][reaches];
+                    }
+                }
+            }
+        }
+    }
 }
 
-bool Liveness::isLiveInBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock)
+bool Liveness::isLive(llvm::Value *pQueryValue, llvm::Instruction *pQueryPoint)
 {
-    return false;
+    return true;
 }
 
-bool Liveness::isLiveOutBlock(const llvm::Value *pQuery, const llvm::BasicBlock *pBlock)
+bool Liveness::isLiveInBlock(llvm::Value *pQueryValue, llvm::BasicBlock *pQueryBB)
 {
-    return false;
+    // The algorithm is as follows.
+    // 1) Find the query block
+    // 2) Find all the reduced reachable nodes from this query block.
+
+    llvm::BasicBlock *pDefBlock = llvm::cast<llvm::Instruction>(pQueryValue)->getParent();
+
+    unsigned int queryBBId = m_blockToId[pQueryBB];
+    unsigned int defBBId = m_blockToId[pDefBlock];
+
+    // Find out all the reduced reachable nodes for the query BB
+    AdjMatrixTy reachabilityMatrix = m_adjacencyMatrix;
+
+    addRelevantBackEdges(reachabilityMatrix, queryBBId, defBBId);
+
+    return true;
+}
+
+bool Liveness::isLiveOutBlock(llvm::Value *pQuery, llvm::BasicBlock *pBlock)
+{
+    return true;
 }
 
 bool Liveness::runOnFunction(llvm::Function &F)
@@ -136,6 +189,7 @@ bool Liveness::runOnFunction(llvm::Function &F)
     llvm::DominatorTreeWrapperPass *pDTW = &getAnalysis<llvm::DominatorTreeWrapperPass>();
     m_pDT = &pDTW->getDomTree();
 
+    // Compute the Reduced reachable set for each node of the CFG.
     m_backEdgesMatrix = initialize2DMatrix(F.size());
     initializeAdjacencyMatrix(F);
     computeWarshallTransitiveClosure(F);

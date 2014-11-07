@@ -98,10 +98,10 @@
     <ClInclude Include="..\include\midend\DominanceTree.h" />
     <ClInclude Include="..\include\midend\DominanceTreeConstructor.h" />
     <ClInclude Include="..\include\midend\ITransform.h" />
+    <ClInclude Include="..\include\midend\Liveness.h" />
     <ClInclude Include="..\include\midend\optimizeIR.h" />
     <ClInclude Include="..\include\midend\PassManager.h" />
     <ClInclude Include="..\midend\Analysis.h" />
-    <ClInclude Include="..\midend\Liveness.h" />
     <ClInclude Include="..\midend\LivenessHangs.h" />
   </ItemGroup>
   <ItemGroup>

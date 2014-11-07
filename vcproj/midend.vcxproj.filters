@@ -68,7 +68,7 @@
     <ClInclude Include="..\midend\LivenessHangs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\midend\Liveness.h">
+    <ClInclude Include="..\include\midend\Liveness.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

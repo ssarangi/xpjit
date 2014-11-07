@@ -3,7 +3,7 @@
 #include "midend/ConstantFolder.h"
 #include "midend/DominanceTreeConstructor.h"
 #include "midend/DominanceFrontier.h"
-#include "liveness.h"
+#include <midend/liveness.h>
 
 #include <common/llvm_warnings_push.h>
 #include <llvm/PassManager.h>
