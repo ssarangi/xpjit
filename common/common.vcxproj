@@ -81,9 +81,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="debug.cpp" />
+    <ClCompile Include="llvm_printer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\common\debug.h" />
+    <ClInclude Include="..\include\common\llvm_printer.h" />
     <ClInclude Include="..\include\common\llvm_warnings_pop.h" />
     <ClInclude Include="..\include\common\llvm_warnings_push.h" />
   </ItemGroup>
