@@ -36,7 +36,10 @@
     <ClCompile Include="..\midend\LivenessHangs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\midend\Liveness.cpp">
+    <ClCompile Include="..\midend\Liveness_Benoit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midend\LiveRange.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,7 +71,10 @@
     <ClInclude Include="..\midend\LivenessHangs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\midend\Liveness.h">
+    <ClInclude Include="..\include\midend\Liveness_Benoit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\midend\LiveRange.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

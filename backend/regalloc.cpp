@@ -1,5 +1,5 @@
 #include "regalloc.h"
-#include <midend/Liveness.h>
+#include <midend/Liveness_Benoit.h>
 
 char RegAlloc::ID = 0;
 

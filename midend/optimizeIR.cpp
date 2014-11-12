@@ -3,7 +3,8 @@
 #include "midend/ConstantFolder.h"
 #include "midend/DominanceTreeConstructor.h"
 #include "midend/DominanceFrontier.h"
-#include <midend/liveness.h>
+#include <midend/Liveness_Benoit.h>
+#include <midend/LiveRange.h>
 #include <common/llvm_printer.h>
 
 #include <common/llvm_warnings_push.h>
@@ -29,5 +30,6 @@ void OptimizeIR(llvm::Module& llvmModule)
     //Optimization Passes
     passMgr.add(new ConstantFolder());
     passMgr.add(llvm::createPromoteMemoryToRegisterPass());
+    passMgr.add(new LiveRange());
     passMgr.run(llvmModule);
 }

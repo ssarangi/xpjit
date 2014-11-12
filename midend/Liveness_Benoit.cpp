@@ -1,5 +1,5 @@
 
-#include <midend/Liveness.h>
+#include <midend/Liveness_Benoit.h>
 #include <common/debug.h>
 
 char Liveness::ID = 0;
@@ -190,6 +190,17 @@ bool Liveness::isLiveInBlock(llvm::BasicBlock *pDefBB, llvm::BasicBlock *pQueryB
     addRelevantBackEdges(reachabilityMatrix, queryBBId, defBBId);
 
     return true;
+}
+
+bool Liveness::isLiveInBlock(llvm::Value *pQueryV, llvm::BasicBlock *pQueryBB)
+{
+    if (llvm::isa<llvm::Instruction>(pQueryV))
+    {
+        llvm::BasicBlock *pDefBB = llvm::cast<llvm::Instruction>(pQueryV)->getParent();
+        return isLiveInBlock(pDefBB, pQueryBB);
+    }
+
+    return false;
 }
 
 bool Liveness::isLiveOutBlock(llvm::Value *pQuery, llvm::BasicBlock *pBlock)

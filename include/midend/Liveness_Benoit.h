@@ -42,6 +42,7 @@ public:
 
     bool isLive(llvm::Value *pQuery, llvm::Instruction *pInstNode);
     bool isLiveInBlock(llvm::BasicBlock *pDefBB, llvm::BasicBlock *pQueryBB);
+    bool isLiveInBlock(llvm::Value *pQueryV, llvm::BasicBlock *pQueryBB);
     bool isLiveOutBlock(llvm::Value *pQuery, llvm::BasicBlock *pBlock);
 
     void initializeAdjacencyMatrix(llvm::Function &F);

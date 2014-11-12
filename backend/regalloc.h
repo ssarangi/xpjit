@@ -1,7 +1,7 @@
 #ifndef __REGALLOC__
 #define __REGALLOC__
 
-#include <midend/Liveness.h>
+#include <midend/Liveness_Benoit.h>
 
 #include "common/llvm_warnings_push.h"
 #include <llvm/Pass.h>
