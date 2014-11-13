@@ -42,6 +42,9 @@
     <ClCompile Include="..\midend\LiveRange.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\midend\LoopAnalysis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\midend\ConstantFolder.h">
@@ -75,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\midend\LiveRange.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midend\LoopAnalysis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
