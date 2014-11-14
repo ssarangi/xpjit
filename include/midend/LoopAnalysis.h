@@ -14,6 +14,8 @@
 #include <llvm/IR/Constants.h>
 #include "common/llvm_warnings_pop.h"
 
+#include <queue>
+
 struct NaturalLoopTy
 {
     unsigned int ID;
@@ -41,8 +43,14 @@ public:
 private:
     void findBasicLoopInductionVar(NaturalLoopTy &natural_loop);
     bool isPhiNodeInductionVar(llvm::PHINode *pPhi);
-    void performStrengthReduction(NaturalLoopTy &natural_loop, llvm::SmallVector<llvm::Instruction*, 50> instToRemove);
-    bool doesInstructionUseLoopInductionVar(const llvm::Instruction *pI, const NaturalLoopTy &natural_loop);
+    
+    void performStrengthReduction(
+        NaturalLoopTy &natural_loop,
+        std::queue<llvm::Instruction*>& instMoveOrder,
+        llvm::DenseMap<llvm::Instruction*, llvm::Instruction*>& instMovMap);
+
+    bool doesInstructionUseLoopInductionVar(llvm::Instruction *pI, llvm::DenseMap<llvm::Value*, bool>& induction_var_map);
+    bool notToRemoveInst(llvm::Instruction *pI);
 
 private:
     llvm::DominatorTree *m_pDT;

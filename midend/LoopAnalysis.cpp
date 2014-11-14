@@ -3,10 +3,12 @@
 
 #include "common/llvm_warnings_push.h"
 #include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Verifier.h>
 #include "common/llvm_warnings_pop.h"
 
 #include <stack>
 #include <vector>
+#include <queue>
 
 char LoopAnalysis::ID = 0;
 
@@ -21,6 +23,14 @@ LoopAnalysis *createNewLoopAnalysisPass()
 {
     LoopAnalysis *pL = new LoopAnalysis();
     return pL;
+}
+
+bool LoopAnalysis::notToRemoveInst(llvm::Instruction *pI)
+{
+    if (llvm::isa<llvm::BranchInst>(pI))
+        return true;
+
+    return false;
 }
 
 bool LoopAnalysis::isPhiNodeInductionVar(llvm::PHINode *pPhi)
@@ -65,44 +75,53 @@ void LoopAnalysis::findBasicLoopInductionVar(NaturalLoopTy &natural_loop)
     }
 }
 
-bool LoopAnalysis::doesInstructionUseLoopInductionVar(const llvm::Instruction *pI, const NaturalLoopTy &natural_loop)
+bool LoopAnalysis::doesInstructionUseLoopInductionVar(llvm::Instruction *pI, llvm::DenseMap<llvm::Value*, bool>& induction_var_map)
 {
-    bool presentInPhi = false;
+    g_outputStream() << "\nQuery Instruction: ";
+    pI->print(g_outputStream());
+    g_outputStream.flush();
 
-    int numOps = pI->getNumOperands();
+    if (induction_var_map.find(pI) != induction_var_map.end())
+        return true;
+
+    bool usesInductionVar = false;
+    unsigned int numOps = pI->getNumOperands();
     for (unsigned int i = 0; i < numOps; ++i)
     {
-        llvm::Value *pOp = pI->getOperand(i);
+        if (llvm::Instruction *pOpI = llvm::dyn_cast<llvm::Instruction>(pI->getOperand(i)))
+            usesInductionVar |= doesInstructionUseLoopInductionVar(pOpI, induction_var_map);
 
-        for (llvm::PHINode *pPhi : natural_loop.induction_vars)
-        {
-            if (pOp == pPhi)
-                return true;
-
-            unsigned int numPhiOps = pPhi->getNumIncomingValues();
-            for (unsigned int i = 0; i < numPhiOps; ++i)
-            {
-                if (pOp == pPhi->getIncomingValue(i))
-                    return true;
-            }
-        }
+        if (usesInductionVar)
+            break;
     }
 
-    return false;
+    if (usesInductionVar)
+        induction_var_map[pI] = true;
+
+    return usesInductionVar;
 }
 
-void LoopAnalysis::performStrengthReduction(NaturalLoopTy &natural_loop, llvm::SmallVector<llvm::Instruction*, 50> instToRemove)
+void LoopAnalysis::performStrengthReduction(
+    NaturalLoopTy &natural_loop,
+    std::queue<llvm::Instruction*>& instMoveOrder,
+    llvm::DenseMap<llvm::Instruction*, llvm::Instruction*>& instToMoveBefore)
 {
     g_outputStream() << "Strength Reduction Instruction List: \n";
 
+    llvm::DenseMap<llvm::Value*, bool> induction_var_map;
+
+    for (llvm::Value *pIV : natural_loop.induction_vars)
+        induction_var_map[pIV] = true;
+
     llvm::BasicBlock *pB = *natural_loop.blocks.begin();
     llvm::LLVMContext *pContext = &pB->getContext();
-    llvm::IRBuilder<> builder(*pContext);
+    
+    // llvm::IRBuilder<> builder(*pContext);
     // Loop over all instructions and if they use any of the induction var then 
     // leave it there otherwise move it to the dominator block outside the loop header
     llvm::BasicBlock *pLoopHeader = *natural_loop.blocks.begin();
 
-    llvm::BasicBlock *pLoopHeaderParent = m_pDT->findNearestCommonDominator(pLoopHeader, pLoopHeader);
+    llvm::BasicBlock *pLoopHeaderParent = m_pDT->getNode(pLoopHeader)->getIDom()->getBlock();
 
     for (llvm::BasicBlock *pB : natural_loop.blocks)
     {
@@ -110,17 +129,15 @@ void LoopAnalysis::performStrengthReduction(NaturalLoopTy &natural_loop, llvm::S
             i != e;
             ++i)
         {
-            if (!doesInstructionUseLoopInductionVar(i, natural_loop))
+            if (!doesInstructionUseLoopInductionVar(i, induction_var_map) && !notToRemoveInst(i))
             {
+                g_outputStream() << "\nMoving out of Loop: ";
                 i->print(g_outputStream());
-                g_outputStream() << "\n";
                 g_outputStream.flush();
 
                 llvm::Instruction *pTerminator = pLoopHeaderParent->getTerminator();
-                builder.SetInsertPoint(pTerminator);
-                llvm::Instruction *pClone = i->clone();
-                i->replaceAllUsesWith(pClone);
-                instToRemove.push_back(i);
+                instToMoveBefore[i] = pTerminator;
+                instMoveOrder.push(i);
             }
         }
     }
@@ -275,16 +292,27 @@ bool LoopAnalysis::runOnFunction(llvm::Function &F)
         m_naturalLoops.push_back(natural_loop);
     }
 
-    llvm::SmallVector<llvm::Instruction*, 50> instToRemove;
+    llvm::DenseMap<llvm::Instruction*, llvm::Instruction*> instMoveMap;
+    std::queue<llvm::Instruction*> instMoveOrder;
 
     for (NaturalLoopTy natural_loop : m_naturalLoops)
-        performStrengthReduction(natural_loop, instToRemove);
+        performStrengthReduction(natural_loop, instMoveOrder, instMoveMap);
 
-    for (llvm::Instruction *pI : instToRemove)
-        pI->eraseFromParent();
+    while (!instMoveOrder.empty())
+    {
+        llvm::Instruction *pItoMove = instMoveOrder.front();
+        instMoveOrder.pop();
 
+        llvm::Instruction *pWhereToMove = instMoveMap[pItoMove];
+        pItoMove->moveBefore(pWhereToMove);
+    }
+
+    g_outputStream() << "\n---------------------------------\n";
+    g_outputStream() << "After Strength Reduction:\n";
+    g_outputStream() << "---------------------------------\n";
     F.getParent()->print(g_outputStream(), nullptr);
     g_outputStream.flush();
 
+    llvm::verifyModule(*F.getParent());
     return false;
 }
