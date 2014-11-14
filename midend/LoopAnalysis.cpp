@@ -1,6 +1,10 @@
 #include <midend/LoopAnalysis.h>
 #include <common/debug.h>
 
+#include "common/llvm_warnings_push.h"
+#include <llvm/IR/IRBuilder.h>
+#include "common/llvm_warnings_pop.h"
+
 #include <stack>
 #include <vector>
 
@@ -19,33 +23,40 @@ LoopAnalysis *createNewLoopAnalysisPass()
     return pL;
 }
 
+bool LoopAnalysis::isPhiNodeInductionVar(llvm::PHINode *pPhi)
+{
+    assert(pPhi->getNumIncomingValues() == 2);
+
+    llvm::BasicBlock *pBB1 = pPhi->getIncomingBlock(0);
+    llvm::BasicBlock *pBB2 = pPhi->getIncomingBlock(1);
+    llvm::BasicBlock *pCurrentBB = pPhi->getParent();
+
+    bool isFromDominatorBlock = m_pDT->dominates(pCurrentBB, pBB1) | m_pDT->dominates(pCurrentBB, pBB2);
+    bool isFromDominatedBlock = m_pDT->dominates(pBB1, pCurrentBB) | m_pDT->dominates(pBB2, pCurrentBB);
+
+    return (isFromDominatorBlock & isFromDominatedBlock);
+}
+
 void LoopAnalysis::findBasicLoopInductionVar(NaturalLoopTy &natural_loop)
 {
-    g_outputStream() << "Basic Induction Variables: \n";
+    g_outputStream() << "Induction Variables: \n";
 
-    // Figure out the basic loop induction variable
+    // In SSA form, we can look at the Phi Nodes at loop header. Any variable
+    // whose 1 definition comes from the a dominator block and another one comes
+    // from a block it dominates.
     for (llvm::BasicBlock *pB : natural_loop.blocks)
     {
         for (llvm::BasicBlock::iterator i = pB->begin(), e = pB->end();
             i != e;
             ++i)
         {
-            // Match the pattern v = v op c where c is a constant and op could be a binary op
-            if (llvm::isa<llvm::BinaryOperator>(i))
+            if (llvm::PHINode *pPhi = llvm::dyn_cast<llvm::PHINode>(i))
             {
-                llvm::Value *pOp1 = i->getOperand(0);
-                llvm::Value *pOp2 = i->getOperand(1);
-
-                if (llvm::isa<llvm::ConstantInt>(pOp1) || llvm::isa<llvm::ConstantInt>(pOp2))
+                if (isPhiNodeInductionVar(pPhi))
                 {
-                    LoopInductionVarTriple triple;
-                    triple.pInst = &*i;
-                    triple.pV = llvm::isa<llvm::ConstantInt>(pOp1) ? pOp2 : pOp1;
-                    triple.a = 0;
-                    triple.b = 1;
-                    natural_loop.basic_induction_var.push_back(triple);
+                    natural_loop.induction_vars.push_back(pPhi);
 
-                    i->print(g_outputStream());
+                    pPhi->print(g_outputStream());
                     g_outputStream() << "\n";
                     g_outputStream.flush();
                 }
@@ -54,46 +65,144 @@ void LoopAnalysis::findBasicLoopInductionVar(NaturalLoopTy &natural_loop)
     }
 }
 
-void LoopAnalysis::deriveInductionVar(NaturalLoopTy &natural_loop)
+bool LoopAnalysis::doesInstructionUseLoopInductionVar(const llvm::Instruction *pI, const NaturalLoopTy &natural_loop)
 {
-    g_outputStream() << "Derived Induction Variables: \n";
+    bool presentInPhi = false;
 
-    // Figure out the basic loop induction variable
+    int numOps = pI->getNumOperands();
+    for (unsigned int i = 0; i < numOps; ++i)
+    {
+        llvm::Value *pOp = pI->getOperand(i);
+
+        for (llvm::PHINode *pPhi : natural_loop.induction_vars)
+        {
+            if (pOp == pPhi)
+                return true;
+
+            unsigned int numPhiOps = pPhi->getNumIncomingValues();
+            for (unsigned int i = 0; i < numPhiOps; ++i)
+            {
+                if (pOp == pPhi->getIncomingValue(i))
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+void LoopAnalysis::performStrengthReduction(NaturalLoopTy &natural_loop, llvm::SmallVector<llvm::Instruction*, 50> instToRemove)
+{
+    g_outputStream() << "Strength Reduction Instruction List: \n";
+
+    llvm::BasicBlock *pB = *natural_loop.blocks.begin();
+    llvm::LLVMContext *pContext = &pB->getContext();
+    llvm::IRBuilder<> builder(*pContext);
+    // Loop over all instructions and if they use any of the induction var then 
+    // leave it there otherwise move it to the dominator block outside the loop header
+    llvm::BasicBlock *pLoopHeader = *natural_loop.blocks.begin();
+
+    llvm::BasicBlock *pLoopHeaderParent = m_pDT->findNearestCommonDominator(pLoopHeader, pLoopHeader);
+
     for (llvm::BasicBlock *pB : natural_loop.blocks)
     {
         for (llvm::BasicBlock::iterator i = pB->begin(), e = pB->end();
             i != e;
             ++i)
         {
-            // Match the pattern v = v op c where c is a constant and op could be a binary op
-            if (llvm::isa<llvm::BinaryOperator>(i))
+            if (!doesInstructionUseLoopInductionVar(i, natural_loop))
             {
-                llvm::Value *pOp1 = i->getOperand(0);
-                llvm::Value *pOp2 = i->getOperand(1);
+                i->print(g_outputStream());
+                g_outputStream() << "\n";
+                g_outputStream.flush();
 
-                bool findOp1 = 
-                    std::find(natural_loop.basic_induction_var.begin(), natural_loop.basic_induction_var.end(), pOp1) != natural_loop.basic_induction_var.end();
-
-                bool findOp2 =
-                    std::find(natural_loop.basic_induction_var.begin(), natural_loop.basic_induction_var.end(), pOp2) != natural_loop.basic_induction_var.end();
-
-                if (findOp1 || findOp2)
-                {
-                    LoopInductionVarTriple triple;
-                    triple.pInst = &*i;
-                    triple.pV = llvm::isa<llvm::ConstantInt>(pOp1) ? pOp2 : pOp1;
-                    triple.a = 0;
-                    triple.b = 1;
-                    natural_loop.derived_induction_var.push_back(triple);
-
-                    i->print(g_outputStream());
-                    g_outputStream() << "\n";
-                    g_outputStream.flush();
-                }
+                llvm::Instruction *pTerminator = pLoopHeaderParent->getTerminator();
+                builder.SetInsertPoint(pTerminator);
+                llvm::Instruction *pClone = i->clone();
+                i->replaceAllUsesWith(pClone);
+                instToRemove.push_back(i);
             }
         }
     }
+
+    g_outputStream.flush();
 }
+
+//void LoopAnalysis::findBasicLoopInductionVar(NaturalLoopTy &natural_loop)
+//{
+//    g_outputStream() << "Basic Induction Variables: \n";
+//
+//    // Figure out the basic loop induction variable
+//    for (llvm::BasicBlock *pB : natural_loop.blocks)
+//    {
+//        for (llvm::BasicBlock::iterator i = pB->begin(), e = pB->end();
+//            i != e;
+//            ++i)
+//        {
+//            // Match the pattern v = v op c where c is a constant and op could be a binary op
+//            if (llvm::isa<llvm::BinaryOperator>(i))
+//            {
+//                llvm::Value *pOp1 = i->getOperand(0);
+//                llvm::Value *pOp2 = i->getOperand(1);
+//
+//                if (llvm::isa<llvm::ConstantInt>(pOp1) || llvm::isa<llvm::ConstantInt>(pOp2))
+//                {
+//                    LoopInductionVarTriple triple;
+//                    triple.pInst = &*i;
+//                    triple.pV = llvm::isa<llvm::ConstantInt>(pOp1) ? pOp2 : pOp1;
+//                    triple.a = 0;
+//                    triple.b = 1;
+//                    natural_loop.basic_induction_var.push_back(triple);
+//
+//                    i->print(g_outputStream());
+//                    g_outputStream() << "\n";
+//                    g_outputStream.flush();
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//void LoopAnalysis::deriveInductionVar(NaturalLoopTy &natural_loop)
+//{
+//    g_outputStream() << "Derived Induction Variables: \n";
+//
+//    // Figure out the basic loop induction variable
+//    for (llvm::BasicBlock *pB : natural_loop.blocks)
+//    {
+//        for (llvm::BasicBlock::iterator i = pB->begin(), e = pB->end();
+//            i != e;
+//            ++i)
+//        {
+//            // Match the pattern v = v op c where c is a constant and op could be a binary op
+//            if (llvm::isa<llvm::BinaryOperator>(i))
+//            {
+//                llvm::Value *pOp1 = i->getOperand(0);
+//                llvm::Value *pOp2 = i->getOperand(1);
+//
+//                bool findOp1 = 
+//                    std::find(natural_loop.basic_induction_var.begin(), natural_loop.basic_induction_var.end(), pOp1) != natural_loop.basic_induction_var.end();
+//
+//                bool findOp2 =
+//                    std::find(natural_loop.basic_induction_var.begin(), natural_loop.basic_induction_var.end(), pOp2) != natural_loop.basic_induction_var.end();
+//
+//                if (findOp1 || findOp2)
+//                {
+//                    LoopInductionVarTriple triple;
+//                    triple.pInst = &*i;
+//                    triple.pV = llvm::isa<llvm::ConstantInt>(pOp1) ? pOp2 : pOp1;
+//                    triple.a = 0;
+//                    triple.b = 1;
+//                    natural_loop.derived_induction_var.push_back(triple);
+//
+//                    i->print(g_outputStream());
+//                    g_outputStream() << "\n";
+//                    g_outputStream.flush();
+//                }
+//            }
+//        }
+//    }
+//}
 
 bool LoopAnalysis::runOnFunction(llvm::Function &F)
 {
@@ -118,7 +227,7 @@ bool LoopAnalysis::runOnFunction(llvm::Function &F)
             // A node can dominate itself too
             if (m_pDT->dominates(*succBB, bb))
             {
-                g_outputStream() << "ControlFlow: " << bb->getName().str() << " --> " << (*succBB)->getName().str() << "\n";
+                g_outputStream() << "ControlFlow BackEdges: " << bb->getName().str() << " --> " << (*succBB)->getName().str() << "\n";
                 backedges.emplace_back(bb, *succBB);
             }
         }
@@ -163,11 +272,19 @@ bool LoopAnalysis::runOnFunction(llvm::Function &F)
         }
 
         findBasicLoopInductionVar(natural_loop);
-        deriveInductionVar(natural_loop);
         m_naturalLoops.push_back(natural_loop);
     }
 
+    llvm::SmallVector<llvm::Instruction*, 50> instToRemove;
+
+    for (NaturalLoopTy natural_loop : m_naturalLoops)
+        performStrengthReduction(natural_loop, instToRemove);
+
+    for (llvm::Instruction *pI : instToRemove)
+        pI->eraseFromParent();
+
     F.getParent()->print(g_outputStream(), nullptr);
+    g_outputStream.flush();
 
     return false;
 }

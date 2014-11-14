@@ -1,5 +1,5 @@
 
-/*  A Bison parser, made from e:\github_external\icarus\frontend\grammar\parser.y with Bison version GNU Bison version 1.24
+/*  A Bison parser, made from c:\dev\icarus\frontend\grammar\parser.y with Bison version GNU Bison version 1.24
   */
 
 #define YYBISON 1  /* Identify Bison output.  */
@@ -784,7 +784,7 @@ case 5:
         const std::string& string = yyvsp[-4].string;
         IcErr err = builder->addProtoType(string, getType(yyvsp[-5].integer), NULL);
         if(err != eNoErr)
-            yyerror(errMsg[err]);		
+            yyerror(errMsg[err]);
     ;
     break;}
 case 6:
@@ -814,8 +814,8 @@ case 9:
     ;
     break;}
 case 10:
-{	//we should clear the m_curFunction after this, so that any global decl will not be a part of prev function's symtab
-        builder->endCodeBlock();	
+{   //we should clear the m_curFunction after this, so that any global decl will not be a part of prev function's symtab
+        builder->endCodeBlock();
     ;
     break;}
 case 14:

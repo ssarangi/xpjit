@@ -66,7 +66,7 @@ func_decl: datatype IDENTIFIER '(' arglist ')' ';'
         const std::string& string = $2;
         IcErr err = builder->addProtoType(string, getType($1), NULL);
         if(err != eNoErr)
-            yyerror(errMsg[err]);		
+            yyerror(errMsg[err]);
     }
     ;
     
@@ -99,8 +99,8 @@ func_defn: datatype IDENTIFIER '(' arglist ')' '{'
     }
 
     statement_block '}' 
-    {	//we should clear the m_curFunction after this, so that any global decl will not be a part of prev function's symtab
-        builder->endCodeBlock();	
+    {   //we should clear the m_curFunction after this, so that any global decl will not be a part of prev function's symtab
+        builder->endCodeBlock();
     }
     ;
     
@@ -150,13 +150,13 @@ break_statement: BREAK { $$ = new BreakStatement(); }
     
 declaration: datatype varList ';' { gTrace<<"declaration "; currentType = -1; }
 
-varList: IDENTIFIER	{ builder->addSymbol($1, getType(currentType)); }
+varList: IDENTIFIER { builder->addSymbol($1, getType(currentType)); }
     | varList',' IDENTIFIER { builder->addSymbol($3, getType(currentType)); }
     ;
     
-datatype: INTEGER 	{ gTrace<<"int "; $$ = currentType = Type::IntegerTy; }
-    | FLOAT 	{ gTrace<<"float "; $$ = currentType = Type::FloatTy; }
-    | VOID		{ gTrace<<"void "; $$ = currentType = Type::VoidTy; }
+datatype: INTEGER   { gTrace<<"int "; $$ = currentType = Type::IntegerTy; }
+    | FLOAT     { gTrace<<"float "; $$ = currentType = Type::FloatTy; }
+    | VOID      { gTrace<<"void "; $$ = currentType = Type::VoidTy; }
     ;
     
 assignment: IDENTIFIER '=' expression ';'

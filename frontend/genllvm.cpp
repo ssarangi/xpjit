@@ -6,6 +6,7 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Instructions.h>
+#include <llvm/IR/Verifier.h>
 #include <llvm/ADT/ArrayRef.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/ADT/APInt.h>
@@ -26,7 +27,6 @@ llvm::Value* Constant::genLLVM(GenLLVM* g)
 
 llvm::Value* Variable::genLLVM(GenLLVM* g)
 {
-    //const llvm::Function* curFunc = g->getBuilder().GetInsertPoint()->getParent();
     return g->getBuilder().CreateLoad(g->getNamedValues()[getSymbol().getName()],"");
 }
 
@@ -248,7 +248,7 @@ llvm::Value* Function::genLLVM(GenLLVM* g)
 
 llvm::Value* IcarusModule::genLLVM(GenLLVM* g)
 {
-    std::list<Function*>& funcList = getFunctions();	
+    std::list<Function*>& funcList = getFunctions();
     for(std::list<Function*>::const_iterator funcIter = funcList.begin(); funcIter != funcList.end() ; ++funcIter)
     {
         (*funcIter)->genLLVM(g);
@@ -259,6 +259,7 @@ llvm::Value* IcarusModule::genLLVM(GenLLVM* g)
 void GenLLVM::generateLLVM(IcarusModule &m)
 {
     m.genLLVM(this);
+    llvm::verifyModule(m_module);
 }
 
 GenLLVM::GenLLVM() 

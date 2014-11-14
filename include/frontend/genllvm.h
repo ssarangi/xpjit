@@ -25,7 +25,7 @@ public:
 
 private:
     llvm::IRBuilder<>& m_irBuilder;
-    llvm::Module& m_module;	
+    llvm::Module& m_module;
     std::map<std::string, llvm::Value*> m_namedValues; //to hold the temp allocations in the function
 };
 
