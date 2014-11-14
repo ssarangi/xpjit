@@ -3,14 +3,16 @@ int main()
 	int x;
 	int y;
 	int z;
-	int y;
+	int m;
 
-	int y = 4;
-	int z = 2;
-	
-	for (i = 0; i < n; i++) {
+	y = 4;
+	z = 2;
+	m = 0;
+
+	for (i = 0; i < n; i++)
+	{
 	    x = y + z;
-	    a[i] = 6 * i + x * x;
+	    m = m + 6 * i + x * x;
 	}	
 }
 

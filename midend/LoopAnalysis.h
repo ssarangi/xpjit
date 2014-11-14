@@ -1,2 +1,0 @@
-#ifndef __LOOPANALYSIS__
-#define __LOOPANALYSIS__

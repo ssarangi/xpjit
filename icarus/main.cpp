@@ -80,14 +80,14 @@ int Compile(char *fileName, char *pOutputFileName)
         pIcarusModule = nullptr;
     }
 
-    g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
-    g_outputStream.stream() << "                         Before Optimization                       " << std::endl;
-    g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
+    g_outputStream() << "-------------------------------------------------------------------\n";
+    g_outputStream() << "                         Before Optimization                       \n";
+    g_outputStream() << "-------------------------------------------------------------------\n";
     g_outputStream.flush();
     if (gDebug.isDebuggable())
     {
-        llvmModule.print(g_outputStream.raw_stream(), nullptr);
-        g_outputStream.flush_raw_stream();
+        llvmModule.print(g_outputStream(), nullptr);
+        g_outputStream.flush();
     }
 
     if(gDebug.isOptimizing())
@@ -95,14 +95,14 @@ int Compile(char *fileName, char *pOutputFileName)
         OptimizeIR(llvmModule);
     }
     
-    g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
-    g_outputStream.stream() << "                          After Optimization                       " << std::endl;
-    g_outputStream.stream() << "-------------------------------------------------------------------" << std::endl;
+    g_outputStream() << "-------------------------------------------------------------------\n";
+    g_outputStream() << "                          After Optimization                       \n";
+    g_outputStream() << "-------------------------------------------------------------------\n";
     g_outputStream.flush();
     if(gDebug.isDebuggable())
     {
-        llvmModule.print(g_outputStream.raw_stream(), nullptr);
-        g_outputStream.flush_raw_stream();
+        llvmModule.print(g_outputStream(), nullptr);
+        g_outputStream.flush();
     }
 
     std::string moduleStr;

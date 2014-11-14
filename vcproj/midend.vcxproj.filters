@@ -80,7 +80,7 @@
     <ClInclude Include="..\include\midend\LiveRange.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\midend\LoopAnalysis.h">
+    <ClInclude Include="..\include\midend\LoopAnalysis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

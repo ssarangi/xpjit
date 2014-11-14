@@ -81,10 +81,7 @@ void OutputStream::flush()
     }
 
     m_stringStream.str(std::string());
-}
 
-void OutputStream::flush_raw_stream()
-{
     for (auto iter : m_subscribers)
     {
         std::stringstream stream(m_pRawStringOStream->str());

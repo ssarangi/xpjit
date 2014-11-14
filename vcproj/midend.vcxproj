@@ -102,11 +102,11 @@
     <ClInclude Include="..\include\midend\ITransform.h" />
     <ClInclude Include="..\include\midend\Liveness_Benoit.h" />
     <ClInclude Include="..\include\midend\LiveRange.h" />
+    <ClInclude Include="..\include\midend\LoopAnalysis.h" />
     <ClInclude Include="..\include\midend\optimizeIR.h" />
     <ClInclude Include="..\include\midend\PassManager.h" />
     <ClInclude Include="..\midend\Analysis.h" />
     <ClInclude Include="..\midend\LivenessHangs.h" />
-    <ClInclude Include="..\midend\LoopAnalysis.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\common\common.vcxproj">

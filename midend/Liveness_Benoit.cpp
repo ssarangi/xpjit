@@ -56,7 +56,7 @@ void printMatrix(AdjMatrixTy& matrix)
 
         currLine += "\n";
 
-        g_outputStream.stream() << currLine;
+        g_outputStream() << currLine;
     }
 
     g_outputStream.flush();
@@ -237,17 +237,17 @@ bool Liveness::runOnFunction(llvm::Function &F)
 
     computeWarshallTransitiveClosure(F);
 
-    g_outputStream.stream() << "-------------------------------------- Adjacency Matrix ------------------------------------\n";
+    g_outputStream() << "-------------------------------------- Adjacency Matrix ------------------------------------\n";
     g_outputStream.flush();
 
     printMatrix(m_adjacencyMatrix);
 
-    g_outputStream.stream() << "-------------------------------------- Transitive Closure ------------------------------------\n";
+    g_outputStream() << "-------------------------------------- Transitive Closure ------------------------------------\n";
     g_outputStream.flush();
 
     printMatrix(m_transitiveClosure);
 
-    g_outputStream.stream() << "-------------------------------------- Back Edges ------------------------------------\n";
+    g_outputStream() << "-------------------------------------- Back Edges ------------------------------------\n";
     g_outputStream.flush();
 
     printMatrix(m_backEdgesMatrix);

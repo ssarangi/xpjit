@@ -5,6 +5,7 @@
 #include "midend/DominanceFrontier.h"
 #include <midend/Liveness_Benoit.h>
 #include <midend/LiveRange.h>
+#include <midend/LoopAnalysis.h>
 #include <common/llvm_printer.h>
 
 #include <common/llvm_warnings_push.h>
@@ -15,8 +16,6 @@
 
 void OptimizeIR(llvm::Module& llvmModule)
 {
-    llvm::PassManager* pPassMgr;
-
     llvm::PassManager passMgr;
 
     PrintCFG *pCFG = new PrintCFG();
@@ -30,6 +29,7 @@ void OptimizeIR(llvm::Module& llvmModule)
     //Optimization Passes
     passMgr.add(new ConstantFolder());
     passMgr.add(llvm::createPromoteMemoryToRegisterPass());
-    passMgr.add(new LiveRange());
+    passMgr.add(createNewLoopAnalysisPass());
+    // passMgr.add(createNewLiveRangePass());
     passMgr.run(llvmModule);
 }

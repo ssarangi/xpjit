@@ -21,6 +21,15 @@ using namespace std;
 }
 #endif
 
+#define ADD_HEADER(txt) \
+{                                                                                                                  \
+    g_outputStream() << "-------------------------------------------------------------------\n";            \
+    g_outputStream() << "                         " << txt << "                        \n";                 \
+    g_outputStream() << "-------------------------------------------------------------------\n";            \
+    g_outputStream.flush();                                                                                              \
+}
+
+
 //Singleton debug class
 class Trace
 {
@@ -107,10 +116,8 @@ public:
     void addOutputStreamSubscriber(OutputStreamSubscriber* pSubscriber);
     void removeOutputStreamSubscriber(OutputStreamSubscriber* pSubscriber);
 
+    llvm::raw_ostream& operator()() { return *m_pRawStringOStream; }
     void flush();
-    void flush_raw_stream();
-    std::stringstream& stream() { return m_stringStream; }
-    llvm::raw_ostream& raw_stream() { return *m_pRawStringOStream; }
 
 private:
     std::vector<OutputStreamSubscriber *> m_subscribers;

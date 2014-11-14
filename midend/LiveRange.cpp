@@ -12,7 +12,7 @@ char LiveRange::ID = 0;
 //  - a flag saying this is not an analysis pass
 llvm::RegisterPass<LiveRange> T("LiveRangeCustomAnalysis", "Live Range Custom analysis", false, true);
 
-LiveRange *createNewLivenessPass()
+LiveRange *createNewLiveRangePass()
 {
     LiveRange *pL = new LiveRange();
     return pL;
@@ -45,7 +45,7 @@ void LiveRange::unionLiveInSetsOfSuccessors(llvm::BasicBlock *pBB)
     {
         if (m_BBLiveIns.find(*si) == m_BBLiveIns.end())
         {
-            g_outputStream.stream() << "Successor of " << pBB->getName().str() << " not processed: " << si->getName().str() << std::endl;
+            g_outputStream() << "Successor of " << pBB->getName().str() << " not processed: " << si->getName().str() << "\n";
             g_outputStream.flush();
             assert(0 && "Expected to find Basic Block to be processed before predecessor");
         }
@@ -137,7 +137,8 @@ bool LiveRange::runOnFunction(llvm::Function &F)
         if b is loop header then
             loopEnd = last block of the loop starting at b
             for each opd in live do
-                intervals[opd].addRange(b.from, loopEnd.to)        */
+                intervals[opd].addRange(b.from, loopEnd.to)
+        */
     }
 
     return false;
@@ -162,8 +163,8 @@ void LiveRange::visitInstruction(llvm::Instruction *pI)
         opi != ope;
         ++opi)
     {
-        m_intervals[opi].addBB(bbID);
-        m_intervals[opi].addInstructionOffset(instruction_offset);
+        //m_intervals[opi].addBB(bbID);
+        //m_intervals[opi].addInstructionOffset(instruction_offset);
     }
 }
 
