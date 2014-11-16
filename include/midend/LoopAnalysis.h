@@ -21,6 +21,7 @@ struct NaturalLoopTy
     unsigned int ID;
     std::set<llvm::BasicBlock*> blocks;
     std::vector<llvm::PHINode*> induction_vars;
+    llvm::SmallVector<NaturalLoopTy*, 10> inner_loops;
 };
 
 class LoopAnalysis : public llvm::FunctionPass
@@ -41,11 +42,11 @@ public:
     };
 
 private:
-    void findBasicLoopInductionVar(NaturalLoopTy &natural_loop);
+    void findBasicLoopInductionVar(NaturalLoopTy *pNaturalLoop);
     bool isPhiNodeInductionVar(llvm::PHINode *pPhi);
     
     void performStrengthReduction(
-        NaturalLoopTy &natural_loop,
+        NaturalLoopTy *pNaturalLoop,
         std::queue<llvm::Instruction*>& instMoveOrder,
         llvm::DenseMap<llvm::Instruction*, llvm::Instruction*>& instMovMap);
 
@@ -54,7 +55,7 @@ private:
 
 private:
     llvm::DominatorTree *m_pDT;
-    llvm::SmallVector<NaturalLoopTy, 10> m_naturalLoops;
+    llvm::SmallVector<NaturalLoopTy*, 10> m_naturalLoops;
 };
 
 LoopAnalysis *createNewLoopAnalysisPass();

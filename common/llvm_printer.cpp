@@ -54,5 +54,6 @@ bool PrintCFG::runOnFunction(llvm::Function &F)
         visitBasicBlock(*BB);
 
     m_fileStream << "}\n";
+    m_fileStream.close();
     return false;
 }
