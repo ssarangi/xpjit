@@ -5,7 +5,7 @@
 #include "midend/DominanceFrontier.h"
 #include <midend/Liveness_Benoit.h>
 #include <midend/LiveRange.h>
-#include <midend/LoopAnalysis.h>
+#include "LICM.h"
 #include <common/llvm_printer.h>
 
 #include <common/llvm_warnings_push.h>
@@ -29,7 +29,7 @@ void OptimizeIR(llvm::Module& llvmModule)
     //Optimization Passes
     passMgr.add(new ConstantFolder());
     passMgr.add(llvm::createPromoteMemoryToRegisterPass());
-    passMgr.add(createNewLoopAnalysisPass());
+    passMgr.add(createNewLoopInvariantCodeMotionPass());
     // passMgr.add(createNewLiveRangePass());
     passMgr.run(llvmModule);
 }

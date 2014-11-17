@@ -45,6 +45,9 @@
     <ClCompile Include="..\midend\LoopAnalysis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\midend\LICM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\midend\ConstantFolder.h">
@@ -81,6 +84,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\midend\LoopAnalysis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midend\LICM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

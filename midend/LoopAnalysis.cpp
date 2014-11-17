@@ -4,6 +4,7 @@
 #include "common/llvm_warnings_push.h"
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/ADT/SCCIterator.h>
+#include <llvm/ADT/PostOrderIterator.h>
 #include <llvm/IR/Verifier.h>
 #include "common/llvm_warnings_pop.h"
 
@@ -24,14 +25,6 @@ LoopAnalysis *createNewLoopAnalysisPass()
 {
     LoopAnalysis *pL = new LoopAnalysis();
     return pL;
-}
-
-bool LoopAnalysis::notToRemoveInst(llvm::Instruction *pI)
-{
-    if (llvm::isa<llvm::BranchInst>(pI))
-        return true;
-
-    return false;
 }
 
 bool LoopAnalysis::isPhiNodeInductionVar(llvm::PHINode *pPhi)
@@ -55,7 +48,27 @@ void LoopAnalysis::findBasicLoopInductionVar(NaturalLoopTy *pNaturalLoop)
     // In SSA form, we can look at the Phi Nodes at loop header. Any variable
     // whose 1 definition comes from the a dominator block and another one comes
     // from a block it dominates.
-    for (llvm::BasicBlock *pB : pNaturalLoop->blocks)
+    //for (llvm::BasicBlock *pB : pNaturalLoop->blocks)
+    //{
+    //    for (llvm::BasicBlock::iterator i = pB->begin(), e = pB->end();
+    //        i != e;
+    //        ++i)
+    //    {
+    //        if (llvm::PHINode *pPhi = llvm::dyn_cast<llvm::PHINode>(i))
+    //        {
+    //            if (isPhiNodeInductionVar(pPhi))
+    //            {
+    //                pNaturalLoop->induction_vars.push_back(pPhi);
+
+    //                pPhi->print(g_outputStream());
+    //                g_outputStream() << "\n";
+    //                g_outputStream.flush();
+    //            }
+    //        }
+    //    }
+    //}
+
+    llvm::BasicBlock *pB = pNaturalLoop->pHeader;
     {
         for (llvm::BasicBlock::iterator i = pB->begin(), e = pB->end();
             i != e;
@@ -65,7 +78,7 @@ void LoopAnalysis::findBasicLoopInductionVar(NaturalLoopTy *pNaturalLoop)
             {
                 if (isPhiNodeInductionVar(pPhi))
                 {
-                    pNaturalLoop->induction_vars.push_back(pPhi);
+                    pNaturalLoop->induction_vars.insert(pPhi);
 
                     pPhi->print(g_outputStream());
                     g_outputStream() << "\n";
@@ -76,151 +89,35 @@ void LoopAnalysis::findBasicLoopInductionVar(NaturalLoopTy *pNaturalLoop)
     }
 }
 
-bool LoopAnalysis::doesInstructionUseLoopInductionVar(llvm::Instruction *pI, llvm::DenseMap<llvm::Value*, bool>& induction_var_map)
+void LoopAnalysis::removeInnerLoopNodeDFS(NaturalLoopTy *pLoop, NaturalLoopTy *pParent)
 {
-    g_outputStream() << "\nQuery Instruction: ";
-    pI->print(g_outputStream());
-    g_outputStream.flush();
+    // If there are no inner loops then recursively delete from parent
+    if (pLoop->inner_loops.size() == 0)
+        pLoop->pParent = pParent;
 
-    if (induction_var_map.find(pI) != induction_var_map.end())
-        return true;
+    std::set<NaturalLoopTy*> loopsToRemove;
 
-    bool usesInductionVar = false;
-    unsigned int numOps = pI->getNumOperands();
-    for (unsigned int i = 0; i < numOps; ++i)
+    for (NaturalLoopTy *pInnerLoop : pLoop->inner_loops)
     {
-        if (llvm::Instruction *pOpI = llvm::dyn_cast<llvm::Instruction>(pI->getOperand(i)))
-            usesInductionVar |= doesInstructionUseLoopInductionVar(pOpI, induction_var_map);
-
-        if (usesInductionVar)
-            break;
+        // Run the DFS only if the parent hasn't been found. If the node has no inner loops then wait till all the other nodes finish to see
+        // if it belongs to this node or not.
+        if (pInnerLoop->pParent == nullptr && pInnerLoop->inner_loops.size() > 0)
+            removeInnerLoopNodeDFS(pInnerLoop, pLoop);
     }
 
-    if (usesInductionVar)
-        induction_var_map[pI] = true;
-
-    return usesInductionVar;
-}
-
-void LoopAnalysis::performStrengthReduction(
-    NaturalLoopTy *pNaturalLoop,
-    std::queue<llvm::Instruction*>& instMoveOrder,
-    llvm::DenseMap<llvm::Instruction*, llvm::Instruction*>& instToMoveBefore)
-{
-    g_outputStream() << "Strength Reduction Instruction List: \n";
-
-    llvm::DenseMap<llvm::Value*, bool> induction_var_map;
-
-    for (llvm::Value *pIV : pNaturalLoop->induction_vars)
-        induction_var_map[pIV] = true;
-
-    llvm::BasicBlock *pB = *pNaturalLoop->blocks.begin();
-    llvm::LLVMContext *pContext = &pB->getContext();
-    
-    // llvm::IRBuilder<> builder(*pContext);
-    // Loop over all instructions and if they use any of the induction var then 
-    // leave it there otherwise move it to the dominator block outside the loop header
-    llvm::BasicBlock *pLoopHeader = *pNaturalLoop->blocks.begin();
-
-    llvm::BasicBlock *pLoopHeaderParent = m_pDT->getNode(pLoopHeader)->getIDom()->getBlock();
-
-    for (llvm::BasicBlock *pB : pNaturalLoop->blocks)
+    for (NaturalLoopTy *pInnerLoop : pLoop->inner_loops)
     {
-        for (llvm::BasicBlock::iterator i = pB->begin(), e = pB->end();
-            i != e;
-            ++i)
-        {
-            if (!doesInstructionUseLoopInductionVar(i, induction_var_map) && !notToRemoveInst(i))
-            {
-                g_outputStream() << "\nMoving out of Loop: ";
-                i->print(g_outputStream());
-                g_outputStream.flush();
-
-                llvm::Instruction *pTerminator = pLoopHeaderParent->getTerminator();
-                instToMoveBefore[i] = pTerminator;
-                instMoveOrder.push(i);
-            }
-        }
+        // If the parent has been found and correctly marked, then mark this loop to be removed.
+        if (pInnerLoop->pParent && pInnerLoop->pParent != pLoop)
+            loopsToRemove.insert(pInnerLoop);
     }
 
-    g_outputStream.flush();
-}
+    for (NaturalLoopTy *pTempLoop : loopsToRemove)
+        pLoop->inner_loops.erase(pTempLoop);
 
-//void LoopAnalysis::findBasicLoopInductionVar(NaturalLoopTy &natural_loop)
-//{
-//    g_outputStream() << "Basic Induction Variables: \n";
-//
-//    // Figure out the basic loop induction variable
-//    for (llvm::BasicBlock *pB : natural_loop.blocks)
-//    {
-//        for (llvm::BasicBlock::iterator i = pB->begin(), e = pB->end();
-//            i != e;
-//            ++i)
-//        {
-//            // Match the pattern v = v op c where c is a constant and op could be a binary op
-//            if (llvm::isa<llvm::BinaryOperator>(i))
-//            {
-//                llvm::Value *pOp1 = i->getOperand(0);
-//                llvm::Value *pOp2 = i->getOperand(1);
-//
-//                if (llvm::isa<llvm::ConstantInt>(pOp1) || llvm::isa<llvm::ConstantInt>(pOp2))
-//                {
-//                    LoopInductionVarTriple triple;
-//                    triple.pInst = &*i;
-//                    triple.pV = llvm::isa<llvm::ConstantInt>(pOp1) ? pOp2 : pOp1;
-//                    triple.a = 0;
-//                    triple.b = 1;
-//                    natural_loop.basic_induction_var.push_back(triple);
-//
-//                    i->print(g_outputStream());
-//                    g_outputStream() << "\n";
-//                    g_outputStream.flush();
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//void LoopAnalysis::deriveInductionVar(NaturalLoopTy &natural_loop)
-//{
-//    g_outputStream() << "Derived Induction Variables: \n";
-//
-//    // Figure out the basic loop induction variable
-//    for (llvm::BasicBlock *pB : natural_loop.blocks)
-//    {
-//        for (llvm::BasicBlock::iterator i = pB->begin(), e = pB->end();
-//            i != e;
-//            ++i)
-//        {
-//            // Match the pattern v = v op c where c is a constant and op could be a binary op
-//            if (llvm::isa<llvm::BinaryOperator>(i))
-//            {
-//                llvm::Value *pOp1 = i->getOperand(0);
-//                llvm::Value *pOp2 = i->getOperand(1);
-//
-//                bool findOp1 = 
-//                    std::find(natural_loop.basic_induction_var.begin(), natural_loop.basic_induction_var.end(), pOp1) != natural_loop.basic_induction_var.end();
-//
-//                bool findOp2 =
-//                    std::find(natural_loop.basic_induction_var.begin(), natural_loop.basic_induction_var.end(), pOp2) != natural_loop.basic_induction_var.end();
-//
-//                if (findOp1 || findOp2)
-//                {
-//                    LoopInductionVarTriple triple;
-//                    triple.pInst = &*i;
-//                    triple.pV = llvm::isa<llvm::ConstantInt>(pOp1) ? pOp2 : pOp1;
-//                    triple.a = 0;
-//                    triple.b = 1;
-//                    natural_loop.derived_induction_var.push_back(triple);
-//
-//                    i->print(g_outputStream());
-//                    g_outputStream() << "\n";
-//                    g_outputStream.flush();
-//                }
-//            }
-//        }
-//    }
-//}
+    for (NaturalLoopTy *pInnerLoop : pLoop->inner_loops)
+        pInnerLoop->pParent = pLoop;
+}
 
 bool LoopAnalysis::runOnFunction(llvm::Function &F)
 {
@@ -230,9 +127,12 @@ bool LoopAnalysis::runOnFunction(llvm::Function &F)
 
     m_pDT = &getAnalysis<llvm::DominatorTreeWrapperPass>().getDomTree();
 
-    std::vector<std::pair<llvm::BasicBlock*, llvm::BasicBlock*>> backedges;
+    llvm::PostDominatorTree *pPDT = &getAnalysis<llvm::PostDominatorTree>();
 
-    // Now iterate through the basic blocks from the function
+    // Associate the loops to their outer loops. Currently this is an O(n^2) algorithm till I figure out a better way.
+    unsigned int loopID = 0;
+    std::set<NaturalLoopTy*> natural_loops_detected;
+
     for (llvm::Function::iterator bb = F.begin(), be = F.end();
         bb != be;
         ++bb)
@@ -242,104 +142,85 @@ bool LoopAnalysis::runOnFunction(llvm::Function &F)
             succBB != succBBE;
             ++succBB)
         {
+            // If the Basic Block loops on itself
+            llvm::BasicBlock *pTarget = *succBB;
+            llvm::BasicBlock *pSrc = bb;
+
             // A node can dominate itself too
-            if (m_pDT->dominates(*succBB, bb))
+            if (m_pDT->dominates(pTarget, pSrc))
             {
-                g_outputStream() << "ControlFlow BackEdges: " << bb->getName().str() << " --> " << (*succBB)->getName().str() << "\n";
-                backedges.emplace_back(bb, *succBB);
+                g_outputStream() << "ControlFlow BackEdges: " << pSrc->getName().str() << " --> " << (pTarget)->getName().str() << "\n";
+
+                NaturalLoopTy *pNaturalLoop = new NaturalLoopTy();
+                pNaturalLoop->ID = loopID++;
+                pNaturalLoop->pHeader = pTarget;
+                pNaturalLoop->pExit = pSrc;
+                pNaturalLoop->blocks.insert(pTarget);
+                pNaturalLoop->blocks.insert(pSrc);
+
+                natural_loops_detected.insert(pNaturalLoop);
+
+                if (pTarget != pSrc)
+                {
+                    std::stack<llvm::BasicBlock*> bb_visited;
+                    bb_visited.push(pSrc);
+
+                    while (!bb_visited.empty())
+                    {
+                        llvm::BasicBlock *pBB = bb_visited.top();
+                        bb_visited.pop();
+
+                        for (llvm::pred_iterator pi = llvm::pred_begin(pBB), pe = llvm::pred_end(pBB);
+                            pi != pe;
+                            ++pi)
+                        {
+                            if (*pi != pBB && pTarget != pBB && !pNaturalLoop->blocks.count(*pi))
+                            {
+                                pNaturalLoop->blocks.insert(*pi);
+                                bb_visited.push(*pi);
+
+                                g_outputStream() << "\nInserted Block: " << (*pi)->getName() << "\n";
+                                g_outputStream.flush();
+                            }
+                        }
+                    }
+                }
+
+                findBasicLoopInductionVar(pNaturalLoop);
             }
         }
     }
 
-    g_outputStream.flush();
+    llvm::SmallVector<NaturalLoopTy*, 5> loops_to_remove_from_outermost;
 
-    std::stack<NaturalLoopTy*> loopstack;
-
-    // Now that we have the back edges figure out all the BB's involved in the loop i.e. figure out the natural loop
-    unsigned int loopID = 0;
-    for (std::pair<llvm::BasicBlock*, llvm::BasicBlock*> srctarget_pair : backedges)
+    // Now associate inner loops with outer loops if present.
+    for (NaturalLoopTy *pLoop : natural_loops_detected)
     {
-        llvm::BasicBlock *pSrc = srctarget_pair.first;
-        llvm::BasicBlock *pTarget = srctarget_pair.second;
-
-        NaturalLoopTy *pNaturalLoop = new NaturalLoopTy();
-
-        pNaturalLoop->ID = loopID++;
-        pNaturalLoop->blocks.insert(pSrc);
-        pNaturalLoop->blocks.insert(pTarget);
-
-        // If the Basic Block loops on itself
-        if (pSrc != pTarget)
+        for (NaturalLoopTy *pCheckLoop : natural_loops_detected)
         {
-            std::stack<llvm::BasicBlock*> bb_visited;
-            bb_visited.push(pSrc);
-
-            while (!bb_visited.empty())
+            if (pLoop != pCheckLoop)
             {
-                llvm::BasicBlock *pBB = bb_visited.top();
-                bb_visited.pop();
-
-                for (llvm::pred_iterator pi = llvm::pred_begin(pBB), pe = llvm::pred_end(pBB);
-                    pi != pe;
-                    ++pi)
+                // The loop header should dominate the loop header of inner loop and the loop exit should post dominate the loop exit of
+                // inner loop
+                if (m_pDT->dominates(pLoop->pHeader, pCheckLoop->pHeader) && pPDT->dominates(pLoop->pExit, pCheckLoop->pExit))
                 {
-                    pNaturalLoop->blocks.insert(*pi);
-
-                    if (*pi != pBB && pTarget != pBB && !pNaturalLoop->blocks.count(*pi))
-                        bb_visited.push(*pi);
+                    // Check loop is an inner loop to pLoop. Do not SET PARENT here. It could be wrong due to order of iteration. 
+                    // A DFS algorithm is used to compute that.
+                    pLoop->inner_loops.insert(pCheckLoop);
+                    loops_to_remove_from_outermost.push_back(pCheckLoop);
                 }
             }
         }
-
-        findBasicLoopInductionVar(pNaturalLoop);
-        m_naturalLoops.push_back(pNaturalLoop);
     }
 
-    llvm::DenseMap<llvm::Instruction*, llvm::Instruction*> instMoveMap;
-    std::queue<llvm::Instruction*> instMoveOrder;
+    for (NaturalLoopTy *pRemoveLoop : loops_to_remove_from_outermost)
+        natural_loops_detected.erase(pRemoveLoop);
 
-    for (NaturalLoopTy *pNaturalLoop : m_naturalLoops)
-        performStrengthReduction(pNaturalLoop, instMoveOrder, instMoveMap);
+    // Now do a DFS of the tree structure created to remove some of the innermost loops from the outer loops. for example if Loop 1 --> contains Loop 2 --> contains Loop 3
+    // Then Loop 3 will appear both in the list of Loop 2 & Loop 1. We have to remove from Loop 1.
+    for (NaturalLoopTy *pLoop : natural_loops_detected)
+        removeInnerLoopNodeDFS(pLoop, nullptr);
 
-    while (!instMoveOrder.empty())
-    {
-        llvm::Instruction *pItoMove = instMoveOrder.front();
-        instMoveOrder.pop();
-
-        llvm::Instruction *pWhereToMove = instMoveMap[pItoMove];
-        pItoMove->moveBefore(pWhereToMove);
-    }
-
-    g_outputStream() << "\n---------------------------------\n";
-    g_outputStream() << "After Strength Reduction:\n";
-    g_outputStream() << "---------------------------------\n";
-    F.getParent()->print(g_outputStream(), nullptr);
-    g_outputStream.flush();
-
-    // Use LLVM's Strongly Connected Components (SCCs) iterator to produce
-    // a reverse topological sort of SCCs.
-    g_outputStream() << "SCCs for " << F.getName() << " in post-order:\n";
-    for (llvm::scc_iterator<llvm::Function *> I = scc_begin(&F),
-        IE = scc_end(&F);
-        I != IE; ++I)
-    {
-        // Obtain the vector of BBs in this SCC and print it out.
-        const std::vector<llvm::BasicBlock *> &SCCBBs = *I;
-        g_outputStream() << "  SCC: ";
-        for (std::vector<llvm::BasicBlock *>::const_iterator BBI = SCCBBs.begin(),
-            BBIE = SCCBBs.end();
-            BBI != BBIE; ++BBI)
-        {
-            g_outputStream() << (*BBI)->getName() << "  ";
-        }
-        g_outputStream() << "\n";
-    }
-
-    g_outputStream.flush();
-
-    llvm::BasicBlock *pBB;
-    for (llvm::BasicBlock::reverse_iterator ir = pBB->rbegin())
-
-    llvm::verifyModule(*F.getParent());
+    m_naturalLoops = natural_loops_detected;
     return false;
 }

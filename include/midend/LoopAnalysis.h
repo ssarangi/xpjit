@@ -11,17 +11,29 @@
 #include <llvm/ADT/SparseSet.h>
 #include <llvm/IR/CFG.h>
 #include <llvm/IR/Dominators.h>
+#include <llvm/Analysis/PostDominators.h>
 #include <llvm/IR/Constants.h>
+#include <llvm/PassRegistry.h>
 #include "common/llvm_warnings_pop.h"
 
 #include <queue>
 
 struct NaturalLoopTy
 {
+    NaturalLoopTy() {}
+
     unsigned int ID;
+    llvm::BasicBlock *pHeader = nullptr;
+    llvm::BasicBlock *pExit = nullptr;
     std::set<llvm::BasicBlock*> blocks;
-    std::vector<llvm::PHINode*> induction_vars;
-    llvm::SmallVector<NaturalLoopTy*, 10> inner_loops;
+    std::set<llvm::Instruction*> induction_vars;
+    std::set<NaturalLoopTy*> inner_loops;
+    NaturalLoopTy *pParent = nullptr;
+
+    bool operator=(const NaturalLoopTy &nloop)
+    {
+        return ((pHeader == nloop.pHeader) & (pExit == nloop.pExit));
+    }
 };
 
 class LoopAnalysis : public llvm::FunctionPass
@@ -31,31 +43,38 @@ public:
     LoopAnalysis()
         : llvm::FunctionPass(ID)
         , m_pDT(nullptr)
-    {}
+    {
+        llvm::initializePostDominatorTreePass(*llvm::PassRegistry::getPassRegistry());
+    }
 
     virtual bool runOnFunction(llvm::Function &F);
 
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
     {
         AU.addRequired<llvm::DominatorTreeWrapperPass>();
+        AU.addRequired<llvm::PostDominatorTree>();
         AU.setPreservesAll();
     };
 
+    unsigned int getNumOuterLoops() const { return m_naturalLoops.size(); }
+    std::set<NaturalLoopTy*>::const_iterator begin()
+    {
+        return m_naturalLoops.cbegin();
+    }
+
+    std::set<NaturalLoopTy*>::const_iterator end()
+    {
+        return m_naturalLoops.cend();
+    }
+
 private:
+    void removeInnerLoopNodeDFS(NaturalLoopTy *pLoop, NaturalLoopTy *pParent);
     void findBasicLoopInductionVar(NaturalLoopTy *pNaturalLoop);
     bool isPhiNodeInductionVar(llvm::PHINode *pPhi);
-    
-    void performStrengthReduction(
-        NaturalLoopTy *pNaturalLoop,
-        std::queue<llvm::Instruction*>& instMoveOrder,
-        llvm::DenseMap<llvm::Instruction*, llvm::Instruction*>& instMovMap);
-
-    bool doesInstructionUseLoopInductionVar(llvm::Instruction *pI, llvm::DenseMap<llvm::Value*, bool>& induction_var_map);
-    bool notToRemoveInst(llvm::Instruction *pI);
 
 private:
     llvm::DominatorTree *m_pDT;
-    llvm::SmallVector<NaturalLoopTy*, 10> m_naturalLoops;
+    std::set<NaturalLoopTy*> m_naturalLoops;
 };
 
 LoopAnalysis *createNewLoopAnalysisPass();

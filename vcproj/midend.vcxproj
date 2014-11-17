@@ -87,6 +87,7 @@
     <ClCompile Include="..\midend\ConstantFolder.cpp" />
     <ClCompile Include="..\midend\DominanceFrontier.cpp" />
     <ClCompile Include="..\midend\DominanceTreeConstructor.cpp" />
+    <ClCompile Include="..\midend\LICM.cpp" />
     <ClCompile Include="..\midend\Liveness_Benoit.cpp" />
     <ClCompile Include="..\midend\LivenessHangs.cpp" />
     <ClCompile Include="..\midend\LiveRange.cpp" />
@@ -106,6 +107,7 @@
     <ClInclude Include="..\include\midend\optimizeIR.h" />
     <ClInclude Include="..\include\midend\PassManager.h" />
     <ClInclude Include="..\midend\Analysis.h" />
+    <ClInclude Include="..\midend\LICM.h" />
     <ClInclude Include="..\midend\LivenessHangs.h" />
   </ItemGroup>
   <ItemGroup>
