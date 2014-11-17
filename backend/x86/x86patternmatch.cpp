@@ -6,35 +6,35 @@ char X86PatternMatch::ID = 0;
 static llvm::RegisterPass<X86PatternMatch>
 MPM("X86PatternMatch", "Pattern Matching for X86", true, true);
 
-bool instHasPhiUse(llvm::Instruction *pI)
-{
-    for (auto UI = pI->use_begin(), UE = pI->use_end(); UI != UE; ++UI)
-    {
-        
-        if (llvm::isa<llvm::PHINode>(llvm::cast<llvm::Instruction>(*UI)))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool instHasSideEffects(llvm::Instruction *pI)
-{
-    if (pI->mayWriteToMemory() || llvm::isa<llvm::TerminatorInst>(pI))
-        return true;
-
-    return false;
-}
-
-bool instIsDbgInst(llvm::Instruction *pI)
-{
-    if (llvm::isa<llvm::DbgInfoIntrinsic>(pI))
-        return true;
-
-    return false;
-}
+//bool instHasPhiUse(llvm::Instruction *pI)
+//{
+//    for (auto UI = pI->use_begin(), UE = pI->use_end(); UI != UE; ++UI)
+//    {
+//        
+//        if (llvm::isa<llvm::PHINode>(llvm::cast<llvm::Instruction>(*UI)))
+//        {
+//            return true;
+//        }
+//    }
+//
+//    return false;
+//}
+//
+//bool instHasSideEffects(llvm::Instruction *pI)
+//{
+//    if (pI->mayWriteToMemory() || llvm::isa<llvm::TerminatorInst>(pI))
+//        return true;
+//
+//    return false;
+//}
+//
+//bool instIsDbgInst(llvm::Instruction *pI)
+//{
+//    if (llvm::isa<llvm::DbgInfoIntrinsic>(pI))
+//        return true;
+//
+//    return false;
+//}
 
 void X86PatternMatch::markAsUsed(llvm::Instruction *pI)
 {
