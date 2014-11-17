@@ -66,18 +66,32 @@ enum MIPS_SYSCALLS
     EXIT_WITH_RETVAL = 17,
 };
 
-extern BackendRegister A0;
-extern BackendRegister T1;
-extern BackendRegister FP;
-extern BackendRegister SP;
-extern BackendRegister V0;
-extern BackendRegister RA;
+// General Registers
+extern BackendRegister EAX;
+extern BackendRegister EBX;
+extern BackendRegister ECX;
+extern BackendRegister EDX;
 
-class MipsInstSet
+// Segment Registers
+extern BackendRegister CS;
+extern BackendRegister DS;
+extern BackendRegister ES;
+extern BackendRegister FS;
+extern BackendRegister GS;
+extern BackendRegister SS;
+
+// Index and pointers
+extern BackendRegister ESI;
+extern BackendRegister EDI;
+extern BackendRegister EBP;
+extern BackendRegister EIP;
+extern BackendRegister ESP;
+
+class X86InstSet
 {
 public:
-    MipsInstSet() {}
-    ~MipsInstSet() {}
+    X86InstSet() {}
+    ~X86InstSet() {}
     
     static void emitLoad(BackendRegister &dstReg, int offset, BackendRegister &srcReg, std::ostream &s);
     static void emitStore(BackendRegister &srcReg, int offset, BackendRegister &dstReg, std::ostream &s);

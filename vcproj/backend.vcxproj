@@ -86,6 +86,9 @@
     <ClInclude Include="..\backend\mips\mipspatternmatch.h" />
     <ClInclude Include="..\backend\regalloc.h" />
     <ClInclude Include="..\backend\tempstacksize.h" />
+    <ClInclude Include="..\backend\x86\x86codegen.h" />
+    <ClInclude Include="..\backend\x86\x86instset.h" />
+    <ClInclude Include="..\backend\x86\x86patternmatch.h" />
     <ClInclude Include="..\include\backend\backendcodegen.h" />
     <ClInclude Include="..\include\backend\backendvar.h" />
     <ClInclude Include="..\include\backend\iarchcodegen.h" />
@@ -97,6 +100,9 @@
     <ClCompile Include="..\backend\mips\mipspatternmatch.cpp" />
     <ClCompile Include="..\backend\regalloc.cpp" />
     <ClCompile Include="..\backend\tempstacksize.cpp" />
+    <ClCompile Include="..\backend\x86\x86codegen.cpp" />
+    <ClCompile Include="..\backend\x86\x86instset.cpp" />
+    <ClCompile Include="..\backend\x86\x86patternmatch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\common\common.vcxproj">

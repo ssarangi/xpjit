@@ -8,12 +8,12 @@
 
 #include <stack>
 
-MipsRegister A0("$a0");
-MipsRegister T1("$t1");
-MipsRegister FP("$fp");
-MipsRegister SP("$sp");
-MipsRegister V0("$v0");
-MipsRegister RA("$ra");
+BackendRegister A0("$a0");
+BackendRegister T1("$t1");
+BackendRegister FP("$fp");
+BackendRegister SP("$sp");
+BackendRegister V0("$v0");
+BackendRegister RA("$ra");
 
 #define COMMENT_STR(STR)                        \
 {                                               \
@@ -34,7 +34,7 @@ void MipsCodeGen::storeTemporary(llvm::Instruction *pI)
 {
     // Store the temporary in the specified register.
     // Assumption is that the result is in A0.
-    MipsVariable *pMipsVar = new MipsVariable(m_temporaryBytesUsed);
+    BackendVariable *pMipsVar = new BackendVariable(m_temporaryBytesUsed);
     m_symbolTables[m_pCurrentFunction]->set(pI, pMipsVar);
     MipsInstSet::emitStore(A0, -(m_temporaryBytesUsed), FP, m_ostream);
     m_temporaryBytesUsed += 4;
@@ -72,7 +72,7 @@ void MipsCodeGen::loadBaseVariable(BaseVariable *pVar, std::ostream &s)
     }
     else if (pVar->isInstanceOf(BACKEND_VARIABLE))
     {
-        MipsInstSet::emitLoad(A0, -(((MipsVariable*)pVar)->getTempLocation()), FP, s);
+        MipsInstSet::emitLoad(A0, -(((BackendVariable*)pVar)->getTempLocation()), FP, s);
     }
 }
 
@@ -159,7 +159,7 @@ void MipsCodeGen::visitFunction(llvm::Function& F)
 
         // Start from right to left. Also the offsets are negative because we are looking at the opposite direction from fp.
         // i.e. going up onto higher addresses since we are moving from the current frame pointer.
-        MipsVariable *pMipsVar = new MipsVariable(-m_temporaryBytesUsed);
+        BackendVariable *pMipsVar = new BackendVariable(-m_temporaryBytesUsed);
         m_symbolTables[m_pCurrentFunction]->set(pArg, pMipsVar);
         m_temporaryBytesUsed += 4;
     }

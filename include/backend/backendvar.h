@@ -98,16 +98,16 @@ public:
     }
 };
 
-class MipsVariable : public BaseVariable
+class BackendVariable : public BaseVariable
 {
 public:
-    MipsVariable(int location)
+    BackendVariable(int location)
         : m_tempLocation(location)
     {}
 
     setClassInstance1(VarType::BACKEND_VARIABLE, BaseVariable);
 
-    friend std::ostream& operator<<(std::ostream& out, const MipsVariable& var)
+    friend std::ostream& operator<<(std::ostream& out, const BackendVariable& var)
     {
         out << var.m_tempLocation;
         return out;
@@ -119,16 +119,16 @@ private:
     int m_tempLocation;
 };
 
-class MipsRegister : public BaseVariable
+class BackendRegister : public BaseVariable
 {
 public:
-    MipsRegister(std::string regName)
+    BackendRegister(std::string regName)
         : m_regName(regName)
     {}
 
     setClassInstance1(VarType::REGISTER, BaseVariable);
 
-    friend std::ostream& operator<<(std::ostream& out, const MipsRegister& reg)
+    friend std::ostream& operator<<(std::ostream& out, const BackendRegister& reg)
     {
         out << reg.m_regName.c_str();
         return out;

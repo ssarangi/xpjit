@@ -10,6 +10,9 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{c9108245-0864-4c7c-80e0-e7f5b8fc63f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="x86">
+      <UniqueIdentifier>{5cebac74-822d-4133-bc87-3d56672818a7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\backend\mips\mipscodegen.h">
@@ -36,6 +39,15 @@
     <ClInclude Include="..\backend\regalloc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\backend\x86\x86codegen.h">
+      <Filter>x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backend\x86\x86instset.h">
+      <Filter>x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backend\x86\x86patternmatch.h">
+      <Filter>x86</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\mips\mipscodegen.cpp">
@@ -55,6 +67,15 @@
     </ClCompile>
     <ClCompile Include="..\backend\regalloc.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backend\x86\x86codegen.cpp">
+      <Filter>x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backend\x86\x86instset.cpp">
+      <Filter>x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backend\x86\x86patternmatch.cpp">
+      <Filter>x86</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
