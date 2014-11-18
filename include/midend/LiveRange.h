@@ -44,9 +44,9 @@ struct LiveRangeInfo
     /*
        A very rudimentary DS to denote the live range. We do not handle holes at the moment
     */
-    unsigned int startBlockNo; // start and end are for live through blocks
-    unsigned int endBlockNo;
-    unsigned int instructionOffset;  // offset from beginning of basic block
+    int startBlockNo; // start and end are for live through blocks
+    int endBlockNo;
+    int instructionOffset;  // offset from beginning of basic block
 
     std::set<unsigned int> range;
     llvm::Value *pValue;
@@ -54,6 +54,9 @@ struct LiveRangeInfo
 public:
     LiveRangeInfo(llvm::Value *pV)
         : pValue(pV)
+        , startBlockNo(-1)
+        , endBlockNo(-1)
+        , instructionOffset(-1)
     {}
 
     bool operator<(LiveRangeInfo &LRI)
@@ -79,6 +82,65 @@ public:
         range.erase(BB_no);
     }
 
+    void addUseStartBlockNo(
+        int blockNo,
+        llvm::DenseMap<llvm::BasicBlock*, unsigned int>& blockToId,
+        llvm::DenseMap<unsigned int, llvm::BasicBlock*>& idToBlock,
+        llvm::DominatorTree *pDT)
+    {
+        if (startBlockNo == -1)
+        {
+            startBlockNo = blockNo;
+            return;
+        }
+
+        llvm::BasicBlock *pOldStartBlock = idToBlock[(unsigned int)(startBlockNo)];
+        llvm::BasicBlock *pNewUseStartBlock = idToBlock[(unsigned int)blockNo];
+
+        if (pDT->dominates(pNewUseStartBlock, pOldStartBlock))
+            startBlockNo = blockNo;
+    }
+
+    void addUseEndBlockNo(
+        int blockNo,
+        llvm::DenseMap<llvm::BasicBlock*, unsigned int>& blockToId,
+        llvm::DenseMap<unsigned int, llvm::BasicBlock*>& idToBlock,
+        llvm::PostDominatorTree *pPDT)
+    {
+        // If uninitialized then add this
+        if (endBlockNo == -1)
+        {
+            endBlockNo = blockNo;
+            return;
+        }
+
+        // If the end block has been identified before try to find the block which is the most post dominated.
+        llvm::BasicBlock *pOldEndBlock = idToBlock[(unsigned int)(endBlockNo)];
+        llvm::BasicBlock *pNewUseEndBlock = idToBlock[(unsigned int)blockNo];
+
+        if (pPDT->dominates(pNewUseEndBlock, pOldEndBlock))
+        {
+            endBlockNo = blockNo;
+        }
+
+        // If the old block doesn't dominate the new use block then both of them could be in control flow.
+        /*
+                                     Root - x defined here
+                                     /  \
+                                    B1   \
+                                    /     \
+                    x used here - oldB   newB - x used here
+                                    \    /
+                                     \  /
+                                 CommonDomRoot
+        */
+        if (!pPDT->dominates(pOldEndBlock, pNewUseEndBlock))
+        {
+            llvm::BasicBlock *pCommonDenominatorBlock = pPDT->findNearestCommonDominator(pNewUseEndBlock, pOldEndBlock);
+            endBlockNo = blockToId[pCommonDenominatorBlock];
+        }
+    }
+
     void addInstructionOffset(int instructionOffset)
     {
         // Update only if this offset is more than before
@@ -99,7 +161,10 @@ public:
     LiveRange()
         : llvm::FunctionPass(ID)
         , m_pDT(nullptr)
-    {}
+    {
+            initializeDominatorTreeWrapperPassPass(*llvm::PassRegistry::getPassRegistry());
+            initializePostDominatorTreePass(*llvm::PassRegistry::getPassRegistry());
+    }
 
     virtual bool runOnFunction(llvm::Function &F);
 
@@ -110,6 +175,7 @@ public:
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
     {
         AU.addRequired<llvm::DominatorTreeWrapperPass>();
+        AU.addRequired<llvm::PostDominatorTree>();
         AU.addRequired<LoopAnalysis>();
         AU.setPreservesAll();
     };
@@ -137,8 +203,10 @@ private:
     std::set<LiveRangeInfo*> m_intervals;
     
     llvm::DenseMap<llvm::Instruction*, unsigned int> m_instructionOffsets;
-    llvm::DominatorTree *m_pDT;
     LoopAnalysis *m_pLoopAnalysis;
+
+    llvm::DominatorTree *m_pDT;
+    llvm::PostDominatorTree *m_pPDT;
 };
 
 LiveRange *createNewLiveRangePass();

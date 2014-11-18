@@ -36,7 +36,9 @@ bool LiveRange::isLiveOutBlock(llvm::Value *pQuery, llvm::BasicBlock *pBlock)
 
 LiveRangeInfo* LiveRange::createNewLiveRange(llvm::Value *pV)
 {
+    llvm::Instruction *pI = llvm::cast<llvm::Instruction>(pV);
     LiveRangeInfo *pLRI = new LiveRangeInfo(pV);
+    pLRI->startBlockNo = m_blockToId[pI->getParent()];
     m_intervals.insert(pLRI);
     m_intervalMap[pV] = pLRI;
     return pLRI;
@@ -46,13 +48,7 @@ LiveRangeInfo* LiveRange::findOrCreateLiveRange(llvm::Value *pV)
 {
     LiveRangeInfo *pLRI = nullptr;
     if (m_intervalMap.find(pV) == m_intervalMap.end())
-    {
-        g_outputStream() << "Creating new Live Range for Var: ";
-        pV->print(g_outputStream());
-        g_outputStream.flush();
-
         pLRI = createNewLiveRange(pV);
-    }
     else
         pLRI = m_intervalMap[pV];
 
@@ -88,11 +84,15 @@ void LiveRange::unionLiveInSetsOfSuccessors(llvm::BasicBlock *pBB)
 
 void LiveRange::addBBToRange(llvm::Value* pV, int bbNo)
 {
-    if (m_intervalMap.find(pV) == m_intervalMap.end())
-        LiveRangeInfo *pLRI = createNewLiveRange(pV);
+    if (llvm::isa<llvm::Instruction>(pV))
+    {
+        if (m_intervalMap.find(pV) == m_intervalMap.end())
+            LiveRangeInfo *pLRI = createNewLiveRange(pV);
 
-    LiveRangeInfo* pLRI = m_intervalMap[pV];
-    pLRI->addBB(bbNo);
+        LiveRangeInfo* pLRI = m_intervalMap[pV];
+        pLRI->addBB(bbNo);
+        pLRI->addUseStartBlockNo(bbNo, m_blockToId, m_idToBlock, m_pDT);
+    }
 }
 
 std::stack<llvm::BasicBlock*> LiveRange::initializeBlockAndInstructionID(llvm::Function &F)
@@ -133,6 +133,7 @@ bool LiveRange::runOnFunction(llvm::Function &F)
     m_pLoopAnalysis = &getAnalysis<LoopAnalysis>();
 
     m_pDT = &getAnalysis<llvm::DominatorTreeWrapperPass>().getDomTree();
+    m_pPDT = &getAnalysis<llvm::PostDominatorTree>();
 
     std::stack<llvm::BasicBlock*> reverse_order_blocks = initializeBlockAndInstructionID(F);
 
@@ -140,6 +141,9 @@ bool LiveRange::runOnFunction(llvm::Function &F)
     {
         llvm::BasicBlock *pBB = reverse_order_blocks.top();
         reverse_order_blocks.pop();
+
+        g_outputStream() << "Visiting BB: " << pBB->getName() << "\n";
+        g_outputStream.flush();
 
         unionLiveInSetsOfSuccessors(pBB);
 
@@ -150,6 +154,10 @@ bool LiveRange::runOnFunction(llvm::Function &F)
         {
             for (llvm::PHINode *pPhi : m_PhiNodesInBB[*si])
             {
+                g_outputStream() << "Visiting Phi: "; pPhi->print(g_outputStream());
+                g_outputStream() << "\n";
+                g_outputStream.flush();
+
                 llvm::Value *pPhiOperandFromBB = pPhi->getIncomingValueForBlock(pBB);
                 m_BBLiveIns[pBB].liveIns.insert(pPhiOperandFromBB);
             }
@@ -158,7 +166,6 @@ bool LiveRange::runOnFunction(llvm::Function &F)
         // Iterate over all the livein's currently in BB and add the range
         for (llvm::Value *pV : m_BBLiveIns[pBB].liveIns)
             addBBToRange(pV, m_blockToId[pBB]);
-
 
         // Now iterate through the instructions in reverse order.
         for (llvm::BasicBlock::reverse_iterator i = pBB->rbegin(), e = pBB->rend();
@@ -183,8 +190,8 @@ bool LiveRange::runOnFunction(llvm::Function &F)
             for (llvm::Value* pOpd : m_BBLiveIns[pBB].liveIns)
             {
                 LiveRangeInfo *pLRI = m_intervalMap[pOpd];
-                pLRI->startBlockNo = std::min(pLRI->startBlockNo, m_blockToId[pLoop->pHeader]);
-                pLRI->endBlockNo = std::max(pLRI->endBlockNo, m_blockToId[pLoop->pExit]);
+                pLRI->startBlockNo = std::min(pLRI->startBlockNo, (int)m_blockToId[pLoop->pHeader]);
+                pLRI->endBlockNo = std::max(pLRI->endBlockNo, (int)m_blockToId[pLoop->pExit]);
 
                 for (auto bb : pLoop->blocks)
                     pLRI->addBB(m_blockToId[bb]);
@@ -195,14 +202,28 @@ bool LiveRange::runOnFunction(llvm::Function &F)
     // View the Live Ranges by sorting them by starting point
     for (auto interval : m_intervals)
     {
-        g_outputStream() << (*interval).startBlockNo << " <--> " << (*interval).endBlockNo << "\n";
+        g_outputStream() << "\nLive Range: ";
+        (*interval).pValue->print(g_outputStream());
+        g_outputStream() << " [ " << (*interval).startBlockNo << " <--> " << (*interval).endBlockNo << " ]";
+        g_outputStream() << " { ";
+        for (int bb : (*interval).range)
+            g_outputStream() << bb << ", ";
+
+        g_outputStream() << "}\n";
+        g_outputStream.flush();
     }
 
+    g_outputStream.flush();
     return false;
 }
 
 void LiveRange::visitInstruction(llvm::Instruction *pI)
 {
+    g_outputStream() << "Visiting Instruction: ";
+    pI->print(g_outputStream());
+    g_outputStream() << "\n";
+    g_outputStream.flush();
+
     llvm::BasicBlock *pBB = pI->getParent();
     unsigned int bbID = m_blockToId[pBB];
 
@@ -214,11 +235,12 @@ void LiveRange::visitInstruction(llvm::Instruction *pI)
         opi != ope;
         ++opi)
     {
-        if (!llvm::isa<llvm::Constant>(*opi))
+        if (llvm::isa<llvm::Instruction>(*opi))
         {
             LiveRangeInfo *pLRIOp = findOrCreateLiveRange(*opi);
             pLRIOp->addBB(bbID);
             pLRIOp->addInstructionOffset(instruction_offset);
+            pLRIOp->addUseEndBlockNo(m_blockToId[pI->getParent()], m_blockToId, m_idToBlock, m_pPDT);
         }
     }
 
@@ -226,9 +248,9 @@ void LiveRange::visitInstruction(llvm::Instruction *pI)
     if (pI->getNumUses() > 0)
     {
         LiveRangeInfo *pLRI = findOrCreateLiveRange(pI);
-
         pLRI->addInstructionOffset(instruction_offset);
         pLRI->removeBB(bbID);
+        pLRI->addUseEndBlockNo(m_blockToId[pI->getParent()], m_blockToId, m_idToBlock, m_pPDT);
     }
 
     // Remove this instruction from the live set of this block
