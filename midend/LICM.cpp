@@ -34,31 +34,6 @@ bool LICM::notToRemoveInst(llvm::Instruction *pI)
     return false;
 }
 
-//bool LICM::doesInstructionUseLoopInductionVar(llvm::Instruction *pI, llvm::DenseMap<llvm::Value*, bool>& induction_var_map)
-//{
-//    g_outputStream() << "\nQuery Instruction: ";
-//    pI->print(g_outputStream());
-//    g_outputStream.flush();
-//
-//    if (induction_var_map.find(pI) != induction_var_map.end())
-//        return true;
-//
-//    bool usesInductionVar = false;
-//    unsigned int numOps = pI->getNumOperands();
-//    for (unsigned int i = 0; i < numOps; ++i)
-//    {
-//        if (llvm::Instruction *pOpI = llvm::dyn_cast<llvm::Instruction>(pI->getOperand(i)))
-//            usesInductionVar |= doesInstructionUseLoopInductionVar(pOpI, induction_var_map);
-//
-//        if (usesInductionVar)
-//            break;
-//    }
-//
-//    if (usesInductionVar)
-//        induction_var_map[pI] = true;
-//
-//    return usesInductionVar;
-//}
 NaturalLoopTy* LICM::findInnerMostLoopContainingBB(llvm::BasicBlock *pBB, NaturalLoopTy *pOuterLoop)
 {
     NaturalLoopTy *pLoop = nullptr;
@@ -113,9 +88,6 @@ llvm::BasicBlock* LICM::returnTargetBBForInstMove(llvm::Instruction *pI, Natural
         return nullptr;
 
     llvm::BasicBlock *pTargetBlockToMoveTo = nullptr;
-    //g_outputStream() << "\nQuery Instruction: ";
-    //pI->print(g_outputStream());
-    //g_outputStream.flush();
 
     bool uses_induction_var = false;
     NaturalLoopTy *pOutermostLoopToMoveInst = nullptr;

@@ -42,13 +42,17 @@ struct LiveRangeInfo
     /*
        A very rudimentary DS to denote the live range. We do not handle holes at the moment
     */
-private:
     int startBlockNo; // start and end are for live through blocks
     int endBlockNo;
     std::set<unsigned int> range;
     int instructionOffset;  // offset from beginning of basic block
+    llvm::Value *pValue;
 
 public:
+    LiveRangeInfo(llvm::Value *pV)
+        : pValue(pV)
+    {}
+
     bool operator<(LiveRangeInfo &LRI)
     {
         bool result = false;
@@ -112,13 +116,18 @@ public:
 private:
     void unionLiveInSetsOfSuccessors(llvm::BasicBlock *pBB);
     void addBBToRange(llvm::Value* pV, int bbNo);
+    LiveRangeInfo* createNewLiveRange(llvm::Value *pV);
 
 private:
     llvm::DenseMap<llvm::BasicBlock*, unsigned int> m_blockToId;
     llvm::DenseMap<unsigned int, llvm::BasicBlock*> m_idToBlock;
+    
     llvm::DenseMap<llvm::BasicBlock*, BasicBlockLiveIn> m_BBLiveIns;
     llvm::DenseMap<llvm::BasicBlock*, llvm::SmallVector<llvm::PHINode*, 5>> m_PhiNodesInBB;
-    llvm::DenseMap<llvm::Value*, LiveRangeInfo> m_intervals;
+    
+    llvm::DenseMap<llvm::Value*, LiveRangeInfo*> m_intervalMap;
+    std::set<LiveRangeInfo*> m_intervals;
+    
     llvm::DenseMap<llvm::Instruction*, unsigned int> m_instructionOffsets;
     llvm::DominatorTree *m_pDT;
 };

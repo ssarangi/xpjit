@@ -30,6 +30,6 @@ void OptimizeIR(llvm::Module& llvmModule)
     passMgr.add(new ConstantFolder());
     passMgr.add(llvm::createPromoteMemoryToRegisterPass());
     passMgr.add(createNewLoopInvariantCodeMotionPass());
-    // passMgr.add(createNewLiveRangePass());
+    passMgr.add(createNewLiveRangePass());
     passMgr.run(llvmModule);
 }
