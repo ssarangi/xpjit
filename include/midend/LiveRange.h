@@ -6,6 +6,7 @@ Based on the paper - Linear Scan Register Allocation on SSA Form
 by Christian Wimmer Michael Franz
 */
 
+#include <midend/LoopAnalysis.h>
 
 #include "common/llvm_warnings_push.h"
 #include <llvm/Pass.h>
@@ -28,6 +29,7 @@ by Christian Wimmer Michael Franz
 #include "common/llvm_warnings_pop.h"
 
 #include <set>
+#include <stack>
 
 /*
 Cases to handle for live range
@@ -42,10 +44,11 @@ struct LiveRangeInfo
     /*
        A very rudimentary DS to denote the live range. We do not handle holes at the moment
     */
-    int startBlockNo; // start and end are for live through blocks
-    int endBlockNo;
+    unsigned int startBlockNo; // start and end are for live through blocks
+    unsigned int endBlockNo;
+    unsigned int instructionOffset;  // offset from beginning of basic block
+
     std::set<unsigned int> range;
-    int instructionOffset;  // offset from beginning of basic block
     llvm::Value *pValue;
 
 public:
@@ -107,6 +110,7 @@ public:
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
     {
         AU.addRequired<llvm::DominatorTreeWrapperPass>();
+        AU.addRequired<LoopAnalysis>();
         AU.setPreservesAll();
     };
 
@@ -116,7 +120,11 @@ public:
 private:
     void unionLiveInSetsOfSuccessors(llvm::BasicBlock *pBB);
     void addBBToRange(llvm::Value* pV, int bbNo);
+    
+    std::stack<llvm::BasicBlock*> initializeBlockAndInstructionID(llvm::Function &F);
+
     LiveRangeInfo* createNewLiveRange(llvm::Value *pV);
+    LiveRangeInfo* findOrCreateLiveRange(llvm::Value *pV);
 
 private:
     llvm::DenseMap<llvm::BasicBlock*, unsigned int> m_blockToId;
@@ -130,6 +138,7 @@ private:
     
     llvm::DenseMap<llvm::Instruction*, unsigned int> m_instructionOffsets;
     llvm::DominatorTree *m_pDT;
+    LoopAnalysis *m_pLoopAnalysis;
 };
 
 LiveRange *createNewLiveRangePass();

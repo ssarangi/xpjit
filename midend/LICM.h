@@ -38,7 +38,7 @@ public:
     };
 
 private:
-    void performStrengthReduction(
+    void performLICM(
         NaturalLoopTy *pNaturalLoop,
         std::queue<llvm::Instruction*>& instMoveOrder,
         llvm::DenseMap<llvm::Instruction*, llvm::Instruction*>& instMovMap);

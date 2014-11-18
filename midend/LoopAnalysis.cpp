@@ -224,3 +224,34 @@ bool LoopAnalysis::runOnFunction(llvm::Function &F)
     m_naturalLoops = natural_loops_detected;
     return false;
 }
+
+bool LoopAnalysis::isLoopHeader(llvm::BasicBlock *pBB, NaturalLoopTy* pQueryLoop, NaturalLoopTy* &pLoop)
+{
+    if (pQueryLoop->pHeader == pBB)
+    {
+        pLoop = pQueryLoop;
+        return true;
+    }
+
+    for (NaturalLoopTy *pInnerLoop : pQueryLoop->inner_loops)
+    {
+        bool is_loop_header = isLoopHeader(pBB, pInnerLoop, pLoop);
+
+        if (is_loop_header)
+            return true;
+    }
+
+    return false;
+}
+
+bool LoopAnalysis::isLoopHeader(llvm::BasicBlock* pBB, NaturalLoopTy* &pLoop)
+{
+    bool is_loop_header = false;
+
+    for (NaturalLoopTy *pOuterLoop : m_naturalLoops)
+    {
+        is_loop_header = isLoopHeader(pBB, pOuterLoop, pLoop);
+    }
+
+    return is_loop_header;
+}

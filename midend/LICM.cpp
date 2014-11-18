@@ -115,7 +115,7 @@ llvm::BasicBlock* LICM::returnTargetBBForInstMove(llvm::Instruction *pI, Natural
     return pTargetBlockToMoveTo;
 }
 
-void LICM::performStrengthReduction(
+void LICM::performLICM(
     NaturalLoopTy *pNaturalLoop,
     std::queue<llvm::Instruction*>& instMoveOrder,
     llvm::DenseMap<llvm::Instruction*, llvm::Instruction*>& instToMoveBefore)
@@ -165,7 +165,7 @@ void LICM::performStrengthReduction(
     }
 
     for (NaturalLoopTy *pInnerLoop : pNaturalLoop->inner_loops)
-        performStrengthReduction(pInnerLoop, instMoveOrder, instToMoveBefore);
+        performLICM(pInnerLoop, instMoveOrder, instToMoveBefore);
 
     g_outputStream.flush();
 }
@@ -189,7 +189,7 @@ bool LICM::runOnFunction(llvm::Function &F)
     {
         NaturalLoopTy *pNaturalLoop = *nl;
         std::set<llvm::BasicBlock*> blocksVisited;
-        performStrengthReduction(pNaturalLoop, instMoveOrder, instMoveMap);
+        performLICM(pNaturalLoop, instMoveOrder, instMoveMap);
     }
 
     while (!instMoveOrder.empty())

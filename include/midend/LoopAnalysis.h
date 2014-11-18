@@ -67,6 +67,18 @@ public:
         return m_naturalLoops.cend();
     }
 
+    /*
+    Loop through all the loops we have and figure out if we find a match for the basic block
+    as being the header of some block
+    */
+    bool isLoopHeader(llvm::BasicBlock *pBB, NaturalLoopTy* &pLoop);
+
+    /*
+    Given a loop find out if the basic block is a loop header of either the outermost loop or any of
+    its inner loop
+    */
+    bool isLoopHeader(llvm::BasicBlock *pBB, NaturalLoopTy* pQueryLoop, NaturalLoopTy* &pLoop);
+
 private:
     void removeInnerLoopNodeDFS(NaturalLoopTy *pLoop, NaturalLoopTy *pParent);
     void findBasicLoopInductionVar(NaturalLoopTy *pNaturalLoop);
