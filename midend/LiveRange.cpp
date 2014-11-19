@@ -153,6 +153,7 @@ bool LiveRange::runOnFunction(llvm::Function &F)
             for (llvm::PHINode *pPhi : m_PhiNodesInBB[*si])
             {
                 g_outputStream << "Visiting Phi: "; pPhi->print(g_outputStream());
+                g_outputStream.flush();
                 g_outputStream << "\n";
 
                 llvm::Value *pPhiOperandFromBB = pPhi->getIncomingValueForBlock(pBB);
@@ -201,6 +202,7 @@ bool LiveRange::runOnFunction(llvm::Function &F)
     {
         g_outputStream << "\nLive Range: ";
         (*interval).pValue->print(g_outputStream());
+        g_outputStream.flush();
         g_outputStream << " [ " << (*interval).startBlockNo << " <--> " << (*interval).endBlockNo << " ]";
         g_outputStream << " { ";
         for (int bb : (*interval).range)
@@ -216,6 +218,7 @@ void LiveRange::visitInstruction(llvm::Instruction *pI)
 {
     g_outputStream << "Visiting Instruction: ";
     pI->print(g_outputStream());
+    g_outputStream.flush();
     g_outputStream << "\n";
 
     llvm::BasicBlock *pBB = pI->getParent();

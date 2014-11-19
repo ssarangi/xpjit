@@ -153,6 +153,7 @@ void LICM::performLICM(
             {
                 g_outputStream << "\nMoving out of Loop: ";
                 i->print(g_outputStream());
+                g_outputStream.flush();
                 g_outputStream << " { " << pBB->getName() << " --> " << pTargetBB->getName() << " }";
 
                 llvm::Instruction *pTerminator = pTargetBB->getTerminator();

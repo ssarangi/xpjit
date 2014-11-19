@@ -25,6 +25,7 @@ bool SSADeconstructionPass::runOnFunction(llvm::Function &F)
     g_outputStream << "CSSA Form\n";
     g_outputStream << "--------------\n";
     F.print(g_outputStream());
+    g_outputStream.flush();
 
     return true;
 }

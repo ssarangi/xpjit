@@ -101,6 +101,7 @@ public:
     void removeOutputStreamSubscriber(OutputStreamSubscriber* pSubscriber);
 
     llvm::raw_ostream& operator()() { return *m_pRawStringOStream; }
+    
     template <typename T>
     OutputStream& operator<<(const T& s)
     {
@@ -109,7 +110,6 @@ public:
         return *this;
     }
 
-private:
     void flush();
 
 private:
