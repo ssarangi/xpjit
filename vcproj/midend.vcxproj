@@ -93,6 +93,7 @@
     <ClCompile Include="..\midend\LiveRange.cpp" />
     <ClCompile Include="..\midend\LoopAnalysis.cpp" />
     <ClCompile Include="..\midend\optimizeIR.cpp" />
+    <ClCompile Include="..\midend\SSADeconstructionPass.cpp" />
     <ClCompile Include="..\midend\PassManager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -109,6 +110,7 @@
     <ClInclude Include="..\midend\Analysis.h" />
     <ClInclude Include="..\midend\LICM.h" />
     <ClInclude Include="..\midend\LivenessHangs.h" />
+    <ClInclude Include="..\midend\SSADeconstructionPass.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\common\common.vcxproj">
