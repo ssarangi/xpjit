@@ -21,6 +21,10 @@ Adapted from the lecture notes: http://www.cs.rice.edu/~keith/512/Lectures/14SSA
 #include <llvm/IR/IRBuilder.h>
 #include "common/llvm_warnings_pop.h"
 
+#include <utility>
+
+typedef std::pair<llvm::PHINode*, llvm::PHINode*> OldNewPhiNodePair;
+
 class SSADeconstructionPass : public llvm::FunctionPass
 {
 public:
@@ -39,7 +43,7 @@ public:
     };
 
     void convertToCSSA(llvm::Function &F);
-    void visitPhi(llvm::PHINode *pPhi);
+    OldNewPhiNodePair visitPhi(llvm::PHINode *pPhi);
 
 private:
 };

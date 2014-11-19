@@ -36,22 +36,43 @@ void SSADeconstructionPass::convertToCSSA(llvm::Function &F)
         bb != be;
         ++bb)
     {
+        llvm::Instruction *pInstToInsertMovBefore = nullptr;
+        std::set<OldNewPhiNodePair> oldNewPhiNodesPair;
+
         for (llvm::BasicBlock::iterator i = bb->begin(), ie = bb->end();
             i != ie;
             ++i)
         {
             if (llvm::PHINode *pPhi = llvm::dyn_cast<llvm::PHINode>(i))
-                visitPhi(pPhi);
+            {
+                OldNewPhiNodePair phiNodePair = visitPhi(pPhi);
+                oldNewPhiNodesPair.insert(phiNodePair);
+            }
+            else if (pInstToInsertMovBefore == nullptr)
+                pInstToInsertMovBefore = i;
+        }
+
+        // Iterate over all the phi instructions and add the copy next to it
+        for (auto oldNewPair : oldNewPhiNodesPair)
+        {
+            llvm::PHINode *pOldPhi = oldNewPair.first;
+            llvm::PHINode *pNewPhi = oldNewPair.second;
+
+            std::string newPhiName = pNewPhi->getName().substr(0, pNewPhi->getName().size() - std::string("_dash").length());
+            llvm::Value *pBitcast = llvm::BitCastInst::Create(llvm::Instruction::CastOps::BitCast, pNewPhi, pNewPhi->getType(), newPhiName, pInstToInsertMovBefore);
+            pOldPhi->replaceAllUsesWith(pBitcast);
+            pOldPhi->removeFromParent();
         }
     }
+
 }
 
-void SSADeconstructionPass::visitPhi(llvm::PHINode *pPhi)
+OldNewPhiNodePair SSADeconstructionPass::visitPhi(llvm::PHINode *pPhi)
 {
     llvm::IRBuilder<> builder(pPhi->getContext());
 
     // For each operand, insert a mov in the predecessor blocks and then use those in the phi
-    llvm::DenseMap<llvm::BasicBlock*, llvm::Value*> pPhiToRemove;
+    llvm::PHINode *pNewPhi = llvm::PHINode::Create(pPhi->getType(), pPhi->getNumIncomingValues(), pPhi->getName() + "_dash", pPhi);
 
     for (llvm::User::op_iterator op = pPhi->op_begin(), ope = pPhi->op_end();
         op != ope;
@@ -60,35 +81,39 @@ void SSADeconstructionPass::visitPhi(llvm::PHINode *pPhi)
         llvm::BasicBlock *pPredBB = pPhi->getIncomingBlock(*op);
         llvm::TerminatorInst *pTerminator = pPredBB->getTerminator();
 
-        // Now insert a new copy instruction here.
-        llvm::Value *pC = nullptr;
+        llvm::Value *pOp = nullptr;
 
-        llvm::Value *pI = llvm::cast<llvm::Value>(op);
-        llvm::Type *pType = pI->getType();
-
-        llvm::Type *pIntTy = builder.getInt32Ty();
-        llvm::Type *pFloatTy = builder.getFloatTy();
-        llvm::Type *pDoubleTy = builder.getDoubleTy();
-
-        if (pI->getType()->isPointerTy())
-            assert(0 && "Pointer types are not handled");
-
-        if (pType == pIntTy)
-            pC = builder.getInt32(1);
-        else if (pType == pFloatTy)
-            pC = llvm::ConstantFP::get(builder.getFloatTy(), 1.0f);
+        if (llvm::isa<llvm::Constant>(*op))
+        {
+            pOp = *op;
+        }
         else
-            assert(0 && "Other types not handled yet");
+        {
+            // Now insert a new copy instruction here.
+            llvm::Value *pC = nullptr;
 
-        llvm::Value *pMul = llvm::BitCastInst::Create(llvm::Instruction::CastOps::BitCast, pI, pType, "", pTerminator);
+            llvm::Value *pI = llvm::cast<llvm::Value>(op);
+            llvm::Type *pType = pI->getType();
 
-        // Replace the original value in phi with this new instruction we created.
-        pPhiToRemove[pPredBB] = pMul;
+            llvm::Type *pIntTy = builder.getInt32Ty();
+            llvm::Type *pFloatTy = builder.getFloatTy();
+            llvm::Type *pDoubleTy = builder.getDoubleTy();
+
+            if (pI->getType()->isPointerTy())
+                assert(0 && "Pointer types are not handled");
+
+            if (pType == pIntTy)
+                pC = builder.getInt32(1);
+            else if (pType == pFloatTy)
+                pC = llvm::ConstantFP::get(builder.getFloatTy(), 1.0f);
+            else
+                assert(0 && "Other types not handled yet");
+
+            pOp = llvm::BitCastInst::Create(llvm::Instruction::CastOps::BitCast, pI, pType, pI->getName() + "_dash", pTerminator);
+        }
+
+        pNewPhi->addIncoming(pOp, pPredBB);
     }
 
-    for (auto keyval : pPhiToRemove)
-    {
-        pPhi->removeIncomingValue(keyval.first);
-        pPhi->addIncoming(keyval.second, keyval.first);
-    }
+    return std::make_pair(pPhi, pNewPhi);
 }
