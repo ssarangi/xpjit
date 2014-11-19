@@ -70,8 +70,7 @@ void LiveRange::unionLiveInSetsOfSuccessors(llvm::BasicBlock *pBB)
         if (m_BBLiveIns.find(*si) == m_BBLiveIns.end() &&
             m_pDT->dominates(pBB, *si))
         {
-            g_outputStream() << "Successor of " << pBB->getName().str() << " not processed: " << si->getName().str() << "\n";
-            g_outputStream.flush();
+            g_outputStream << "Successor of " << pBB->getName().str() << " not processed: " << si->getName().str() << "\n";
             assert(0 && "Expected to find Basic Block to be processed before predecessor");
         }
 
@@ -142,8 +141,7 @@ bool LiveRange::runOnFunction(llvm::Function &F)
         llvm::BasicBlock *pBB = reverse_order_blocks.top();
         reverse_order_blocks.pop();
 
-        g_outputStream() << "Visiting BB: " << pBB->getName() << "\n";
-        g_outputStream.flush();
+        g_outputStream << "Visiting BB: " << pBB->getName() << "\n";
 
         unionLiveInSetsOfSuccessors(pBB);
 
@@ -154,9 +152,8 @@ bool LiveRange::runOnFunction(llvm::Function &F)
         {
             for (llvm::PHINode *pPhi : m_PhiNodesInBB[*si])
             {
-                g_outputStream() << "Visiting Phi: "; pPhi->print(g_outputStream());
-                g_outputStream() << "\n";
-                g_outputStream.flush();
+                g_outputStream << "Visiting Phi: "; pPhi->print(g_outputStream());
+                g_outputStream << "\n";
 
                 llvm::Value *pPhiOperandFromBB = pPhi->getIncomingValueForBlock(pBB);
                 m_BBLiveIns[pBB].liveIns.insert(pPhiOperandFromBB);
@@ -202,27 +199,24 @@ bool LiveRange::runOnFunction(llvm::Function &F)
     // View the Live Ranges by sorting them by starting point
     for (auto interval : m_intervals)
     {
-        g_outputStream() << "\nLive Range: ";
+        g_outputStream << "\nLive Range: ";
         (*interval).pValue->print(g_outputStream());
-        g_outputStream() << " [ " << (*interval).startBlockNo << " <--> " << (*interval).endBlockNo << " ]";
-        g_outputStream() << " { ";
+        g_outputStream << " [ " << (*interval).startBlockNo << " <--> " << (*interval).endBlockNo << " ]";
+        g_outputStream << " { ";
         for (int bb : (*interval).range)
-            g_outputStream() << bb << ", ";
+            g_outputStream << bb << ", ";
 
-        g_outputStream() << "}\n";
-        g_outputStream.flush();
+        g_outputStream << "}\n";
     }
 
-    g_outputStream.flush();
     return false;
 }
 
 void LiveRange::visitInstruction(llvm::Instruction *pI)
 {
-    g_outputStream() << "Visiting Instruction: ";
+    g_outputStream << "Visiting Instruction: ";
     pI->print(g_outputStream());
-    g_outputStream() << "\n";
-    g_outputStream.flush();
+    g_outputStream << "\n";
 
     llvm::BasicBlock *pBB = pI->getParent();
     unsigned int bbID = m_blockToId[pBB];

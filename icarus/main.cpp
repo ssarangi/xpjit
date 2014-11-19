@@ -26,7 +26,6 @@
 
 extern IcarusModule* ParseFile(const char *filename); //using this for now. need to create a standard header file for lex
 
-static Trace& gTrace = Trace::getInstance();
 static Debug& gDebug = Debug::getInstance();
 
 using namespace std;
@@ -50,7 +49,7 @@ void genExecutable(CodeGenModule& module, std::string filename)
 
 int Compile(char *fileName, char *pOutputFileName)
 {
-    gTrace <<"Compiling file: " << fileName;
+    g_outputStream << "Compiling file: " << fileName;
     pIcarusModule = ParseFile(fileName);
     
     if(pIcarusModule == nullptr)
@@ -80,14 +79,12 @@ int Compile(char *fileName, char *pOutputFileName)
         pIcarusModule = nullptr;
     }
 
-    g_outputStream() << "-------------------------------------------------------------------\n";
-    g_outputStream() << "                         Before Optimization                       \n";
-    g_outputStream() << "-------------------------------------------------------------------\n";
-    g_outputStream.flush();
+    g_outputStream << "-------------------------------------------------------------------\n";
+    g_outputStream << "                         Before Optimization                       \n";
+    g_outputStream << "-------------------------------------------------------------------\n";
     if (gDebug.isDebuggable())
     {
         llvmModule.print(g_outputStream(), nullptr);
-        g_outputStream.flush();
     }
 
     if(gDebug.isOptimizing())
@@ -95,14 +92,12 @@ int Compile(char *fileName, char *pOutputFileName)
         OptimizeIR(llvmModule);
     }
     
-    g_outputStream() << "-------------------------------------------------------------------\n";
-    g_outputStream() << "                          After Optimization                       \n";
-    g_outputStream() << "-------------------------------------------------------------------\n";
-    g_outputStream.flush();
+    g_outputStream << "-------------------------------------------------------------------\n";
+    g_outputStream << "                          After Optimization                       \n";
+    g_outputStream << "-------------------------------------------------------------------\n";
     if(gDebug.isDebuggable())
     {
         llvmModule.print(g_outputStream(), nullptr);
-        g_outputStream.flush();
     }
 
     std::string moduleStr;
@@ -133,7 +128,7 @@ int main(int argc, char *argv[])
     gDebug.setDotGen(true);
     gDebug.setCodeOptimization(true); //we need to allow setting levels
 
-    gTrace << "Verbose on!\n";
+    g_outputStream << "Verbose on!\n";
 
     g_outputStream.addOutputStreamSubscriber(&g_consoleStreamSubscriber);
     g_outputStream.addOutputStreamSubscriber(&g_outputDebugStringSubscriber);

@@ -20,8 +20,6 @@ void yyrestart( FILE *new_file );
 Type& getType(int parsedType);
 int currentType = -1;
 
-
-static Trace& gTrace = Trace::getInstance();
 static Debug& gDebug = Debug::getInstance();
 
 static ASTBuilder* builder;
@@ -62,7 +60,7 @@ program: program statement
 
 func_decl: datatype IDENTIFIER '(' arglist ')' ';' 
     { 
-        gTrace<<"function declaration\n";
+        g_outputStream <<"function declaration\n";
         const std::string& string = $2;
         IcErr err = builder->addProtoType(string, getType($1), NULL);
         if(err != eNoErr)
@@ -88,7 +86,7 @@ arglist: datatype IDENTIFIER
 
 func_defn: datatype IDENTIFIER '(' arglist ')' '{' 
     {
-        gTrace<<"function definition\n";
+        g_outputStream <<"function definition\n";
         const std::string& string = $2;
         FunctionProtoType* fp = builder->getProtoType(string);//use current dataTypeList
         if(fp == NULL) //find the prototype in the module. if not found, add a new one
@@ -110,36 +108,36 @@ statement: declaration
     | assignment  { builder->insertStatement(*$1);}
     | expression';' 
     { 
-        gTrace<<"expression\n";
+        g_outputStream <<"expression\n";
         builder->insertStatement(*new ExpressionStatement(*(Expression *)$1));
     }
     | return_stmt ';'{ builder->insertStatement(*$1);}
-    | while_statement { gTrace<<"done with while loop\n"; }
-    | break_statement ';' { gTrace<<"break\n"; builder->insertStatement(*$1); }
-    | if_else_statement { gTrace<<"if else"; }
-    | ';' { gTrace<<"empty statement\n";}
+    | while_statement { g_outputStream <<"done with while loop\n"; }
+    | break_statement ';' { g_outputStream <<"break\n"; builder->insertStatement(*$1); }
+    | if_else_statement { g_outputStream <<"if else"; }
+    | ';' { g_outputStream <<"empty statement\n";}
     ;
 
 if_else_statement: IF '(' expression ')' 
     {
-        gTrace<<"if statement ";
+        g_outputStream <<"if statement ";
         builder->insertStatement(*new BranchStatement(*(Expression*)$3));
     }
-        codeblock { gTrace<<"ending if block";  }
+        codeblock { g_outputStream <<"ending if block";  }
     iftail
     ;
 
 iftail: ELSE {
         builder->addBranch(*(Expression*)new Constant(1)); //a 'true' expression
     }
-    codeblock { gTrace<<"ending else block"; builder->endCodeBlock(); }
+    codeblock { g_outputStream <<"ending else block"; builder->endCodeBlock(); }
     | %prec LOWER_THAN_ELSE //Refer http://stackoverflow.com/questions/1737460/how-to-find-shift-reduce-conflict-in-this-yacc-file
      { builder->endCodeBlock(); }
     ;
 
 
-while_statement: WHILE '(' expression ')' { gTrace<<"while statement\n"; builder->insertStatement(*new WhileStatement(*(Expression*)$3)); }
-    codeblock { gTrace<<"ending while loop\n"; builder->endCodeBlock(); }
+while_statement: WHILE '(' expression ')' { g_outputStream <<"while statement\n"; builder->insertStatement(*new WhileStatement(*(Expression*)$3)); }
+    codeblock { g_outputStream <<"ending while loop\n"; builder->endCodeBlock(); }
     ;
 
 codeblock: '{' statement_block '}'
@@ -148,20 +146,20 @@ codeblock: '{' statement_block '}'
 
 break_statement: BREAK { $$ = new BreakStatement(); }
     
-declaration: datatype varList ';' { gTrace<<"declaration "; currentType = -1; }
+declaration: datatype varList ';' { g_outputStream <<"declaration "; currentType = -1; }
 
 varList: IDENTIFIER { builder->addSymbol($1, getType(currentType)); }
     | varList',' IDENTIFIER { builder->addSymbol($3, getType(currentType)); }
     ;
     
-datatype: INTEGER   { gTrace<<"int "; $$ = currentType = Type::IntegerTy; }
-    | FLOAT     { gTrace<<"float "; $$ = currentType = Type::FloatTy; }
-    | VOID      { gTrace<<"void "; $$ = currentType = Type::VoidTy; }
+datatype: INTEGER   { g_outputStream <<"int "; $$ = currentType = Type::IntegerTy; }
+    | FLOAT     { g_outputStream <<"float "; $$ = currentType = Type::FloatTy; }
+    | VOID      { g_outputStream <<"void "; $$ = currentType = Type::VoidTy; }
     ;
     
 assignment: IDENTIFIER '=' expression ';'
     { 
-        gTrace<<"assignment";
+        g_outputStream <<"assignment";
         Symbol *identifierSymbol = builder->getSymbol($1);
         if(identifierSymbol == NULL)
         {
@@ -177,7 +175,7 @@ return_stmt: RETURN expression { $$ = new ReturnStatement($2);};
 
 expression: NUMBER { $$ = new Constant($1); }
     | IDENTIFIER {
-        gTrace<<"identifier";
+        g_outputStream <<"identifier";
         Symbol *identifierSymbol = builder->getSymbol($1);
         if(identifierSymbol == NULL)
         {
@@ -202,7 +200,7 @@ expression: NUMBER { $$ = new Constant($1); }
     
 func_call: IDENTIFIER'('paramlist')'
     {
-        gTrace<<"function called";
+        g_outputStream <<"function called";
         std::list<Type*> paramTypeList;
         
         FunctionProtoType* fp = builder->getFunctionProtoType($1);

@@ -9,6 +9,8 @@
 #include <llvm/IR/CFG.h> //We need a specialization of the GraphTrait class 
 #include <common/llvm_warnings_pop.h>
 
+#include "common/debug.h"
+
 #include <map>
 #include <set>
 #include <queue>
@@ -23,11 +25,8 @@ char DominanceTreeConstructor::ID = 0;
 //INITIALIZE_PASS_END(DominanceTreeConstructor, "domfrontier",
 //                "Dominance Frontier Construction", true, true)
 
-
-static Trace& gTrace = Trace::getInstance();
-
 bool DominanceTreeConstructor::runOnFunction(llvm::Function &F){
-    gTrace<<" Constructing Dominator Tree for "<<F.getName(); 
+    g_outputStream <<" Constructing Dominator Tree for "<<F.getName(); 
    
     // Keith D. Cooper's algorithm for computing dominators
     
@@ -106,10 +105,10 @@ BasicBlock* DominanceTreeConstructor::intersect(BasicBlock* pred, BasicBlock* ne
 template<>
 void DominanceTree<BasicBlock>::print()
 {
-    gTrace<<"Printing dominance tree\n";
+    g_outputStream <<"Printing dominance tree\n";
     if(m_root == NULL)
     {
-        gTrace<<"Graph is empty\n";
+        g_outputStream << "Graph is empty\n";
         return;
     }
     
@@ -119,15 +118,15 @@ void DominanceTree<BasicBlock>::print()
     while(!visitQ.empty())
     {
         DominanceNode<BasicBlock>* node = visitQ.front();
-        gTrace<<"*"<<node->getActualNode()->getName()<<" --> ";
+        g_outputStream << "*" << node->getActualNode()->getName() << " --> ";
         visitQ.pop();
         std::set<DominanceNode<BasicBlock>*>& children = node->getChildren();
         for(std::set<DominanceNode<BasicBlock>*>::iterator iter = children.begin();
                                           iter != children.end(); ++iter)
         {
-            gTrace<<((DominanceNode<BasicBlock>*)(*iter))->getActualNode()->getName()<<" ";
+            g_outputStream << ((DominanceNode<BasicBlock>*)(*iter))->getActualNode()->getName() << " ";
             visitQ.push(*iter);
         }
-        gTrace<<"\n";
+        g_outputStream << "\n";
     }
 }

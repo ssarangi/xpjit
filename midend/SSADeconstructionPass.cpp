@@ -22,10 +22,9 @@ bool SSADeconstructionPass::runOnFunction(llvm::Function &F)
 
     convertToCSSA(F);
 
-    g_outputStream() << "CSSA Form\n";
-    g_outputStream() << "--------------\n";
+    g_outputStream << "CSSA Form\n";
+    g_outputStream << "--------------\n";
     F.print(g_outputStream());
-    g_outputStream.flush();
 
     return true;
 }
@@ -83,11 +82,11 @@ OldNewPhiNodePair SSADeconstructionPass::visitPhi(llvm::PHINode *pPhi)
 
         llvm::Value *pOp = nullptr;
 
-        if (llvm::isa<llvm::Constant>(*op))
-        {
-            pOp = *op;
-        }
-        else
+        //if (llvm::isa<llvm::Constant>(*op))
+        //{
+        //    pOp = *op;
+        //}
+        //else
         {
             // Now insert a new copy instruction here.
             llvm::Value *pC = nullptr;

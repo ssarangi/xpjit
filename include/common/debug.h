@@ -23,26 +23,10 @@ using namespace std;
 
 #define ADD_HEADER(txt) \
 {                                                                                                                  \
-    g_outputStream() << "-------------------------------------------------------------------\n";            \
-    g_outputStream() << "                         " << txt << "                        \n";                 \
-    g_outputStream() << "-------------------------------------------------------------------\n";            \
-    g_outputStream.flush();                                                                                              \
+    g_outputStream << "-------------------------------------------------------------------\n";            \
+    g_outputStream << "                         " << txt << "                        \n";                 \
+    g_outputStream << "-------------------------------------------------------------------\n";            \
 }
-
-
-//Singleton debug class
-class Trace
-{
-public: 
-    static Trace& getInstance();
-    ~Trace();
-
-    Trace& operator<<(std::string s);
-    //Trace& operator<<(char* s);
-private:
-    static Trace* m_instance;
-    Trace(){}
-};
 
 class Debug 
 {
@@ -117,6 +101,15 @@ public:
     void removeOutputStreamSubscriber(OutputStreamSubscriber* pSubscriber);
 
     llvm::raw_ostream& operator()() { return *m_pRawStringOStream; }
+    template <typename T>
+    OutputStream& operator<<(const T& s)
+    {
+        *m_pRawStringOStream << s;
+        flush();
+        return *this;
+    }
+
+private:
     void flush();
 
 private:

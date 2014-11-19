@@ -21,11 +21,9 @@ using namespace std;
 using namespace llvm;
 char DominanceFrontier::ID = 0;
 
-static Trace& gTrace = Trace::getInstance();
-
 bool DominanceFrontier::runOnFunction(Function &F)
 {
-    gTrace<<" Calculating Dominator Frontier for "<<F.getName();
+    g_outputStream << " Calculating Dominator Frontier for " << F.getName();
 
     DominanceTreeConstructor& DT = getAnalysis<DominanceTreeConstructor>(); 
     std::map<BasicBlock*, BasicBlock*>& doms = DT.getDoms();
@@ -57,15 +55,15 @@ bool DominanceFrontier::runOnFunction(Function &F)
 
 void DominanceFrontier::print()
 {
-    gTrace<<"Printing Dominance Frontier Information\n";
+    g_outputStream <<"Printing Dominance Frontier Information\n";
     std::map<BasicBlock*, std::set<BasicBlock*> >::iterator frontierIter = m_frontiers.begin();
     for(; frontierIter != m_frontiers.end(); ++frontierIter)
     {
-        gTrace<<frontierIter->first->getName()<<" --> ";
+        g_outputStream << frontierIter->first->getName() << " --> ";
         std::set<BasicBlock*>& fSet = frontierIter->second;
         std::set<BasicBlock*>::iterator setIter = fSet.begin();
         for(; setIter != fSet.end(); ++setIter)
-            gTrace<<(*setIter)->getName()<<", ";
-        gTrace<<"\n";
+            g_outputStream << (*setIter)->getName() << ", ";
+        g_outputStream << "\n";
     }
 }

@@ -45,8 +45,6 @@ void yyrestart( FILE *new_file );
 Type& getType(int parsedType);
 int currentType = -1;
 
-
-static Trace& gTrace = Trace::getInstance();
 static Debug& gDebug = Debug::getInstance();
 
 static ASTBuilder* builder;
@@ -162,12 +160,12 @@ static const short yyrhs[] = {    32,
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-    57,    58,    59,    60,    63,    73,    79,    85,    89,   101,
-   107,   107,   109,   110,   111,   116,   117,   118,   119,   120,
-   123,   128,   130,   132,   135,   136,   141,   142,   145,   146,
-   149,   151,   153,   154,   157,   158,   159,   162,   174,   175,
-   178,   179,   189,   190,   191,   192,   193,   194,   195,   196,
-   197,   198,   199,   200,   203,   215,   216,   217
+    55,    56,    57,    58,    61,    71,    77,    83,    87,    99,
+   105,   105,   107,   108,   109,   114,   115,   116,   117,   118,
+   121,   126,   128,   130,   133,   134,   139,   140,   143,   144,
+   147,   149,   151,   152,   155,   156,   157,   160,   172,   173,
+   176,   177,   187,   188,   189,   190,   191,   192,   193,   194,
+   195,   196,   197,   198,   201,   213,   214,   215
 };
 
 static const char * const yytname[] = {   "$","error","$undefined.","EQUALS",
@@ -780,7 +778,7 @@ yyreduce:
 
 case 5:
 { 
-        gTrace<<"function declaration\n";
+        g_outputStream <<"function declaration\n";
         const std::string& string = yyvsp[-4].string;
         IcErr err = builder->addProtoType(string, getType(yyvsp[-5].integer), NULL);
         if(err != eNoErr)
@@ -803,7 +801,7 @@ case 7:
     break;}
 case 9:
 {
-        gTrace<<"function definition\n";
+        g_outputStream <<"function definition\n";
         const std::string& string = yyvsp[-4].string;
         FunctionProtoType* fp = builder->getProtoType(string);//use current dataTypeList
         if(fp == NULL) //find the prototype in the module. if not found, add a new one
@@ -823,7 +821,7 @@ case 14:
     break;}
 case 15:
 { 
-        gTrace<<"expression\n";
+        g_outputStream <<"expression\n";
         builder->insertStatement(*new ExpressionStatement(*(Expression *)yyvsp[-1].value));
     ;
     break;}
@@ -831,25 +829,25 @@ case 16:
 { builder->insertStatement(*yyvsp[-1].statement);;
     break;}
 case 17:
-{ gTrace<<"done with while loop\n"; ;
+{ g_outputStream <<"done with while loop\n"; ;
     break;}
 case 18:
-{ gTrace<<"break\n"; builder->insertStatement(*yyvsp[-1].statement); ;
+{ g_outputStream <<"break\n"; builder->insertStatement(*yyvsp[-1].statement); ;
     break;}
 case 19:
-{ gTrace<<"if else"; ;
+{ g_outputStream <<"if else"; ;
     break;}
 case 20:
-{ gTrace<<"empty statement\n";;
+{ g_outputStream <<"empty statement\n";;
     break;}
 case 21:
 {
-        gTrace<<"if statement ";
+        g_outputStream <<"if statement ";
         builder->insertStatement(*new BranchStatement(*(Expression*)yyvsp[-1].value));
     ;
     break;}
 case 22:
-{ gTrace<<"ending if block";  ;
+{ g_outputStream <<"ending if block";  ;
     break;}
 case 24:
 {
@@ -857,22 +855,22 @@ case 24:
     ;
     break;}
 case 25:
-{ gTrace<<"ending else block"; builder->endCodeBlock(); ;
+{ g_outputStream <<"ending else block"; builder->endCodeBlock(); ;
     break;}
 case 26:
 { builder->endCodeBlock(); ;
     break;}
 case 27:
-{ gTrace<<"while statement\n"; builder->insertStatement(*new WhileStatement(*(Expression*)yyvsp[-1].value)); ;
+{ g_outputStream <<"while statement\n"; builder->insertStatement(*new WhileStatement(*(Expression*)yyvsp[-1].value)); ;
     break;}
 case 28:
-{ gTrace<<"ending while loop\n"; builder->endCodeBlock(); ;
+{ g_outputStream <<"ending while loop\n"; builder->endCodeBlock(); ;
     break;}
 case 31:
 { yyval.statement = new BreakStatement(); ;
     break;}
 case 32:
-{ gTrace<<"declaration "; currentType = -1; ;
+{ g_outputStream <<"declaration "; currentType = -1; ;
     break;}
 case 33:
 { builder->addSymbol(yyvsp[0].string, getType(currentType)); ;
@@ -881,17 +879,17 @@ case 34:
 { builder->addSymbol(yyvsp[0].string, getType(currentType)); ;
     break;}
 case 35:
-{ gTrace<<"int "; yyval.integer = currentType = Type::IntegerTy; ;
+{ g_outputStream <<"int "; yyval.integer = currentType = Type::IntegerTy; ;
     break;}
 case 36:
-{ gTrace<<"float "; yyval.integer = currentType = Type::FloatTy; ;
+{ g_outputStream <<"float "; yyval.integer = currentType = Type::FloatTy; ;
     break;}
 case 37:
-{ gTrace<<"void "; yyval.integer = currentType = Type::VoidTy; ;
+{ g_outputStream <<"void "; yyval.integer = currentType = Type::VoidTy; ;
     break;}
 case 38:
 { 
-        gTrace<<"assignment";
+        g_outputStream <<"assignment";
         Symbol *identifierSymbol = builder->getSymbol(yyvsp[-3].string);
         if(identifierSymbol == NULL)
         {
@@ -912,7 +910,7 @@ case 41:
     break;}
 case 42:
 {
-        gTrace<<"identifier";
+        g_outputStream <<"identifier";
         Symbol *identifierSymbol = builder->getSymbol(yyvsp[0].string);
         if(identifierSymbol == NULL)
         {
@@ -960,7 +958,7 @@ case 54:
     break;}
 case 55:
 {
-        gTrace<<"function called";
+        g_outputStream <<"function called";
         std::list<Type*> paramTypeList;
         
         FunctionProtoType* fp = builder->getFunctionProtoType(yyvsp[-3].string);

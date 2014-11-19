@@ -32,9 +32,8 @@ void GenerateCode(CodeGenModule& M, std::string outputFile)
     file.write(pMipsCodeGen->getAssembly().c_str(), pMipsCodeGen->getAssembly().length());
     file.close();
 
-    g_outputStream() << "-------------------------------------------------------------------\n";
-    g_outputStream() << "                         Code Generation                           \n";
-    g_outputStream() << "-------------------------------------------------------------------\n";
-    g_outputStream() << pMipsCodeGen->getAssembly();
-    g_outputStream.flush();
+    g_outputStream << "-------------------------------------------------------------------\n";
+    g_outputStream << "                         Code Generation                           \n";
+    g_outputStream << "-------------------------------------------------------------------\n";
+    g_outputStream << pMipsCodeGen->getAssembly();
 }

@@ -43,7 +43,7 @@ bool LoopAnalysis::isPhiNodeInductionVar(llvm::PHINode *pPhi)
 
 void LoopAnalysis::findBasicLoopInductionVar(NaturalLoopTy *pNaturalLoop)
 {
-    g_outputStream() << "Induction Variables: \n";
+    g_outputStream << "Induction Variables: \n";
 
     // In SSA form, we can look at the Phi Nodes at loop header. Any variable
     // whose 1 definition comes from the a dominator block and another one comes
@@ -81,8 +81,7 @@ void LoopAnalysis::findBasicLoopInductionVar(NaturalLoopTy *pNaturalLoop)
                     pNaturalLoop->induction_vars.insert(pPhi);
 
                     pPhi->print(g_outputStream());
-                    g_outputStream() << "\n";
-                    g_outputStream.flush();
+                    g_outputStream << "\n";
                 }
             }
         }
@@ -123,7 +122,6 @@ bool LoopAnalysis::runOnFunction(llvm::Function &F)
 {
     ADD_HEADER("Loop Analysis");
     F.getParent()->print(g_outputStream(), nullptr);
-    g_outputStream.flush();
 
     m_pDT = &getAnalysis<llvm::DominatorTreeWrapperPass>().getDomTree();
 
@@ -149,7 +147,7 @@ bool LoopAnalysis::runOnFunction(llvm::Function &F)
             // A node can dominate itself too
             if (m_pDT->dominates(pTarget, pSrc))
             {
-                g_outputStream() << "ControlFlow BackEdges: " << pSrc->getName().str() << " --> " << (pTarget)->getName().str() << "\n";
+                g_outputStream << "ControlFlow BackEdges: " << pSrc->getName().str() << " --> " << (pTarget)->getName().str() << "\n";
 
                 NaturalLoopTy *pNaturalLoop = new NaturalLoopTy();
                 pNaturalLoop->ID = loopID++;
@@ -179,8 +177,7 @@ bool LoopAnalysis::runOnFunction(llvm::Function &F)
                                 pNaturalLoop->blocks.insert(*pi);
                                 bb_visited.push(*pi);
 
-                                g_outputStream() << "\nInserted Block: " << (*pi)->getName() << "\n";
-                                g_outputStream.flush();
+                                g_outputStream << "\nInserted Block: " << (*pi)->getName() << "\n";
                             }
                         }
                     }

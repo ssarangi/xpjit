@@ -120,7 +120,7 @@ void LICM::performLICM(
     std::queue<llvm::Instruction*>& instMoveOrder,
     llvm::DenseMap<llvm::Instruction*, llvm::Instruction*>& instToMoveBefore)
 {
-    g_outputStream() << "\nStrength Reduction Instruction List for Loop ID: " << pNaturalLoop->ID << "\n";
+    g_outputStream << "\nStrength Reduction Instruction List for Loop ID: " << pNaturalLoop->ID << "\n";
 
     llvm::DenseMap<llvm::Value*, bool> induction_var_map;
 
@@ -138,8 +138,7 @@ void LICM::performLICM(
 
     for (llvm::BasicBlock *pB : pNaturalLoop->blocks)
     {
-        g_outputStream() << "\nLooking at instructions in BB: " << pB->getName() << "\n";
-        g_outputStream.flush();
+        g_outputStream << "\nLooking at instructions in BB: " << pB->getName() << "\n";
 
         for (llvm::BasicBlock::iterator i = pB->begin(), e = pB->end();
             i != e;
@@ -152,10 +151,9 @@ void LICM::performLICM(
             llvm::BasicBlock *pTargetBB = returnTargetBBForInstMove(i, pInnermostLoop);
             if (pTargetBB && !notToRemoveInst(i))
             {
-                g_outputStream() << "\nMoving out of Loop: ";
+                g_outputStream << "\nMoving out of Loop: ";
                 i->print(g_outputStream());
-                g_outputStream() << " { " << pBB->getName() << " --> " << pTargetBB->getName() << " }";
-                g_outputStream.flush();
+                g_outputStream << " { " << pBB->getName() << " --> " << pTargetBB->getName() << " }";
 
                 llvm::Instruction *pTerminator = pTargetBB->getTerminator();
                 instToMoveBefore[i] = pTerminator;
@@ -166,8 +164,6 @@ void LICM::performLICM(
 
     for (NaturalLoopTy *pInnerLoop : pNaturalLoop->inner_loops)
         performLICM(pInnerLoop, instMoveOrder, instToMoveBefore);
-
-    g_outputStream.flush();
 }
 
 bool LICM::runOnFunction(llvm::Function &F)
@@ -201,11 +197,10 @@ bool LICM::runOnFunction(llvm::Function &F)
         pItoMove->moveBefore(pWhereToMove);
     }
 
-    g_outputStream() << "\n---------------------------------\n";
-    g_outputStream() << "After Strength Reduction:\n";
-    g_outputStream() << "---------------------------------\n";
+    g_outputStream << "\n---------------------------------\n";
+    g_outputStream << "After Strength Reduction:\n";
+    g_outputStream << "---------------------------------\n";
     F.getParent()->print(g_outputStream(), nullptr);
-    g_outputStream.flush();
 
     llvm::verifyModule(*F.getParent());
 
