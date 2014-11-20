@@ -22,13 +22,73 @@ llvm::RegisterPass<EdgeLivenessPass> T("EdgeLivenessPass", "Edge Liveness Pass",
 
 EdgeLivenessPass *createEdgeLivenessPass()
 {
-    EdgeLivenessPass *pLICM = new EdgeLivenessPass();
-    return pLICM;
+    EdgeLivenessPass *pEdgeLivenessPass = new EdgeLivenessPass();
+    return pEdgeLivenessPass;
 }
+
+void EdgeLivenessPass::toVector(llvm::BasicBlock* pOrigin, llvm::BasicBlock* pDst, std::vector<unsigned> & ans)
+{
+    unsigned int row = m_pBlockLayout->getBlockID(pOrigin);
+    unsigned int col = m_pBlockLayout->getBlockID(pDst);
+    llvm::SmallVector<bool, 50>& live_variables = m_liveSets[row][col];
+    ans.clear();
+
+    for (unsigned i = 0, e = live_variables.size(); i != e; ++i)
+    {
+        if (live_variables[i])
+        {
+            ans.push_back(i);
+        }
+    }
+}
+
+
+//===--------------------------------------------------------------------------
+// returns a string in the format (t1, t2, ..., tn), where ti is one of the
+// temporaries alive in the edge that connects the machine basic block
+// "origin" to "destiny".
+//===--------------------------------------------------------------------------
+std::string EdgeLivenessPass::toString(llvm::BasicBlock* pOrigin, llvm::BasicBlock* pDst)
+{
+    unsigned int row = m_pBlockLayout->getBlockID(pOrigin);
+    unsigned int col = m_pBlockLayout->getBlockID(pDst);
+    llvm::SmallVector<bool, 50>& live_variables = m_liveSets[row][col];
+    
+    bool isFirst = true;
+    std::ostringstream aux;
+    aux << "(";
+    for (unsigned i = 0, e = live_variables.size(); i != e; ++i)
+    {
+        if (live_variables[i])
+        {
+            if (isFirst)
+            {
+                isFirst = false;
+                aux << "t" << i;
+            }
+            else
+            {
+                aux << ", " << "t" << i;
+            }
+        }
+    }
+    aux << ")";
+    return aux.str();
+}
+
 
 void EdgeLivenessPass::initializeDataStructures(llvm::Function &F)
 {
     unsigned int numBlocks = F.size();
+
+    m_numVReg = 0;
+    for (llvm::Function::iterator bb = F.begin(), bbe = F.end();
+        bb != bbe;
+        ++bb)
+    {
+        m_numVReg += bb->size();
+    }
+
     m_liveSets.resize(numBlocks);
     for (unsigned int i = 0; i < numBlocks; ++i)
         m_liveSets[i].resize(numBlocks);
@@ -108,7 +168,7 @@ void EdgeLivenessPass::setAlive(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDe
     unsigned int instructionID = m_pBlockLayout->getInstructionID(pI);
 
     llvm::SmallVector<bool, 50>& edge = m_liveSets[row][col];
-    if (edge.size() == 0)
+    if (edge.size() <= 0)
         edge.assign(m_numVReg, false);
 
     edge[instructionID] = true;
@@ -146,15 +206,13 @@ void EdgeLivenessPass::computeLiveness(llvm::BasicBlock *pBB)
         {
             if (!llvm::isa<llvm::Constant>(op))
             {
-                unsigned int instrNum = m_pBlockLayout->getInstructionID(*op);
                 if (llvm::PHINode *pPhi = llvm::dyn_cast<llvm::PHINode>(i))
                 {
                     setAlive(pPhi->getIncomingBlock(*op), pBB, pPhi);
                     handleUse(pPhi, pBB);
                 }
-                else
+                else if (llvm::Instruction *pI = llvm::dyn_cast<llvm::Instruction>(op))
                 {
-                    llvm::Instruction *pI = llvm::dyn_cast<llvm::Instruction>(op);
                     handleUse(pI, pBB);
                 }
             }
@@ -165,6 +223,8 @@ void EdgeLivenessPass::computeLiveness(llvm::BasicBlock *pBB)
 bool EdgeLivenessPass::runOnFunction(llvm::Function &F)
 {
     m_pBlockLayout = &getAnalysis<BlockLayoutPass>();
+
+    ADD_HEADER("Edge Liveness Pass");
 
     initializeDataStructures(F);
 

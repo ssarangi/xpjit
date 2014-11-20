@@ -26,7 +26,7 @@ char DominanceTreeConstructor::ID = 0;
 //                "Dominance Frontier Construction", true, true)
 
 bool DominanceTreeConstructor::runOnFunction(llvm::Function &F){
-    g_outputStream <<" Constructing Dominator Tree for "<<F.getName(); 
+    g_outputStream <<" Constructing Dominator Tree for "<<F.getName() << "\n"; 
    
     // Keith D. Cooper's algorithm for computing dominators
     

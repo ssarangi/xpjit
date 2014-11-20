@@ -23,6 +23,8 @@ llvm::RegisterPass<BlockLayoutPass> T("BlockLayoutPass", "Block Layout Analysis 
 
 bool BlockLayoutPass::runOnFunction(llvm::Function &F)
 {
+    ADD_HEADER("Block Layout Pass");
+
     llvm::SmallPtrSet<llvm::BasicBlock*, 16> visited;
     llvm::BasicBlock *pEntryBB = F.begin();
 
@@ -33,6 +35,7 @@ bool BlockLayoutPass::runOnFunction(llvm::Function &F)
         di != de;
     ++di)
     {
+        g_outputStream << di->getName() << " ; " << bb_no << "\n";
         m_reverseOrderBlockLayout.push(*di);
         m_blockToId[*di] = bb_no;
         m_idToBlock[bb_no++] = *di;
@@ -45,6 +48,8 @@ bool BlockLayoutPass::runOnFunction(llvm::Function &F)
             if (llvm::PHINode *pPhi = llvm::dyn_cast<llvm::PHINode>(ii))
                 m_PhiNodesInBB[*di].push_back(pPhi);
 
+            ii->print(g_outputStream());
+            g_outputStream << "; {" << instructionID << " , " << instruction_offset << " }\n";
             m_instructionToOffset[ii] = instruction_offset++;
             m_instructionToID[ii] = instructionID++;
         }
@@ -73,6 +78,7 @@ unsigned int BlockLayoutPass::getInstructionID(llvm::Instruction *pI)
 
 unsigned int BlockLayoutPass::getInstructionID(llvm::Value *pV)
 {
+    pV->dump();
     assert(m_instructionToID.find(pV) != m_instructionToID.end());
     return m_instructionToID[pV];
 }

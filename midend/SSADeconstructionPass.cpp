@@ -19,6 +19,7 @@ SSADeconstructionPass *createSSADeconstructionPass()
 bool SSADeconstructionPass::runOnFunction(llvm::Function &F)
 {
     ADD_HEADER("SSA Deconstruction Pass");
+    m_pEdgeLiveness = &getAnalysis<EdgeLivenessPass>();
 
     convertToCSSA(F);
 
@@ -29,8 +30,6 @@ bool SSADeconstructionPass::runOnFunction(llvm::Function &F)
 
     return true;
 }
-
-
 
 void SSADeconstructionPass::convertToCSSA(llvm::Function &F)
 {

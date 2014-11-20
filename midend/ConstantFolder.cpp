@@ -5,6 +5,6 @@ char ConstantFolder::ID;
 
 bool ConstantFolder::runOnFunction(llvm::Function &F)
 {
-    g_outputStream <<"Constant Folding "<<F.getName();
+    g_outputStream <<"Constant Folding " << F.getName() << "\n";
     return false;
 }

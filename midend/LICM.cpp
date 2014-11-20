@@ -169,9 +169,10 @@ void LICM::performLICM(
 
 bool LICM::runOnFunction(llvm::Function &F)
 {
-    ADD_HEADER("Loop Invariant Code Motion");
     m_pDT = &getAnalysis<llvm::DominatorTreeWrapperPass>().getDomTree();
     m_pLoopAnalysis = &getAnalysis<LoopAnalysis>();
+
+    ADD_HEADER("Loop Invariant Code Motion");
 
     LoopAnalysis *pLoopAnalysis = &(*m_pLoopAnalysis);
 

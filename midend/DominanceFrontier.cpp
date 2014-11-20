@@ -23,7 +23,7 @@ char DominanceFrontier::ID = 0;
 
 bool DominanceFrontier::runOnFunction(Function &F)
 {
-    g_outputStream << " Calculating Dominator Frontier for " << F.getName();
+    g_outputStream << " Calculating Dominator Frontier for " << F.getName() << "\n";
 
     DominanceTreeConstructor& DT = getAnalysis<DominanceTreeConstructor>(); 
     std::map<BasicBlock*, BasicBlock*>& doms = DT.getDoms();

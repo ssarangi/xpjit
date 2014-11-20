@@ -36,6 +36,9 @@ public:
     EdgeLivenessPass()
         : llvm::FunctionPass(ID)
         , m_pDT(nullptr)
+        , m_pPDT(nullptr)
+        , m_pBlockLayout(nullptr)
+        , m_numVReg(0)
     {
         initializeDominatorTreeWrapperPassPass(*llvm::PassRegistry::getPassRegistry());
         initializePostDominatorTreePass(*llvm::PassRegistry::getPassRegistry());
@@ -43,22 +46,16 @@ public:
 
     virtual bool runOnFunction(llvm::Function &F);
 
-    bool isLive(const llvm::BasicBlock *pOrigin, const llvm::BasicBlock *pDst, const unsigned int vreg) const;
-    bool isLiveInBlock(llvm::BasicBlock *pDefBB, llvm::BasicBlock *pQueryBB);
-    bool isLiveOutBlock(llvm::Value *pQuery, llvm::BasicBlock *pBlock);
-
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
     {
         AU.addRequired<llvm::DominatorTreeWrapperPass>();
         AU.addRequired<llvm::PostDominatorTree>();
-        AU.addRequired<LoopAnalysis>();
         AU.addRequired<BlockLayoutPass>();
         AU.setPreservesAll();
     };
 
-private:
-    void toVector(const llvm::BasicBlock *pOrigin, const llvm::BasicBlock *pDestination, std::vector<unsigned int>& ans) const;
-    std::string toString(const llvm::BasicBlock *pOrigin, const llvm::BasicBlock *pDestination) const;
+    void toVector(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination, std::vector<unsigned int>& ans);
+    std::string toString(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination);
     
     bool isAlive(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDst, llvm::Instruction *pI);
     const llvm::SmallVector<bool, 50>& getLiveVariables(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination) const;
@@ -78,10 +75,10 @@ private:
 private:
     llvm::DominatorTree *m_pDT;
     llvm::PostDominatorTree *m_pPDT;
-    unsigned int m_numVReg;
-
-    llvm::SmallVector< llvm::SmallVector< llvm::SmallVector<bool, 50>, 50>, 50> m_liveSets;
     BlockLayoutPass *m_pBlockLayout;
+
+    unsigned int m_numVReg;
+    llvm::SmallVector< llvm::SmallVector< llvm::SmallVector<bool, 50>, 50>, 50> m_liveSets;
 };
 
 EdgeLivenessPass *createEdgeLivenessPass();

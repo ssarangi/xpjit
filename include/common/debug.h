@@ -22,7 +22,8 @@ using namespace std;
 #endif
 
 #define ADD_HEADER(txt) \
-{                                                                                                                  \
+{                                                                                                         \
+    g_outputStream << "\n";                                                                               \
     g_outputStream << "-------------------------------------------------------------------\n";            \
     g_outputStream << "                         " << txt << "                        \n";                 \
     g_outputStream << "-------------------------------------------------------------------\n";            \

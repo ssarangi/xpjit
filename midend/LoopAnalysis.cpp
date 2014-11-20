@@ -121,7 +121,6 @@ void LoopAnalysis::removeInnerLoopNodeDFS(NaturalLoopTy *pLoop, NaturalLoopTy *p
 bool LoopAnalysis::runOnFunction(llvm::Function &F)
 {
     ADD_HEADER("Loop Analysis");
-    F.getParent()->print(g_outputStream(), nullptr);
 
     m_pDT = &getAnalysis<llvm::DominatorTreeWrapperPass>().getDomTree();
 

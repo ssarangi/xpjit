@@ -5,6 +5,8 @@
 Adapted from the lecture notes: http://www.cs.rice.edu/~keith/512/Lectures/14SSA-II-1up.pdf
 */
 
+#include <midend/EdgeLivenessPass.h>
+
 #include "common/llvm_warnings_push.h"
 #include <llvm/Pass.h>
 #include <llvm/IR/Module.h>
@@ -31,6 +33,7 @@ public:
     static char ID; // Pass identification, replacement for typeid
     SSADeconstructionPass()
         : llvm::FunctionPass(ID)
+        , m_pEdgeLiveness(nullptr)
     {
     }
 
@@ -39,6 +42,7 @@ public:
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
     {
         AU.addRequired<llvm::DominatorTreeWrapperPass>();
+        AU.addRequired<EdgeLivenessPass>();
         AU.setPreservesCFG();
     };
 
@@ -46,6 +50,7 @@ public:
     OldNewPhiNodePair visitPhi(llvm::PHINode *pPhi);
 
 private:
+    EdgeLivenessPass *m_pEdgeLiveness;
 };
 
 SSADeconstructionPass *createSSADeconstructionPass();
