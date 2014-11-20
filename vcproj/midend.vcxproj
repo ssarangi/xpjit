@@ -84,9 +84,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\midend\Analysis.cpp" />
+    <ClCompile Include="..\midend\BlockLayoutPass.cpp" />
     <ClCompile Include="..\midend\ConstantFolder.cpp" />
     <ClCompile Include="..\midend\DominanceFrontier.cpp" />
     <ClCompile Include="..\midend\DominanceTreeConstructor.cpp" />
+    <ClCompile Include="..\midend\EdgeLivenessPass.cpp" />
     <ClCompile Include="..\midend\LICM.cpp" />
     <ClCompile Include="..\midend\Liveness_Benoit.cpp" />
     <ClCompile Include="..\midend\LivenessHangs.cpp" />
@@ -97,10 +99,12 @@
     <ClCompile Include="..\midend\PassManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\midend\BlockLayoutPass.h" />
     <ClInclude Include="..\include\midend\ConstantFolder.h" />
     <ClInclude Include="..\include\midend\DominanceFrontier.h" />
     <ClInclude Include="..\include\midend\DominanceTree.h" />
     <ClInclude Include="..\include\midend\DominanceTreeConstructor.h" />
+    <ClInclude Include="..\include\midend\EdgeLivenessPass.h" />
     <ClInclude Include="..\include\midend\ITransform.h" />
     <ClInclude Include="..\include\midend\Liveness_Benoit.h" />
     <ClInclude Include="..\include\midend\LiveRange.h" />

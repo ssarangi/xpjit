@@ -51,6 +51,12 @@
     <ClCompile Include="..\midend\SSADeconstructionPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\midend\EdgeLivenessPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midend\BlockLayoutPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\midend\ConstantFolder.h">
@@ -93,6 +99,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\midend\SSADeconstructionPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\midend\EdgeLivenessPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\midend\BlockLayoutPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
