@@ -30,6 +30,8 @@ bool SSADeconstructionPass::runOnFunction(llvm::Function &F)
     return true;
 }
 
+
+
 void SSADeconstructionPass::convertToCSSA(llvm::Function &F)
 {
     for (llvm::Function::iterator bb = F.begin(), be = F.end();
@@ -64,7 +66,6 @@ void SSADeconstructionPass::convertToCSSA(llvm::Function &F)
             pOldPhi->removeFromParent();
         }
     }
-
 }
 
 OldNewPhiNodePair SSADeconstructionPass::visitPhi(llvm::PHINode *pPhi)
