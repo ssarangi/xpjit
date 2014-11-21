@@ -1,6 +1,8 @@
 #ifndef __PHI_DOMINANCE_FOREST__
 #define __PHI_DOMINANCE_FOREST__
 
+#include <midend/EdgeLivenessPass.h>
+
 #include "common/llvm_warnings_push.h"
 #include <llvm/Pass.h>
 #include <llvm/IR/Module.h>
@@ -24,6 +26,7 @@ public:
     PhiDominanceForestPass()
         : llvm::FunctionPass(ID)
         , m_pDT(nullptr)
+        , m_pEdgeLiveness(nullptr)
     {
     }
 
@@ -32,6 +35,7 @@ public:
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
     {
         AU.addRequired<llvm::DominatorTreeWrapperPass>();
+        AU.addRequired<EdgeLivenessPass>();
         AU.setPreservesCFG();
     };
 
@@ -54,6 +58,8 @@ private:
 
 private:
     llvm::DominatorTree *m_pDT;
+    EdgeLivenessPass *m_pEdgeLiveness;
+
     llvm::DenseMap<llvm::BasicBlock*, std::set<llvm::Instruction*>> m_congruenceClass;
     llvm::DenseMap<llvm::Instruction*, PhiVarNode*> m_phiCongruentClass;
 };

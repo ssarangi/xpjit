@@ -51,5 +51,7 @@ void PhiDominanceForestPass::buildDominanceForest(llvm::Function &F)
 
 bool PhiDominanceForestPass::runOnFunction(llvm::Function &F)
 {
+    m_pDT = &getAnalysis<llvm::DominatorTreeWrapperPass>().getDomTree();
+    m_pEdgeLiveness = &getAnalysis<EdgeLivenessPass>();
     buildDominanceForest(F);
 }
