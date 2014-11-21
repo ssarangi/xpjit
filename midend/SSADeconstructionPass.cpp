@@ -60,7 +60,8 @@ void SSADeconstructionPass::convertToCSSA(llvm::Function &F)
             llvm::PHINode *pNewPhi = oldNewPair.second;
 
             std::string newPhiName = pNewPhi->getName().substr(0, pNewPhi->getName().size() - std::string("_dash").length());
-            llvm::Value *pBitcast = llvm::BitCastInst::Create(llvm::Instruction::CastOps::BitCast, pNewPhi, pNewPhi->getType(), newPhiName, pInstToInsertMovBefore);
+            llvm::Instruction *pBitcast = llvm::BitCastInst::Create(llvm::Instruction::CastOps::BitCast, pNewPhi, pNewPhi->getType(), newPhiName, pInstToInsertMovBefore);
+            m_phiResultPartitions.insert(pBitcast);
             pOldPhi->replaceAllUsesWith(pBitcast);
             pOldPhi->removeFromParent();
         }
@@ -81,38 +82,32 @@ OldNewPhiNodePair SSADeconstructionPass::visitPhi(llvm::PHINode *pPhi)
         llvm::BasicBlock *pPredBB = pPhi->getIncomingBlock(*op);
         llvm::TerminatorInst *pTerminator = pPredBB->getTerminator();
 
-        llvm::Value *pOp = nullptr;
+        llvm::Instruction *pI = nullptr;
 
-        //if (llvm::isa<llvm::Constant>(*op))
-        //{
-        //    pOp = *op;
-        //}
-        //else
-        {
-            // Now insert a new copy instruction here.
-            llvm::Value *pC = nullptr;
+        // Now insert a new copy instruction here.
+        llvm::Value *pC = nullptr;
 
-            llvm::Value *pI = llvm::cast<llvm::Value>(op);
-            llvm::Type *pType = pI->getType();
+        llvm::Value *pI = llvm::cast<llvm::Value>(op);
+        llvm::Type *pType = pI->getType();
 
-            llvm::Type *pIntTy = builder.getInt32Ty();
-            llvm::Type *pFloatTy = builder.getFloatTy();
-            llvm::Type *pDoubleTy = builder.getDoubleTy();
+        llvm::Type *pIntTy = builder.getInt32Ty();
+        llvm::Type *pFloatTy = builder.getFloatTy();
+        llvm::Type *pDoubleTy = builder.getDoubleTy();
 
-            if (pI->getType()->isPointerTy())
-                assert(0 && "Pointer types are not handled");
+        if (pI->getType()->isPointerTy())
+            assert(0 && "Pointer types are not handled");
 
-            if (pType == pIntTy)
-                pC = builder.getInt32(1);
-            else if (pType == pFloatTy)
-                pC = llvm::ConstantFP::get(builder.getFloatTy(), 1.0f);
-            else
-                assert(0 && "Other types not handled yet");
+        if (pType == pIntTy)
+            pC = builder.getInt32(1);
+        else if (pType == pFloatTy)
+            pC = llvm::ConstantFP::get(builder.getFloatTy(), 1.0f);
+        else
+            assert(0 && "Other types not handled yet");
 
-            pOp = llvm::BitCastInst::Create(llvm::Instruction::CastOps::BitCast, pI, pType, pI->getName() + "_dash", pTerminator);
-        }
+        pI = llvm::BitCastInst::Create(llvm::Instruction::CastOps::BitCast, pI, pType, pI->getName() + "_dash", pTerminator);
+        m_phiParameterPartitions.insert(pI);
 
-        pNewPhi->addIncoming(pOp, pPredBB);
+        pNewPhi->addIncoming(pI, pPredBB);
     }
 
     return std::make_pair(pPhi, pNewPhi);

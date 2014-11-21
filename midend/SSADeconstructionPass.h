@@ -87,6 +87,8 @@ public:
 
 private:
     EdgeLivenessPass *m_pEdgeLiveness;
+    std::set<llvm::Instruction*> m_phiParameterPartitions;
+    std::set<llvm::Instruction*> m_
 };
 
 SSADeconstructionPass *createSSADeconstructionPass();

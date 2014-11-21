@@ -90,6 +90,11 @@ public:
         return result;
     }
 
+    bool overlaps(const LiveRangeInfo &LRI)
+    {
+        return (this->kill_id < LRI.def_id | this->def_id > LRI.kill_id);
+    }
+
     void add_basic_block(llvm::BasicBlock *pBlock)
     {
         unsigned int blockNo = pBlockLayout->getBlockID(pBlock);
