@@ -61,7 +61,7 @@ void SSADeconstructionPass::convertToCSSA(llvm::Function &F)
 
             std::string newPhiName = pNewPhi->getName().substr(0, pNewPhi->getName().size() - std::string("_dash").length());
             llvm::Instruction *pBitcast = llvm::BitCastInst::Create(llvm::Instruction::CastOps::BitCast, pNewPhi, pNewPhi->getType(), newPhiName, pInstToInsertMovBefore);
-            m_phiResultPartitions.insert(pBitcast);
+            // m_phiResultPartitions.insert(pBitcast);
             pOldPhi->replaceAllUsesWith(pBitcast);
             pOldPhi->removeFromParent();
         }
@@ -81,8 +81,6 @@ OldNewPhiNodePair SSADeconstructionPass::visitPhi(llvm::PHINode *pPhi)
     {
         llvm::BasicBlock *pPredBB = pPhi->getIncomingBlock(*op);
         llvm::TerminatorInst *pTerminator = pPredBB->getTerminator();
-
-        llvm::Instruction *pI = nullptr;
 
         // Now insert a new copy instruction here.
         llvm::Value *pC = nullptr;
@@ -105,7 +103,7 @@ OldNewPhiNodePair SSADeconstructionPass::visitPhi(llvm::PHINode *pPhi)
             assert(0 && "Other types not handled yet");
 
         pI = llvm::BitCastInst::Create(llvm::Instruction::CastOps::BitCast, pI, pType, pI->getName() + "_dash", pTerminator);
-        m_phiParameterPartitions.insert(pI);
+        // m_phiParameterPartitions.insert(pI);
 
         pNewPhi->addIncoming(pI, pPredBB);
     }
