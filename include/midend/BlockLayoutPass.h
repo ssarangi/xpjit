@@ -19,6 +19,7 @@
 #include <llvm/ADT/SparseSet.h>
 #include <llvm/IR/CFG.h>
 #include <llvm/IR/Dominators.h>
+#include <llvm/Analysis/PostDominators.h>
 #include "common/llvm_warnings_pop.h"
 
 #include <set>
@@ -31,8 +32,10 @@ public:
     BlockLayoutPass()
         : llvm::FunctionPass(ID)
         , m_pDT(nullptr)
+        , m_pPDT(nullptr)
     {
-        initializeDominatorTreeWrapperPassPass(*llvm::PassRegistry::getPassRegistry());
+            initializeDominatorTreeWrapperPassPass(*llvm::PassRegistry::getPassRegistry());
+            initializePostDominatorTreePass(*llvm::PassRegistry::getPassRegistry());
     }
 
     virtual bool runOnFunction(llvm::Function &F);
@@ -40,6 +43,7 @@ public:
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
     {
         AU.addRequired<llvm::DominatorTreeWrapperPass>();
+        AU.addRequired<llvm::PostDominatorTree>();
         AU.setPreservesAll();
     };
 
@@ -48,15 +52,22 @@ public:
     unsigned int getInstructionID(llvm::Instruction *pI);
     unsigned int getInstructionID(llvm::Value *pV);
     unsigned int getInstructionOffset(llvm::Instruction *pI);
+    
+    llvm::BasicBlock* getBlockFromInstructionID(unsigned int instr_id);
     std::stack<llvm::BasicBlock*> getReverseOrderBlockLayout();
     llvm::SmallVector<llvm::PHINode*, 5> getPhiNodesForBlock(llvm::BasicBlock *pBB);
     
+    llvm::PostDominatorTree* getPostDomTree() { return m_pPDT; }
+    llvm::DominatorTree* getDomTree() { return m_pDT; }
+
 private:
     llvm::DominatorTree *m_pDT;
+    llvm::PostDominatorTree *m_pPDT;
     llvm::DenseMap<llvm::BasicBlock*, unsigned int> m_blockToId;
     llvm::DenseMap<unsigned int, llvm::BasicBlock*> m_idToBlock;
     llvm::DenseMap<llvm::Value*, unsigned int> m_instructionToID;
     llvm::DenseMap<llvm::Value*, unsigned int> m_instructionToOffset;
+    llvm::DenseMap<unsigned int, llvm::BasicBlock*> m_instructionIDtoBlock;
     std::stack<llvm::BasicBlock*> m_reverseOrderBlockLayout;
     llvm::DenseMap<llvm::BasicBlock*, llvm::SmallVector<llvm::PHINode*, 5>> m_PhiNodesInBB;
 };

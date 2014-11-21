@@ -35,21 +35,15 @@ public:
     static char ID; // Pass identification, replacement for typeid
     EdgeLivenessPass()
         : llvm::FunctionPass(ID)
-        , m_pDT(nullptr)
-        , m_pPDT(nullptr)
         , m_pBlockLayout(nullptr)
         , m_numVReg(0)
     {
-        initializeDominatorTreeWrapperPassPass(*llvm::PassRegistry::getPassRegistry());
-        initializePostDominatorTreePass(*llvm::PassRegistry::getPassRegistry());
     }
 
     virtual bool runOnFunction(llvm::Function &F);
 
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
     {
-        AU.addRequired<llvm::DominatorTreeWrapperPass>();
-        AU.addRequired<llvm::PostDominatorTree>();
         AU.addRequired<BlockLayoutPass>();
         AU.setPreservesAll();
     };
@@ -73,8 +67,6 @@ public:
     void handleUse(llvm::Instruction *pI, llvm::BasicBlock *pBlock);
 
 private:
-    llvm::DominatorTree *m_pDT;
-    llvm::PostDominatorTree *m_pPDT;
     BlockLayoutPass *m_pBlockLayout;
 
     unsigned int m_numVReg;

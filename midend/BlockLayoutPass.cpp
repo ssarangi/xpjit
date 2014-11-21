@@ -23,6 +23,9 @@ llvm::RegisterPass<BlockLayoutPass> T("BlockLayoutPass", "Block Layout Analysis 
 
 bool BlockLayoutPass::runOnFunction(llvm::Function &F)
 {
+    m_pDT = &getAnalysis<llvm::DominatorTreeWrapperPass>().getDomTree();
+    m_pPDT = &getAnalysis<llvm::PostDominatorTree>();
+
     ADD_HEADER("Block Layout Pass");
 
     llvm::SmallPtrSet<llvm::BasicBlock*, 16> visited;
@@ -89,6 +92,12 @@ unsigned int BlockLayoutPass::getInstructionOffset(llvm::Instruction *pI)
     return m_instructionToOffset[pI];
 }
 
+llvm::BasicBlock* BlockLayoutPass::getBlockFromInstructionID(unsigned int instr_id)
+{
+    assert(m_instructionIDtoBlock.find(instr_id) != m_instructionIDtoBlock.end());
+    return m_instructionIDtoBlock[instr_id];
+}
+
 std::stack<llvm::BasicBlock*> BlockLayoutPass::getReverseOrderBlockLayout()
 {
     return m_reverseOrderBlockLayout;
@@ -96,6 +105,11 @@ std::stack<llvm::BasicBlock*> BlockLayoutPass::getReverseOrderBlockLayout()
 
 llvm::SmallVector<llvm::PHINode*, 5> BlockLayoutPass::getPhiNodesForBlock(llvm::BasicBlock *pBB)
 {
-    assert(m_PhiNodesInBB.find(pBB) != m_PhiNodesInBB.end());
+    if (m_PhiNodesInBB.find(pBB) == m_PhiNodesInBB.end())
+    {
+        llvm::SmallVector<llvm::PHINode*, 5> noPhi;
+        return noPhi;
+    }
+
     return m_PhiNodesInBB[pBB];
 }

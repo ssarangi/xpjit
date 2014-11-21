@@ -6,6 +6,7 @@ Adapted from the lecture notes: http://www.cs.rice.edu/~keith/512/Lectures/14SSA
 */
 
 #include <midend/EdgeLivenessPass.h>
+#include <midend/LiveRange.h>
 
 #include "common/llvm_warnings_push.h"
 #include <llvm/Pass.h>
@@ -27,6 +28,40 @@ Adapted from the lecture notes: http://www.cs.rice.edu/~keith/512/Lectures/14SSA
 
 typedef std::pair<llvm::PHINode*, llvm::PHINode*> OldNewPhiNodePair;
 
+struct Line
+{
+    unsigned int start;
+    unsigned int end;
+
+    Line(unsigned int s, unsigned int e)
+    {
+        start = s;
+        end = e;
+    }
+
+    bool contains(unsigned int i) const
+    {
+        return start <= i && i < end;
+    }
+
+    bool operator<(const Line& l)
+    {
+        return end <= l.start;
+    }
+
+    bool overlap(const Line& l)
+    {
+        return l.contains(start) || l.contains(end);
+    }
+};
+
+class PhiEquivalenceClass
+{
+    // typedef std::list<Line> Lines;
+
+    bool overlap(const PhiEquivalenceClass& phiEq) const;
+};
+
 class SSADeconstructionPass : public llvm::FunctionPass
 {
 public:
@@ -43,6 +78,7 @@ public:
     {
         AU.addRequired<llvm::DominatorTreeWrapperPass>();
         AU.addRequired<EdgeLivenessPass>();
+        AU.addRequired<LiveRange>();
         AU.setPreservesCFG();
     };
 
