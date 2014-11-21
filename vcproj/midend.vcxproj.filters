@@ -57,6 +57,9 @@
     <ClCompile Include="..\midend\BlockLayoutPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\midend\PhiDominanceForestPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\midend\ConstantFolder.h">
@@ -105,6 +108,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\midend\BlockLayoutPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midend\PhiDominanceForestPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
