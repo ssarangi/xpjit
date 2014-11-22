@@ -107,6 +107,43 @@ bool EdgeLivenessPass::isAlive(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDst
     return edge[instructionID];
 }
 
+bool EdgeLivenessPass::isLiveIn(llvm::Instruction *pI, llvm::BasicBlock *pBlock)
+{
+    unsigned int row = m_pBlockLayout->getBlockID(pI->getParent());
+    unsigned int col = m_pBlockLayout->getBlockID(pBlock);
+    unsigned int instructionID = m_pBlockLayout->getInstructionID(pI);
+
+    llvm::SmallVector<bool, 50>& edge = m_liveSets[row][col];
+    if (edge.size() == 0)
+        return false;
+
+    return edge[instructionID];
+}
+
+bool EdgeLivenessPass::isLiveOut(llvm::Instruction *pI, llvm::BasicBlock *pBlock)
+{
+    unsigned int row = m_pBlockLayout->getBlockID(pBlock);
+    unsigned int instructionID = m_pBlockLayout->getInstructionID(pI);
+
+    bool present = false;
+
+    for (llvm::succ_iterator succ_bb = llvm::succ_begin(pBlock), succ_end = llvm::succ_end(pBlock);
+        succ_bb != succ_end;
+        ++succ_bb)
+    {
+        unsigned int col = m_pBlockLayout->getBlockID(*succ_bb);
+        llvm::SmallVector<bool, 50>& edge = m_liveSets[row][col];
+        if (edge.size() == 0)
+            return false;
+
+        present |= edge[instructionID];
+        if (present)
+            break;
+    }
+
+    return present;
+}
+
 const llvm::SmallVector<bool, 50>& EdgeLivenessPass::getLiveVariables(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination) const
 {
     unsigned int row = m_pBlockLayout->getBlockID(pOrigin);

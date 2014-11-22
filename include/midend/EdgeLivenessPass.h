@@ -51,6 +51,9 @@ public:
     void toVector(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination, std::vector<unsigned int>& ans);
     std::string toString(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination);
     
+    bool isLiveIn(llvm::Instruction *pI, llvm::BasicBlock *pBlock);
+    bool isLiveOut(llvm::Instruction *pI, llvm::BasicBlock *pBlock);
+
     bool isAlive(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDst, llvm::Instruction *pI);
     const llvm::SmallVector<bool, 50>& getLiveVariables(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination) const;
     
