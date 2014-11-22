@@ -90,7 +90,7 @@ public:
         return result;
     }
 
-    bool overlaps(const LiveRangeInfo &LRI)
+    bool interferes(const LiveRangeInfo &LRI)
     {
         return ((this->kill_id < LRI.def_id) | (this->def_id > LRI.kill_id));
     }
@@ -205,6 +205,7 @@ public:
 
     void visitInstruction(llvm::Instruction *pI);
     void visitPhiNode(llvm::PHINode *pPhi);
+    bool interferes(llvm::Instruction *pA, llvm::Instruction *pB);
 
 private:
     void unionLiveInSetsOfSuccessors(llvm::BasicBlock *pBB);

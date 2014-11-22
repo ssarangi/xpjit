@@ -59,70 +59,6 @@ void StrongPhiEliminationPass::computeDFS(llvm::Function &F)
     }
 }
 
-
-// Checks the interference between 2 instructions. 
-static bool interferes(llvm::Instruction *pA, llvm::Instruction *pB, llvm::BasicBlock *pScan, LiveRange &LR, unsigned int mode)
-{
-    llvm::Instruction *pDef = nullptr;
-    llvm::Instruction *pKill = nullptr;
-
-    // The code is still in SSA form at this point, so there is only one definition
-    bool interference = false;
-
-    // Walk the block, checking for interferences
-    for (llvm::BasicBlock::iterator ii = pScan->begin(), ie = pScan->end();
-        ii != ie;
-        ++ii)
-    {
-        llvm::Instruction *pCurr = ii;
-
-        // Same defining block
-        if (mode == 0)
-        {
-            if (pCurr == pA)
-            {
-                // If we find our first definition, save it
-                if (!pDef)
-                {
-                    pDef = pCurr;
-                    // If there's already an unkilled definition, then this is an interference
-                }
-                else if (!pKill)
-                {
-                    interference = true;
-                    break;
-                    // If there's a definition following by a KillInst, then they can't interfere
-                }
-                else
-                {
-                    interference = false;
-                    break;
-                }
-            }
-            else if (pCurr == pB)
-            {
-                if (!pDef)
-                {
-                    pDef = pCurr;
-                }
-                else if (!pKill)
-                {
-                    interference = true;
-                    break;
-                }
-                else
-                {
-                    interference = false;
-                    break;
-                }
-
-                // Store the kill instructions if they match up with the definition
-            }
-            else if (pCurr->killsRegister(pA))
-        }
-    }
-}
-
 // processBlock - Determine how to break up Phi's in the current block. Each Phi is
 // broken up by some combination of renaming its operands and inserting copies. This
 // method is responsible for determining which operands receive what treatment
@@ -210,27 +146,27 @@ void StrongPhiEliminationPass::processBlock(llvm::BasicBlock *pBB)
 
             llvm::DominatorTree& DT = getAnalysis<llvm::DominatorTree>();
 
-            // Determine the block we need to scan and the relationship between the two registers
-            llvm::BasicBlock *pScan = nullptr;
-            unsigned int mode = 0;
-            if (p.first->getParent() == p.second->getParent())
-            {
-                pScan = p.first->getParent();
-                mode = 0; // Same block
-            }
-            else if (DT.dominates(p.first->getParent(), p.second->getParent()))
-            {
-                pScan = p.second->getParent();
-                mode = 1; // First dominates second
-            }
-            else
-            {
-                pScan = p.first->getParent();
-                mode = 2; // Second dominates first
-            }
+            //// Determine the block we need to scan and the relationship between the two registers
+            //llvm::BasicBlock *pScan = nullptr;
+            //unsigned int mode = 0;
+            //if (p.first->getParent() == p.second->getParent())
+            //{
+            //    pScan = p.first->getParent();
+            //    mode = 0; // Same block
+            //}
+            //else if (DT.dominates(p.first->getParent(), p.second->getParent()))
+            //{
+            //    pScan = p.second->getParent();
+            //    mode = 1; // First dominates second
+            //}
+            //else
+            //{
+            //    pScan = p.first->getParent();
+            //    mode = 2; // Second dominates first
+            //}
 
             // If there's an interference, we need to insert copies
-            if (interferes(p.first, p.second, pScan, LI, mode))
+            if (LR.interferes(p.first, p.second))
             {
                 // Insert the copies for first
                 for (int i = 0; i < pPhi->getNumIncomingValues(); ++i)
@@ -285,6 +221,23 @@ bool StrongPhiEliminationPass::runOnFunction(llvm::Function &F)
     {
         if (!bb->empty() && bb->begin()->getOpcode() == llvm::Instruction::PHI)
             processBlock(bb);
+    }
+
+    // Break interferences where two different phis want to coalesce in the same register
+    std::set<llvm::Instruction*> seen;
+    typedef std::map<llvm::Instruction*, std::map<llvm::Instruction*, llvm::BasicBlock*>> RenameSetType;
+
+    for (RenameSetType::iterator I = m_renameSets.begin(), E = m_renameSets.end();
+        I != E; ++I)
+    {
+        for (std::map<llvm::Instruction*, llvm::BasicBlock*>::iterator
+            OI = I->second.begin(), OE = I->second.end(); OI != OE;)
+        {
+            if (!seen.count(OI->first))
+            {
+
+            }
+        }
     }
 
     return false;

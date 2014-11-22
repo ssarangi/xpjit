@@ -61,6 +61,14 @@ bool LiveRange::isLiveOutBlock(llvm::Value *pQuery, llvm::BasicBlock *pBlock)
     return true;
 }
 
+bool LiveRange::interferes(llvm::Instruction *pA, llvm::Instruction *pB)
+{
+    LiveRangeInfo *pLRIa = findOrCreateLiveRange(pA);
+    LiveRangeInfo *pLRIb = findOrCreateLiveRange(pB);
+
+    return pLRIa->interferes(*pLRIb);
+}
+
 LiveRangeInfo* LiveRange::createNewLiveRange(llvm::Value *pV)
 {
     llvm::Instruction *pI = llvm::cast<llvm::Instruction>(pV);
