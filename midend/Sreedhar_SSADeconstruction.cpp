@@ -90,15 +90,19 @@ void Sreedhar_SSADeconstructionPass::determineCopiesNeeded(llvm::Instruction *pI
     }
 }
 
+bool Sreedhar_SSADeconstructionPass::areUnresolvedInstructionsPresent(const InstToInstSet &I)
+{
+    for (auto inst : I.instSet)
+    {
+        if (m_resolved.find(inst) != m_resolved.end())
+            return true;
+    }
+
+    return false;
+}
+
 void Sreedhar_SSADeconstructionPass::processUnresolvedNeighbors()
 {
-    // Convert to a sorted type
-    struct InstToInstSet
-    {
-        llvm::Instruction *pI;
-        InstructionSetTy instSet;
-    };
-
     std::vector<InstToInstSet> instSetList;
     for (auto iter : m_unresolvedNeighborMap)
     {
@@ -111,9 +115,10 @@ void Sreedhar_SSADeconstructionPass::processUnresolvedNeighbors()
 
     std::sort(instSetList.begin(), instSetList.end(), [](const InstToInstSet& a, const InstToInstSet& b){ return a.instSet.size() < b.instSet.size(); });
 
-    for (auto iter : instSetList)
+    for (auto instSet : instSetList)
     {
-        g_outputStream << iter.pI->getName() << ": " << iter.instSet.size() << "\n";
+        if (areUnresolvedInstructionsPresent(instSet))
+            m_candidateResourceSet.insert(instSet.pI);
     }
 }
 

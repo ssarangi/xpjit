@@ -32,6 +32,16 @@ http://download.springer.com/static/pdf/188/chp%253A10.1007%252F3-540-48294-6_13
 typedef std::set<llvm::Instruction*> InstructionSetTy;
 typedef llvm::DenseMap<llvm::Instruction*, InstructionSetTy> OneToManyInstructionRelationTy;
 
+// Convert to a sorted type
+struct InstToInstSet
+{
+    InstToInstSet()
+    {}
+
+    llvm::Instruction *pI;
+    InstructionSetTy instSet;
+};
+
 class Sreedhar_SSADeconstructionPass : public llvm::FunctionPass
 {
 public:
@@ -57,11 +67,13 @@ private:
     void determineCopiesNeeded(llvm::Instruction *pI, llvm::Instruction *pJ);
     bool intersectPhiCongruenceClassAndLiveOut(llvm::Instruction *pI, llvm::BasicBlock *pLiveOutBB);
     void processUnresolvedNeighbors();
+    bool areUnresolvedInstructionsPresent(const InstToInstSet &I)
 
 private:
     OneToManyInstructionRelationTy  m_phiCongruenceClass;
     OneToManyInstructionRelationTy  m_unresolvedNeighborMap;
     InstructionSetTy                m_candidateResourceSet;
+    InstructionSetTy                m_resolved;
 };
 
 Sreedhar_SSADeconstructionPass *createSreedhar_SSADeconstructionPass();
