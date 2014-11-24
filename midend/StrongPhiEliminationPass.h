@@ -2,6 +2,7 @@
 #define __PHI_DOMINANCE_FOREST__
 
 #include <midend/EdgeLivenessPass.h>
+#include <midend/LiveRange.h>
 
 #include "common/llvm_warnings_push.h"
 #include <llvm/Pass.h>
@@ -21,6 +22,8 @@
 
 #include <map>
 
+typedef std::pair<llvm::PHINode*, llvm::Instruction*> PhiOperandPairTy;
+
 class StrongPhiEliminationPass : public llvm::FunctionPass
 {
 public:
@@ -28,6 +31,7 @@ public:
     StrongPhiEliminationPass()
         : llvm::FunctionPass(ID)
     {
+        initializeDominatorTreeWrapperPassPass(*llvm::PassRegistry::getPassRegistry());
     }
 
     virtual bool runOnFunction(llvm::Function &F);
@@ -36,91 +40,83 @@ public:
     {
         AU.addRequired<llvm::DominatorTreeWrapperPass>();
         AU.addRequired<EdgeLivenessPass>();
+        AU.addRequired<LiveRange>();
         AU.setPreservesCFG();
     };
 
-private:
-
-    void buildDominanceForest(llvm::Function &F);
-
-private:
-    // Waiting stores for each basic block. These are conservative copies meaning that we are 
-    // not yet sure if we want to insert them.
-    llvm::DenseMap <llvm::BasicBlock*, std::multimap<llvm::Instruction*, llvm::Instruction*>> m_waiting;
-
-    // Place holder for all variables to be renamed
-    llvm::DenseMap<unsigned int, std::vector<unsigned int> > m_stacks;
-
-    // Add registers which are Phi nodes and are used as operands in other phi nodes
-    std::set<llvm::Instruction*> m_usedByAnother;
-
-    // Rename sets is a map from a Phi defined register to the input registers to be coalesced
-    // along with predecessor block for those input registers
-    std::map<llvm::Instruction*, std::map<llvm::Instruction*, llvm::BasicBlock*>> m_renameSets;
-
-    // Phi Value Number holds the ID numbers of the Value numbers for each phi that we are
-    // eliminating, indexed by the register defined by that phi.
-    std::map<unsigned int, unsigned int> m_phiValueNumber;
-
-    // Store the DFS-in number of each block
-    llvm::DenseMap<llvm::BasicBlock*, unsigned int> m_preorder;
-
-    // Store the DFS-out number of each block
-    llvm::DenseMap<llvm::BasicBlock*, unsigned int> m_maxpreorder;
-
-private:
-    class DomForestNode
+public:
+    // DomForestNode - Represents a node in the "dominator forest". This is a forest in which
+    // the nodes represent registers and the edges represent a dominance relation in the block
+    // defining those registers
+    struct DomForestNode
     {
     private:
-        std::vector<DomForestNode*> m_children;
+        std::vector<DomForestNode*> children;
 
-        unsigned int m_reg;
+        llvm::Instruction *pI;
 
-        void addChild(DomForestNode *pDFN) { m_children.push_back(pDFN); }
+        void add_child(DomForestNode *pDFN) { children.push_back(pDFN); }
 
     public:
         typedef std::vector<DomForestNode*>::iterator iterator;
 
-        // Create a DomForestNode by providing the register it represents and the node to be
-        // its parent. The virtual root node has register 0 and a null parent
-        DomForestNode(unsigned int r, DomForestNode *pParent)
-            : m_reg(r)
+        // Create a DomForestNode by providing the register it represents, and
+        // the node to be its parent. The virtual root node has a register 0
+        // and a null parent
+        DomForestNode(llvm::Instruction *pInst, DomForestNode *pParent)
+            : pI(pInst)
         {
             if (pParent)
-                pParent->addChild(this);
+                pParent->add_child(this);
         }
 
         ~DomForestNode()
         {
-            for (iterator I = begin(), E = end(); I != E; ++I)
+            for (iterator i = begin(), e = end(); i != e; ++i)
             {
-                delete *I;
+                delete *i;
             }
         }
 
-        inline unsigned int getReg() { return m_reg; }
+        llvm::Instruction *getInstruction() { return pI; }
 
-        // Provide iterator access to our children
-        inline DomForestNode::iterator begin() { return m_children.begin(); }
-        inline DomForestNode::iterator end() { return m_children.end(); }
+        inline DomForestNode::iterator begin() { return children.begin(); }
+        inline DomForestNode::iterator end() { return children.end(); }
     };
 
+private:
+    void buildInitialLiveRange(llvm::Function &F);
+    void checkInitialInterference(
+        llvm::PHINode* pPhi,
+        llvm::Instruction *pI,
+        llvm::DenseMap<llvm::BasicBlock*, std::set<llvm::BasicBlock*>> &blocksConsidered,
+        std::set<llvm::Instruction*> &phiUnion);
+
     void computeDFS(llvm::Function &F);
-    void processBlock(llvm::BasicBlock *pBB);
-
-    std::vector<DomForestNode *> computeDomForest(
-        std::map<llvm::Instruction*, llvm::BasicBlock*>& instrs,
-        llvm::BasicBlock *pBB);
-
+    std::vector<StrongPhiEliminationPass::DomForestNode*> computeDominanceForest(std::set<llvm::Instruction*> &phiUnion);
     void processPHIUnion(
-        llvm::Instruction *pU,
-        std::map<llvm::Instruction*, llvm::BasicBlock*>& phiUnion,
+        llvm::PHINode *pPhi,
+        std::set<llvm::Instruction*> &phiUnion,
         std::vector<StrongPhiEliminationPass::DomForestNode*> &DF,
-        std::vector <std::pair<llvm::Instruction*, llvm::Instruction*>> &locals);
+        std::vector < std::pair<llvm::Instruction*, llvm::Instruction*>> &locals);
 
-    void scheduleCopies(llvm::BasicBlock *pBB, std::set<unsigned int> &pushed);
-    void insertCopies(llvm::DomTreeNode *pDTNode, llvm::SmallPtrSet<llvm::BasicBlock*, 16>& v);
-    bool mergeLiveIntervals(unsigned int primary, unsigned int secondary);
+private:
+    llvm::DenseMap<llvm::BasicBlock*, std::vector<PhiOperandPairTy>> m_waiting;
+    std::set<llvm::Instruction*> m_operandsUsedInAnotherPhi;
+
+    llvm::DenseMap<llvm::BasicBlock*, unsigned int> m_preorder;
+    llvm::DenseMap<unsigned int, llvm::BasicBlock*> m_reverse_preorder;
+    
+    llvm::DenseMap<llvm::BasicBlock*, unsigned int> m_maxpreorder;
+
+    // RenameSets are the is a map from a PHI-defined register
+    // to the input registers to be coalesced along with the 
+    // predecessor block for those input registers.
+    std::map<llvm::Instruction*, std::set<llvm::Instruction*>> m_renameSets;
 };
+
+typedef std::vector<StrongPhiEliminationPass::DomForestNode*> DomForest;
+
+StrongPhiEliminationPass *createStrongPhiEliminationPass();
 
 #endif

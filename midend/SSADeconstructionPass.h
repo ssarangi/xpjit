@@ -84,6 +84,7 @@ public:
 
     void convertToCSSA(llvm::Function &F);
     OldNewPhiNodePair visitPhi(llvm::PHINode *pPhi);
+    void renameVariables(llvm::PHINode *pPhi);
 
 private:
     EdgeLivenessPass *m_pEdgeLiveness;

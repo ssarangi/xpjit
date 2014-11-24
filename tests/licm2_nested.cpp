@@ -1,5 +1,19 @@
 int main()
 {
+	int a;
+	int b;
+	int c;
+	int d;
+	int e;
+	int f;
+
+	a = 0;
+	b = 1;
+	c = 2;
+	d = 3;
+	e = 4;
+	f = 5;
+
 	int x;
 	int y;
 	int z;
@@ -8,12 +22,12 @@ int main()
 	int j;
 	int k;
 
-	y = 4;
-	z = 2;
-	m = 0;
-	i = 0;
-	j = 0;
-	k = 1;
+	y = a;
+	z = b;
+	m = c;
+	i = d;
+	j = e;
+	k = f;
 
 	while (j < 50)
 	{

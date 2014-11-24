@@ -31,6 +31,36 @@ bool SSADeconstructionPass::runOnFunction(llvm::Function &F)
     return true;
 }
 
+// This function will move the IR out of SSA form. There is absolutely no
+// coalescing occurring here.
+void SSADeconstructionPass::renameVariables(llvm::PHINode *pPhi)
+{
+    // Remove the _dash from the name.
+    std::string phiName = pPhi->getName().drop_back(5);
+
+    // Now for every variable in the phi rename it with this new name
+    for (llvm::User::op_iterator opi = pPhi->op_begin(), ope = pPhi->op_end();
+        opi != ope;
+        ++opi)
+    {
+        if (llvm::Instruction *pI = llvm::dyn_cast<llvm::Instruction>(opi))
+        {
+            pI->setName(phiName);
+        }
+    }
+
+    // Now replace all the uses of the phi with this same
+    for (llvm::Instruction::use_iterator useI = pPhi->use_begin(), useE = pPhi->use_end();
+        useI != useE;
+        ++useI)
+    {
+        llvm::Instruction *pUseI = llvm::cast<llvm::Instruction>(*useI);
+        pUseI->setName(phiName);
+    }
+
+    // pPhi->eraseFromParent();
+}
+
 void SSADeconstructionPass::convertToCSSA(llvm::Function &F)
 {
     for (llvm::Function::iterator bb = F.begin(), be = F.end();
@@ -53,19 +83,25 @@ void SSADeconstructionPass::convertToCSSA(llvm::Function &F)
                 pInstToInsertMovBefore = i;
         }
 
+        std::set<llvm::PHINode*> phiToRemove;
         // Iterate over all the phi instructions and add the copy next to it
         for (auto oldNewPair : oldNewPhiNodesPair)
         {
             llvm::PHINode *pOldPhi = oldNewPair.first;
             llvm::PHINode *pNewPhi = oldNewPair.second;
+            phiToRemove.insert(pNewPhi);
 
             std::string newPhiName = pNewPhi->getName().substr(0, pNewPhi->getName().size() - std::string("_dash").length());
             llvm::Instruction *pBitcast = llvm::BitCastInst::Create(llvm::Instruction::CastOps::BitCast, pNewPhi, pNewPhi->getType(), newPhiName, pInstToInsertMovBefore);
-            // m_phiResultPartitions.insert(pBitcast);
             pOldPhi->replaceAllUsesWith(pBitcast);
             pOldPhi->removeFromParent();
+
+            renameVariables(pNewPhi);
         }
     }
+
+    F.print(g_outputStream());
+    g_outputStream.flush();
 }
 
 OldNewPhiNodePair SSADeconstructionPass::visitPhi(llvm::PHINode *pPhi)

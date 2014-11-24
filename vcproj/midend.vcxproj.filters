@@ -60,6 +60,9 @@
     <ClCompile Include="..\midend\StrongPhiEliminationPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\midend\Sreedhar_SSADeconstruction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\midend\ConstantFolder.h">
@@ -111,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\midend\StrongPhiEliminationPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midend\Sreedhar_SSADeconstruction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
