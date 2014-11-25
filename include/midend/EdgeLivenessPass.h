@@ -48,14 +48,11 @@ public:
         AU.setPreservesAll();
     };
 
-    void toVector(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination, std::vector<unsigned int>& ans);
-    std::string toString(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination);
-    
     bool isLiveIn(llvm::Instruction *pI, llvm::BasicBlock *pBlock);
     bool isLiveOut(llvm::Instruction *pI, llvm::BasicBlock *pBlock);
 
     bool isAlive(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDst, llvm::Instruction *pI);
-    const llvm::SmallVector<bool, 50>& getLiveVariables(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination) const;
+    llvm::DenseMap<llvm::Instruction*, bool>& getLiveVariables(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination);
     
     void kill(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination, llvm::Instruction *pI);
     void killForward(llvm::Instruction *pI, llvm::BasicBlock *pBB);
@@ -65,7 +62,6 @@ public:
     void setAlive(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination, llvm::Instruction *pI);
 
     void computeLiveness(llvm::BasicBlock *pBB);
-    void initializeDataStructures(llvm::Function &F);
 
     void handleUse(llvm::Instruction *pI, llvm::BasicBlock *pBlock);
 
@@ -73,7 +69,7 @@ private:
     BlockLayoutPass *m_pBlockLayout;
 
     unsigned int m_numVReg;
-    llvm::SmallVector< llvm::SmallVector< llvm::SmallVector<bool, 50>, 50>, 50> m_liveSets;
+    llvm::DenseMap<llvm::BasicBlock*, llvm::DenseMap<llvm::BasicBlock*, llvm::DenseMap<llvm::Instruction*, bool>>> m_liveSets;
 };
 
 EdgeLivenessPass *createEdgeLivenessPass();

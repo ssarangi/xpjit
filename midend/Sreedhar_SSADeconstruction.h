@@ -67,7 +67,10 @@ private:
     void determineCopiesNeeded(llvm::Instruction *pI, llvm::Instruction *pJ);
     bool intersectPhiCongruenceClassAndLiveOut(llvm::Instruction *pI, llvm::BasicBlock *pLiveOutBB);
     void processUnresolvedNeighbors();
-    bool areUnresolvedInstructionsPresent(const InstToInstSet &I)
+    bool areUnresolvedInstructionsPresent(llvm::Instruction *pI);
+    void trimCandidateResourceSet();
+    llvm::Instruction* insertCopy(llvm::Instruction *pI, llvm::Instruction *pLocationBefore);
+    void insertCopies();
 
 private:
     OneToManyInstructionRelationTy  m_phiCongruenceClass;

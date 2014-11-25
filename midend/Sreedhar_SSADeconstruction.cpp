@@ -90,15 +90,29 @@ void Sreedhar_SSADeconstructionPass::determineCopiesNeeded(llvm::Instruction *pI
     }
 }
 
-bool Sreedhar_SSADeconstructionPass::areUnresolvedInstructionsPresent(const InstToInstSet &I)
+bool Sreedhar_SSADeconstructionPass::areUnresolvedInstructionsPresent(llvm::Instruction *pI)
 {
-    for (auto inst : I.instSet)
+    for (auto inst : m_unresolvedNeighborMap[pI])
     {
         if (m_resolved.find(inst) != m_resolved.end())
             return true;
     }
 
     return false;
+}
+
+void Sreedhar_SSADeconstructionPass::trimCandidateResourceSet()
+{
+    // If all the neighbors of this variable have been marked as resolved, then remove it from
+    // candidate resource set.
+    for (auto iter : m_resolved)
+    {
+        if (!areUnresolvedInstructionsPresent(iter))
+        {
+            m_candidateResourceSet.erase(iter);
+            ++iter;
+        }
+    }
 }
 
 void Sreedhar_SSADeconstructionPass::processUnresolvedNeighbors()
@@ -117,8 +131,67 @@ void Sreedhar_SSADeconstructionPass::processUnresolvedNeighbors()
 
     for (auto instSet : instSetList)
     {
-        if (areUnresolvedInstructionsPresent(instSet))
+        if (areUnresolvedInstructionsPresent(instSet.pI))
+        {
             m_candidateResourceSet.insert(instSet.pI);
+            m_resolved.insert(instSet.pI);
+        }
+    }
+}
+
+llvm::Instruction* Sreedhar_SSADeconstructionPass::insertCopy(llvm::Instruction *pI, llvm::Instruction *pLocationBefore)
+{
+    llvm::IRBuilder<> builder(pI->getContext());
+
+    builder.SetInsertPoint(pLocationBefore);
+
+    // Assume that the builder has set the right insertion point
+    llvm::Value *pC = nullptr;
+
+    llvm::Type *pType = pI->getType();
+
+    if (pI->getType()->isPointerTy())
+        assert(0 && "Pointer types are not handled");
+
+    llvm::Instruction *pBitcast = llvm::cast<llvm::Instruction>(builder.CreateBitCast(pI, pType, pI->getName() + "_dash"));
+    return pBitcast;
+}
+
+void Sreedhar_SSADeconstructionPass::insertCopies()
+{
+    EdgeLivenessPass &EL = getAnalysis<EdgeLivenessPass>();
+
+    for (llvm::Instruction *pI : m_candidateResourceSet)
+    {
+        if (llvm::isa<llvm::PHINode>(pI))
+        {
+            // Insert a copy instruction at the beginning of the basic block.
+            llvm::Instruction *pCopy = insertCopy(pI, pI);
+
+            // Replace the phi with the copy instruction as the target
+            m_phiCongruenceClass[pCopy].insert(pCopy);
+        }
+        else
+        {
+            // This instruction is an operand of the phi instruction
+            // Get Terminator of BB defining pI.
+            llvm::BasicBlock *pDefBlock = pI->getParent();
+            llvm::Instruction *pTerminator = pDefBlock->getTerminator();
+            llvm::Instruction *pCopy = insertCopy(pI, pTerminator);
+            m_phiCongruenceClass[pI].insert(pCopy);
+
+            // TODO: Update the Live Out information accordingly.
+            for (llvm::User::op_iterator opi = pI->op_begin(), ope = pI->op_end(); opi != ope; ++opi)
+            {
+                if (llvm::isa<llvm::PHINode>(opi))
+                {
+                    EL.kill(pDefBlock, llvm::cast<llvm::PHINode>(opi)->getParent(), pI);
+                    EL.setAlive(pDefBlock, llvm::cast<llvm::PHINode>(opi)->getParent(), pCopy);
+
+                    // build interferences edges between copy and LineIn[L0]
+                }
+            }
+        }
     }
 }
 
@@ -137,24 +210,52 @@ void Sreedhar_SSADeconstructionPass::createCandidateResourceSet(llvm::Function &
                     opi != ope;
                     ++opi)
                 {
-                    assert(!llvm::isa<llvm::Constant>(opi) && "Handle constants properly");
-                    llvm::Instruction *pOpi = llvm::cast<llvm::Instruction>(opi);
-
-                    for (llvm::User::op_iterator opj = pPhi->op_begin();
-                        opi != ope;
-                        ++opi)
+                    // assert(!llvm::isa<llvm::Constant>(opi) && "Handle constants properly");
+                    if (llvm::Instruction *pOpi = llvm::cast<llvm::Instruction>(opi))
                     {
-                        assert(!llvm::isa<llvm::Constant>(opj) && "Handle constants properly");
-                        llvm::Instruction *pOpj = llvm::cast<llvm::Instruction>(opj);
-
-                        determineCopiesNeeded(pOpi, pOpj);
+                        for (llvm::User::op_iterator opj = pPhi->op_begin();
+                            opj != ope;
+                            ++opj)
+                        {
+                            // assert(!llvm::isa<llvm::Constant>(opj) && "Handle constants properly");
+                            if (llvm::Instruction *pOpj = llvm::cast<llvm::Instruction>(opj))
+                                determineCopiesNeeded(pOpi, pOpj);
+                        }
                     }
                 }
 
                 processUnresolvedNeighbors();
+                m_unresolvedNeighborMap.clear();
+
+                insertCopies();
+                m_candidateResourceSet.clear();
+
+                std::set<llvm::Instruction*> currentPhiCongruenceClass;
+
+                for (llvm::User::op_iterator opi = pPhi->op_begin();
+                    opi != ope;
+                    ++opi)
+                {
+                    llvm::Instruction *pI = llvm::cast<llvm::Instruction>(opi);
+                    // std::copy(m_phiCongruenceClass[pI].begin(), m_phiCongruenceClass[pI].end(), currentPhiCongruenceClass.begin());
+                }
+
+                // Once all of these have been copied, copy back all elements back to the original classes
+                for (llvm::User::op_iterator opi = pPhi->op_begin();
+                    opi != ope;
+                    ++opi)
+                {
+                    llvm::Instruction *pI = llvm::cast<llvm::Instruction>(opi);
+                    m_phiCongruenceClass[pI].clear();
+                    // std::copy(currentPhiCongruenceClass.begin(), currentPhiCongruenceClass.end(), m_phiCongruenceClass[pI].begin());
+                }
             }
         }
     }
+
+    // Determine which instructions have all their neighbors resolved. If any of them have all their
+    // neighbors resolved, then remove them from candidateResourceSet.
+    trimCandidateResourceSet();
 }
 
 void Sreedhar_SSADeconstructionPass::buildInitialPhiCongruenceClass(llvm::Function &F)
@@ -171,9 +272,11 @@ void Sreedhar_SSADeconstructionPass::buildInitialPhiCongruenceClass(llvm::Functi
                     opi != ope;
                     ++opi)
                 {
-                    assert(!llvm::isa<llvm::Constant>(opi) && "Handle constants properly");
-                    llvm::Instruction *pI = llvm::cast<llvm::Instruction>(opi);
-                    m_phiCongruenceClass[pI].insert(pI);
+                    // assert(!llvm::isa<llvm::Constant>(opi) && "Handle constants properly");
+                    if (llvm::Instruction *pI = llvm::dyn_cast<llvm::Instruction>(opi))
+                    {
+                        m_phiCongruenceClass[pI].insert(pI);
+                    }
                 }
             }
         }
@@ -183,7 +286,9 @@ void Sreedhar_SSADeconstructionPass::buildInitialPhiCongruenceClass(llvm::Functi
 bool Sreedhar_SSADeconstructionPass::runOnFunction(llvm::Function &F)
 {
     ADD_HEADER("SSA Deconstruction Pass");
+    
     buildInitialPhiCongruenceClass(F);
     createCandidateResourceSet(F);
+
     return true;
 }

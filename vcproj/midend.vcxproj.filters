@@ -63,6 +63,9 @@
     <ClCompile Include="..\midend\Sreedhar_SSADeconstruction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\midend\Budimlic_SSADeconstruction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\midend\ConstantFolder.h">
@@ -117,6 +120,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\midend\Sreedhar_SSADeconstruction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midend\Budimlic_SSADeconstruction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -85,6 +85,7 @@
   <ItemGroup>
     <ClCompile Include="..\midend\Analysis.cpp" />
     <ClCompile Include="..\midend\BlockLayoutPass.cpp" />
+    <ClCompile Include="..\midend\Budimlic_SSADeconstruction.cpp" />
     <ClCompile Include="..\midend\ConstantFolder.cpp" />
     <ClCompile Include="..\midend\DominanceFrontier.cpp" />
     <ClCompile Include="..\midend\DominanceTreeConstructor.cpp" />
@@ -114,6 +115,7 @@
     <ClInclude Include="..\include\midend\optimizeIR.h" />
     <ClInclude Include="..\include\midend\PassManager.h" />
     <ClInclude Include="..\midend\Analysis.h" />
+    <ClInclude Include="..\midend\Budimlic_SSADeconstruction.h" />
     <ClInclude Include="..\midend\LICM.h" />
     <ClInclude Include="..\midend\LivenessHangs.h" />
     <ClInclude Include="..\midend\Sreedhar_SSADeconstruction.h" />

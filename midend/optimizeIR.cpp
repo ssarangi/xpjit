@@ -8,7 +8,8 @@
 #include "LICM.h"
 #include "SSADeconstructionPass.h"
 #include "Sreedhar_SSADeconstruction.h"
-#include "StrongPhiEliminationPass.h"
+#include "Budimlic_SSADeconstruction.h"
+// #include "StrongPhiEliminationPass.h"
 #include <common/llvm_printer.h>
 
 #include <common/llvm_warnings_push.h>
@@ -34,6 +35,7 @@ void OptimizeIR(llvm::Module& llvmModule)
     passMgr.add(llvm::createPromoteMemoryToRegisterPass());
     passMgr.add(createNewLoopInvariantCodeMotionPass());
     // passMgr.add(createStrongPhiEliminationPass());
-    passMgr.add(createSreedhar_SSADeconstructionPass());
+    // passMgr.add(createSreedhar_SSADeconstructionPass());
+    passMgr.add(createBudimlic_SSADeconstructionPass());
     passMgr.run(llvmModule);
 }

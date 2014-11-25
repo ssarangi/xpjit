@@ -26,117 +26,50 @@ EdgeLivenessPass *createEdgeLivenessPass()
     return pEdgeLivenessPass;
 }
 
-void EdgeLivenessPass::toVector(llvm::BasicBlock* pOrigin, llvm::BasicBlock* pDst, std::vector<unsigned> & ans)
-{
-    unsigned int row = m_pBlockLayout->getBlockID(pOrigin);
-    unsigned int col = m_pBlockLayout->getBlockID(pDst);
-    llvm::SmallVector<bool, 50>& live_variables = m_liveSets[row][col];
-    ans.clear();
-
-    for (unsigned i = 0, e = live_variables.size(); i != e; ++i)
-    {
-        if (live_variables[i])
-        {
-            ans.push_back(i);
-        }
-    }
-}
-
-
-//===--------------------------------------------------------------------------
-// returns a string in the format (t1, t2, ..., tn), where ti is one of the
-// temporaries alive in the edge that connects the machine basic block
-// "origin" to "destiny".
-//===--------------------------------------------------------------------------
-std::string EdgeLivenessPass::toString(llvm::BasicBlock* pOrigin, llvm::BasicBlock* pDst)
-{
-    unsigned int row = m_pBlockLayout->getBlockID(pOrigin);
-    unsigned int col = m_pBlockLayout->getBlockID(pDst);
-    llvm::SmallVector<bool, 50>& live_variables = m_liveSets[row][col];
-    
-    bool isFirst = true;
-    std::ostringstream aux;
-    aux << "(";
-    for (unsigned i = 0, e = live_variables.size(); i != e; ++i)
-    {
-        if (live_variables[i])
-        {
-            if (isFirst)
-            {
-                isFirst = false;
-                aux << "t" << i;
-            }
-            else
-            {
-                aux << ", " << "t" << i;
-            }
-        }
-    }
-    aux << ")";
-    return aux.str();
-}
-
-
-void EdgeLivenessPass::initializeDataStructures(llvm::Function &F)
-{
-    unsigned int numBlocks = F.size();
-
-    m_numVReg = 0;
-    for (llvm::Function::iterator bb = F.begin(), bbe = F.end();
-        bb != bbe;
-        ++bb)
-    {
-        m_numVReg += bb->size();
-    }
-
-    m_liveSets.resize(numBlocks);
-    for (unsigned int i = 0; i < numBlocks; ++i)
-        m_liveSets[i].resize(numBlocks);
-}
-
 bool EdgeLivenessPass::isAlive(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDst, llvm::Instruction *pI)
 {
-    unsigned int row = m_pBlockLayout->getBlockID(pOrigin);
-    unsigned int col = m_pBlockLayout->getBlockID(pDst);
-    unsigned int instructionID = m_pBlockLayout->getInstructionID(pI);
+    bool is_alive = false;
+    if (m_liveSets.find(pOrigin) != m_liveSets.end() &&
+        m_liveSets[pOrigin].find(pDst) != m_liveSets[pOrigin].end() &&
+        m_liveSets[pOrigin][pDst].find(pI) != m_liveSets[pOrigin][pDst].end())
+    {
+        is_alive = m_liveSets[pOrigin][pDst][pI];
+    }
 
-    llvm::SmallVector<bool, 50>& edge = m_liveSets[row][col];
-    if (edge.size() == 0)
-        return false;
-
-    return edge[instructionID];
+    return is_alive;
 }
 
 bool EdgeLivenessPass::isLiveIn(llvm::Instruction *pI, llvm::BasicBlock *pBlock)
 {
-    unsigned int row = m_pBlockLayout->getBlockID(pI->getParent());
-    unsigned int col = m_pBlockLayout->getBlockID(pBlock);
-    unsigned int instructionID = m_pBlockLayout->getInstructionID(pI);
+    bool is_live_in = false;
 
-    llvm::SmallVector<bool, 50>& edge = m_liveSets[row][col];
-    if (edge.size() == 0)
-        return false;
+    llvm::BasicBlock *pOrigin = pI->getParent();
+    llvm::BasicBlock *pDst = pBlock;
 
-    return edge[instructionID];
+    if (m_liveSets.find(pOrigin) != m_liveSets.end() &&
+        m_liveSets[pOrigin].find(pDst) != m_liveSets[pOrigin].end() &&
+        m_liveSets[pOrigin][pDst].find(pI) != m_liveSets[pOrigin][pDst].end())
+    {
+        is_live_in = m_liveSets[pOrigin][pDst][pI];
+    }
+
+    return is_live_in;
 }
 
 bool EdgeLivenessPass::isLiveOut(llvm::Instruction *pI, llvm::BasicBlock *pBlock)
 {
-    unsigned int row = m_pBlockLayout->getBlockID(pBlock);
-    unsigned int instructionID = m_pBlockLayout->getInstructionID(pI);
+    llvm::BasicBlock *pOrigin = pBlock;
 
     bool present = false;
 
-    for (llvm::succ_iterator succ_bb = llvm::succ_begin(pBlock), succ_end = llvm::succ_end(pBlock);
+    for (llvm::succ_iterator succ_bb = llvm::succ_begin(pOrigin), succ_end = llvm::succ_end(pOrigin);
         succ_bb != succ_end;
         ++succ_bb)
     {
         unsigned int col = m_pBlockLayout->getBlockID(*succ_bb);
-        llvm::SmallVector<bool, 50>& edge = m_liveSets[row][col];
-        if (edge.size() == 0)
-            return false;
+        llvm::BasicBlock *pDst = *succ_bb;
 
-        present |= edge[instructionID];
+        present |= m_liveSets[pOrigin][pDst][pI];
         if (present)
             break;
     }
@@ -144,27 +77,18 @@ bool EdgeLivenessPass::isLiveOut(llvm::Instruction *pI, llvm::BasicBlock *pBlock
     return present;
 }
 
-const llvm::SmallVector<bool, 50>& EdgeLivenessPass::getLiveVariables(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination) const
+llvm::DenseMap<llvm::Instruction*, bool>& EdgeLivenessPass::getLiveVariables(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination)
 {
-    unsigned int row = m_pBlockLayout->getBlockID(pOrigin);
-    unsigned int col = m_pBlockLayout->getBlockID(pDestination);
-
-    return m_liveSets[row][col];
+    return m_liveSets[pOrigin][pDestination];
 }
 
 void EdgeLivenessPass::kill(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination, llvm::Instruction *pI)
 {
-    unsigned int row = m_pBlockLayout->getBlockID(pOrigin);
-    unsigned int col = m_pBlockLayout->getBlockID(pDestination);
-    unsigned int instructionID = m_pBlockLayout->getInstructionID(pI);
-    llvm::SmallVector<bool, 50>& edge = m_liveSets[row][col];
-
-    edge[instructionID] = false;
+    m_liveSets[pOrigin][pDestination][pI] = false;
 }
 
 void EdgeLivenessPass::killForward(llvm::Instruction *pI, llvm::BasicBlock *pBB)
 {
-    unsigned int instructionID = m_pBlockLayout->getInstructionID(pI);
     for (llvm::succ_iterator succ_bb = llvm::succ_begin(pBB), succ_bb_end = llvm::succ_end(pBB);
         succ_bb != succ_bb_end;
         ++succ_bb)
@@ -179,7 +103,6 @@ void EdgeLivenessPass::killForward(llvm::Instruction *pI, llvm::BasicBlock *pBB)
 
 void EdgeLivenessPass::killBackward(llvm::Instruction *pI, llvm::BasicBlock *pBB)
 {
-    unsigned int instructionID = m_pBlockLayout->getInstructionID(pI);
     for (llvm::pred_iterator pred_bb = llvm::pred_begin(pBB), pred_bb_end = llvm::pred_end(pBB);
         pred_bb != pred_bb_end;
         ++pred_bb)
@@ -198,17 +121,9 @@ void EdgeLivenessPass::killLiverange(llvm::Instruction *pI, llvm::BasicBlock *pB
     killBackward(pI, pBB);
 }
 
-void EdgeLivenessPass::setAlive(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDestination, llvm::Instruction *pI)
+void EdgeLivenessPass::setAlive(llvm::BasicBlock *pOrigin, llvm::BasicBlock *pDst, llvm::Instruction *pI)
 {
-    unsigned int row = m_pBlockLayout->getBlockID(pOrigin);
-    unsigned int col = m_pBlockLayout->getBlockID(pDestination);
-    unsigned int instructionID = m_pBlockLayout->getInstructionID(pI);
-
-    llvm::SmallVector<bool, 50>& edge = m_liveSets[row][col];
-    if (edge.size() <= 0)
-        edge.assign(m_numVReg, false);
-
-    edge[instructionID] = true;
+    m_liveSets[pOrigin][pDst][pI] = true;
 }
 
 void EdgeLivenessPass::handleUse(llvm::Instruction *pI, llvm::BasicBlock *pBlock)
@@ -262,8 +177,6 @@ bool EdgeLivenessPass::runOnFunction(llvm::Function &F)
     m_pBlockLayout = &getAnalysis<BlockLayoutPass>();
 
     ADD_HEADER("Edge Liveness Pass");
-
-    initializeDataStructures(F);
 
     for (llvm::Function::iterator bb = F.begin(), be = F.end();
         bb != be;
