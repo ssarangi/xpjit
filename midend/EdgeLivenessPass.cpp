@@ -161,7 +161,7 @@ void EdgeLivenessPass::computeLiveness(llvm::BasicBlock *pBB)
                 if (llvm::PHINode *pPhi = llvm::dyn_cast<llvm::PHINode>(i))
                 {
                     setAlive(pPhi->getIncomingBlock(*op), pBB, pPhi);
-                    handleUse(pPhi, pBB);
+                    handleUse(llvm::cast<llvm::Instruction>(op), pBB);
                 }
                 else if (llvm::Instruction *pI = llvm::dyn_cast<llvm::Instruction>(op))
                 {
