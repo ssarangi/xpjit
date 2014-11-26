@@ -68,7 +68,7 @@ void X86InstSet::emitPop(BackendRegister &reg, int offset, std::ostream &s)
 {
 }
 
-void X86InstSet::emitSyscall(MIPS_SYSCALLS syscall_code, std::ostream &s)
+void X86InstSet::emitSyscall(X86_SYSCALLS syscall_code, std::ostream &s)
 {
 
 }

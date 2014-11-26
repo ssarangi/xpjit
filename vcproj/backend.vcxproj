@@ -86,7 +86,9 @@
     <ClInclude Include="..\backend\mips\mipspatternmatch.h" />
     <ClInclude Include="..\backend\regalloc.h" />
     <ClInclude Include="..\backend\tempstacksize.h" />
+    <ClInclude Include="..\backend\x86\LinearScan.h" />
     <ClInclude Include="..\backend\x86\x86codegen.h" />
+    <ClInclude Include="..\backend\x86\x86defines.h" />
     <ClInclude Include="..\backend\x86\x86instset.h" />
     <ClInclude Include="..\backend\x86\x86patternmatch.h" />
     <ClInclude Include="..\include\backend\backendcodegen.h" />
@@ -101,6 +103,7 @@
     <ClCompile Include="..\backend\regalloc.cpp" />
     <ClCompile Include="..\backend\tempstacksize.cpp" />
     <ClCompile Include="..\backend\x86\x86codegen.cpp" />
+    <ClCompile Include="..\backend\x86\x86defines.cpp" />
     <ClCompile Include="..\backend\x86\x86instset.cpp" />
     <ClCompile Include="..\backend\x86\x86patternmatch.cpp" />
   </ItemGroup>

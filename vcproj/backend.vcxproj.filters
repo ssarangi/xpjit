@@ -48,6 +48,12 @@
     <ClInclude Include="..\backend\x86\x86patternmatch.h">
       <Filter>x86</Filter>
     </ClInclude>
+    <ClInclude Include="..\backend\x86\LinearScan.h">
+      <Filter>x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\backend\x86\x86defines.h">
+      <Filter>x86</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\mips\mipscodegen.cpp">
@@ -75,6 +81,9 @@
       <Filter>x86</Filter>
     </ClCompile>
     <ClCompile Include="..\backend\x86\x86patternmatch.cpp">
+      <Filter>x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backend\x86\x86defines.cpp">
       <Filter>x86</Filter>
     </ClCompile>
   </ItemGroup>
