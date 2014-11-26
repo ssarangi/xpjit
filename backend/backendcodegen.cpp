@@ -4,6 +4,7 @@
 #include <backend/backendcodegen.h>
 #include "mips/mipscodegen.h"
 #include "mips/mipspatternmatch.h"
+#include "x86/LinearScan.h"
 #include "regalloc.h"
 
 #include <common/llvm_warnings_push.h>
@@ -20,9 +21,10 @@ void GenerateCode(CodeGenModule& M, std::string outputFile)
     llvm::PassManager mpm;
     MipsCodeGen *pMipsCodeGen = new MipsCodeGen();
     // CodeGenPass *pCodeGenPass = new CodeGenPass(pMipsCodeGen);
-    mpm.add(new RegAlloc());
-    mpm.add(pMipsCodeGen);
+    // mpm.add(new RegAlloc());
+    // mpm.add(pMipsCodeGen);
     // mpm.add(pCodeGenPass);
+    mpm.add(createLinearScanRegisterAllocationPass());
     mpm.run(*M.getLLVMModule());
 
     // Open the file and write into it.

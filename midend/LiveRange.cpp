@@ -29,9 +29,9 @@ void LiveRange::printLiveRanges(llvm::Function &F)
             ii != ie;
             ++ii)
         {
-            if (!llvm::isa<llvm::PHINode>(ii))
+            if (!isInstructionBlackListed(ii))
             {
-                LiveRangeInfo *pLRI = findOrCreateLiveRange(ii);
+                LiveRangeInterval *pLRI = findOrCreateLiveRange(ii);
                 g_outputStream << "\nLive Range (" << pLRI->instruction_id << "): ";
                 pLRI->pInstr->print(g_outputStream());
                 g_outputStream.flush();
@@ -46,49 +46,50 @@ void LiveRange::printLiveRanges(llvm::Function &F)
     }
 }
 
-bool LiveRange::isLive(llvm::Value *pQueryValue, llvm::Instruction *pQueryPoint)
+bool LiveRange::isInstructionBlackListed(llvm::Instruction *pI)
 {
-    return true;
-}
+    if (llvm::isa<llvm::PHINode>(pI) ||
+        llvm::isa<llvm::BranchInst>(pI) ||
+        llvm::isa<llvm::ReturnInst>(pI))
+        return true;
 
-bool LiveRange::isLiveInBlock(llvm::BasicBlock *pDefBB, llvm::BasicBlock *pQueryBB)
-{
-    return true;
-}
-
-bool LiveRange::isLiveOutBlock(llvm::Value *pQuery, llvm::BasicBlock *pBlock)
-{
-    return true;
+    return false;
 }
 
 bool LiveRange::interferes(llvm::Instruction *pA, llvm::Instruction *pB)
 {
-    LiveRangeInfo *pLRIa = findOrCreateLiveRange(pA);
-    LiveRangeInfo *pLRIb = findOrCreateLiveRange(pB);
+    LiveRangeInterval *pLRIa = findOrCreateLiveRange(pA);
+    LiveRangeInterval *pLRIb = findOrCreateLiveRange(pB);
 
     return pLRIa->interferes(*pLRIb);
 }
 
-LiveRangeInfo* LiveRange::createNewLiveRange(llvm::Value *pV)
+LiveRangeInterval* LiveRange::createNewLiveRange(llvm::Value *pV)
 {
     llvm::Instruction *pI = llvm::cast<llvm::Instruction>(pV);
-    LiveRangeInfo *pLRI = new LiveRangeInfo(pI, m_pBlockLayout);
+
+    if (isInstructionBlackListed(pI))
+        return nullptr;
+
+    LiveRangeInterval *pLRI = new LiveRangeInterval(pI, m_pBlockLayout);
     m_intervals.insert(pLRI);
-    m_intervalMap[pV] = pLRI;
+    m_intervalMap[pI] = pLRI;
     return pLRI;
 }
 
-LiveRangeInfo* LiveRange::findOrCreateLiveRange(llvm::Value *pV)
+LiveRangeInterval* LiveRange::findOrCreateLiveRange(llvm::Value *pV)
 {
-    LiveRangeInfo *pLRI = nullptr;
+    LiveRangeInterval *pLRI = nullptr;
 
     if (llvm::isa<llvm::PHINode>(pV))
-        assert(0 && "where did i come from");
+        return nullptr;
 
-    if (m_intervalMap.find(pV) == m_intervalMap.end())
-        pLRI = createNewLiveRange(pV);
+    llvm::Instruction *pI = llvm::cast<llvm::Instruction>(pV);
+
+    if (m_intervalMap.find(pI) == m_intervalMap.end())
+        pLRI = createNewLiveRange(pI);
     else
-        pLRI = m_intervalMap[pV];
+        pLRI = m_intervalMap[pI];
 
     return pLRI;
 }
@@ -130,12 +131,12 @@ void LiveRange::unionLiveInSetsOfSuccessors(llvm::BasicBlock *pBB)
 
 void LiveRange::addBBToRange(llvm::Value* pV, llvm::BasicBlock *pBlock)
 {
-    if (llvm::isa<llvm::Instruction>(pV))
+    if (llvm::Instruction *pI = llvm::dyn_cast<llvm::Instruction>(pV))
     {
-        if (m_intervalMap.find(pV) == m_intervalMap.end())
-            LiveRangeInfo *pLRI = createNewLiveRange(pV);
+        if (m_intervalMap.find(pI) == m_intervalMap.end())
+            LiveRangeInterval *pLRI = createNewLiveRange(pV);
 
-        LiveRangeInfo* pLRI = m_intervalMap[pV];
+        LiveRangeInterval* pLRI = m_intervalMap[pI];
         pLRI->add_basic_block(pBlock);
     }
 }
@@ -198,12 +199,15 @@ bool LiveRange::runOnFunction(llvm::Function &F)
         {
             for (llvm::Value* pOpd : m_BBLiveIns[pBB].live)
             {
-                LiveRangeInfo *pLRI = m_intervalMap[pOpd];
-                pLRI->def_block = std::min((unsigned int)pLRI->def_block, m_pBlockLayout->getBlockID(pLoop->pHeader));
-                pLRI->kill_block = std::max((unsigned int)pLRI->kill_block, m_pBlockLayout->getBlockID(pLoop->pExit));
+                if (llvm::Instruction *pI = llvm::dyn_cast<llvm::Instruction>(pOpd))
+                {
+                    LiveRangeInterval *pLRI = m_intervalMap[pI];
+                    pLRI->def_block = std::min((unsigned int)pLRI->def_block, m_pBlockLayout->getBlockID(pLoop->pHeader));
+                    pLRI->kill_block = std::max((unsigned int)pLRI->kill_block, m_pBlockLayout->getBlockID(pLoop->pExit));
 
-                for (auto bb : pLoop->blocks)
-                    pLRI->add_basic_block(bb);
+                    for (auto bb : pLoop->blocks)
+                        pLRI->add_basic_block(bb);
+                }
             }
         }
     }
@@ -233,7 +237,7 @@ void LiveRange::visitInstruction(llvm::Instruction *pI)
     {
         if (llvm::isa<llvm::Instruction>(*opi) && !llvm::isa<llvm::PHINode>(*opi))
         {
-            LiveRangeInfo *pLRIOp = findOrCreateLiveRange(*opi);
+            LiveRangeInterval *pLRIOp = findOrCreateLiveRange(*opi);
             pLRIOp->add_kill_block(pI->getParent());
             pLRIOp->add_kill(pI);
             m_BBLiveIns[pBB].live.insert(*opi);
@@ -243,7 +247,7 @@ void LiveRange::visitInstruction(llvm::Instruction *pI)
     // If the instruction has no use then there is no point in keeping this instructions live range
     if (pI->getNumUses() > 0)
     {
-        LiveRangeInfo *pLRI = findOrCreateLiveRange(pI);
+        LiveRangeInterval *pLRI = findOrCreateLiveRange(pI);
         pLRI->remove_basic_block(pBB);
         // pLRI->add_def_block(pI->getParent());
     }
@@ -267,7 +271,7 @@ void LiveRange::visitPhiNode(llvm::PHINode *pPhi)
     {
         if (!(llvm::isa<llvm::Constant>(opi) || llvm::isa<llvm::PHINode>(opi)))
         {
-            LiveRangeInfo *pLRI = findOrCreateLiveRange(*opi);
+            LiveRangeInterval *pLRI = findOrCreateLiveRange(*opi);
             llvm::BasicBlock *pDefBB = pPhi->getIncomingBlock(*opi);
             llvm::Instruction *pTerminator = pDefBB->getTerminator();
 

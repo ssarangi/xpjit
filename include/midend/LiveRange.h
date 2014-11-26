@@ -41,7 +41,7 @@ live-through
 def-to-kill
 */
 
-struct LiveRangeInfo
+struct LiveRangeInterval
 {
     /*
        A very rudimentary DS to denote the live range. We do not handle holes at the moment
@@ -59,7 +59,7 @@ struct LiveRangeInfo
     BlockLayoutPass *pBlockLayout;
 
 public:
-    LiveRangeInfo(llvm::Instruction *pI, BlockLayoutPass *pBLayout)
+    LiveRangeInterval(llvm::Instruction *pI, BlockLayoutPass *pBLayout)
         : pInstr(pI)
         , pBlockLayout(pBLayout)
         , def_block(0)
@@ -75,22 +75,19 @@ public:
         this->def_offset = pBlockLayout->getInstructionOffset(pI);
         this->kill_offset = this->def_offset;
         instruction_id = pBlockLayout->getInstructionID(pI);
+        this->def_id = instruction_id;
     }
 
-    bool operator<(LiveRangeInfo &LRI)
+    bool operator<(LiveRangeInterval &LRI)
     {
         bool result = false;
-        if (*this->range.begin() < *LRI.range.begin())
-            result = true;
-        else if (*this->range.begin() > *LRI.range.begin())
-            result = false;
-        else if (this->def_offset < LRI.def_offset)
+        if (this->def_id < LRI.def_id)
             result = true;
 
         return result;
     }
 
-    bool interferes(const LiveRangeInfo &LRI)
+    bool interferes(const LiveRangeInterval &LRI)
     {
         return ((this->kill_id < LRI.def_id) | (this->def_id > LRI.kill_id));
     }
@@ -177,6 +174,8 @@ struct BasicBlockLiveIn
     std::set<llvm::Value*> live;
 };
 
+typedef llvm::DenseMap<llvm::Instruction*, LiveRangeInterval*> IntervalMapTy;
+
 class LiveRange : public llvm::FunctionPass
 {
 public:
@@ -192,10 +191,6 @@ public:
 
     virtual bool runOnFunction(llvm::Function &F);
 
-    bool isLive(llvm::Value *pQuery, llvm::Instruction *pInstNode);
-    bool isLiveInBlock(llvm::BasicBlock *pDefBB, llvm::BasicBlock *pQueryBB);
-    bool isLiveOutBlock(llvm::Value *pQuery, llvm::BasicBlock *pBlock);
-
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
     {
         AU.addRequired<BlockLayoutPass>();
@@ -206,15 +201,19 @@ public:
     void visitInstruction(llvm::Instruction *pI);
     void visitPhiNode(llvm::PHINode *pPhi);
     bool interferes(llvm::Instruction *pA, llvm::Instruction *pB);
+    const IntervalMapTy& getIntervalMap() const { return m_intervalMap; }
 
 private:
+    // These are instructions which are black listed i.e. no live range interval needs to be
+    // created.
+    bool isInstructionBlackListed(llvm::Instruction *pI);
     void unionLiveInSetsOfSuccessors(llvm::BasicBlock *pBB);
     void addBBToRange(llvm::Value* pV, llvm::BasicBlock *pBlock);
     
     std::stack<llvm::BasicBlock*> initializeBlockAndInstructionID(llvm::Function &F);
 
-    LiveRangeInfo* createNewLiveRange(llvm::Value *pV);
-    LiveRangeInfo* findOrCreateLiveRange(llvm::Value *pV);
+    LiveRangeInterval* createNewLiveRange(llvm::Value *pV);
+    LiveRangeInterval* findOrCreateLiveRange(llvm::Value *pV);
 
     void printLiveRanges(llvm::Function& F);
 
@@ -222,8 +221,8 @@ private:
     llvm::DenseMap<llvm::BasicBlock*, BasicBlockLiveIn> m_BBLiveIns;
     llvm::DenseMap<llvm::BasicBlock*, llvm::SmallVector<llvm::PHINode*, 5>> m_PhiNodesInBB;
     
-    llvm::DenseMap<llvm::Value*, LiveRangeInfo*> m_intervalMap;
-    std::set<LiveRangeInfo*> m_intervals;
+    IntervalMapTy m_intervalMap;
+    std::set<LiveRangeInterval*> m_intervals;
     
     llvm::DenseMap<llvm::Instruction*, unsigned int> m_instructionOffsets;
 

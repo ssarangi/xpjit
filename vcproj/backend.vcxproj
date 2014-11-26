@@ -102,6 +102,7 @@
     <ClCompile Include="..\backend\mips\mipspatternmatch.cpp" />
     <ClCompile Include="..\backend\regalloc.cpp" />
     <ClCompile Include="..\backend\tempstacksize.cpp" />
+    <ClCompile Include="..\backend\x86\LinearScan.cpp" />
     <ClCompile Include="..\backend\x86\x86codegen.cpp" />
     <ClCompile Include="..\backend\x86\x86defines.cpp" />
     <ClCompile Include="..\backend\x86\x86instset.cpp" />
