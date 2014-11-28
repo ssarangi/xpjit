@@ -17,7 +17,7 @@ LinearScanAllocator *createLinearScanRegisterAllocationPass()
     return pPass;
 }
 
-void LinearScanAllocator::performLinearScan()
+void LinearScanAllocator::sortLiveInterval()
 {
     LiveRange &LR = getAnalysis<LiveRange>();
     const IntervalMapTy interval_map = LR.getIntervalMap();
@@ -36,6 +36,11 @@ void LinearScanAllocator::performLinearScan()
         interval.pInstr->print(g_outputStream()); g_outputStream << "\n";
         g_outputStream.flush();
     }
+}
+
+void LinearScanAllocator::performLinearScan()
+{
+    sortLiveInterval();
 }
 
 bool LinearScanAllocator::runOnFunction(llvm::Function &F)

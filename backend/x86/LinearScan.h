@@ -38,6 +38,7 @@ public:
 
     virtual bool runOnFunction(llvm::Function &F);
 
+    void sortLiveInterval();
     void performLinearScan();
 
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
