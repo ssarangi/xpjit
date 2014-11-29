@@ -28,6 +28,7 @@ by Christian Wimmer Michael Franz
 #include <llvm/ADT/SparseSet.h>
 #include <llvm/IR/CFG.h>
 #include <llvm/IR/Dominators.h>
+#include <llvm/ADT/DenseMapInfo.h>
 #include "common/llvm_warnings_pop.h"
 
 #include <set>
@@ -45,7 +46,7 @@ struct LiveRangeInterval
 {
     /*
        A very rudimentary DS to denote the live range. We do not handle holes at the moment
-    */
+       */
     unsigned int def_block; // start and end are for live through blocks
     unsigned int kill_block;
     unsigned int def_offset;  // offset from beginning of basic block
@@ -76,15 +77,6 @@ public:
         this->kill_offset = this->def_offset;
         instruction_id = pBlockLayout->getInstructionID(pI);
         this->def_id = instruction_id;
-    }
-
-    bool operator<(LiveRangeInterval &LRI)
-    {
-        bool result = false;
-        if (this->def_id < LRI.def_id)
-            result = true;
-
-        return result;
     }
 
     bool interferes(const LiveRangeInterval &LRI)
@@ -130,9 +122,9 @@ public:
         ///*
         //                             Root - x defined here
         //                             /  \
-        //                            B1   \
-        //                            /     \
-        //            x used here - oldB   newB - x used here
+                        //                            B1   \
+                        //                            /     \
+                        //            x used here - oldB   newB - x used here
         //                            \    /
         //                             \  /
         //                         CommonDomRoot
@@ -166,6 +158,14 @@ public:
             this->kill_id = id;
             this->kill_offset = pBlockLayout->getInstructionOffset(pI);
         }
+    }
+};
+
+bool operator<(const LiveRangeInterval& lhs, const LiveRangeInterval &rhs);
+
+struct PointerCompare {
+    bool operator()(const LiveRangeInterval* l, const LiveRangeInterval* r) {
+        return l->def_id < r->def_id;
     }
 };
 

@@ -60,12 +60,11 @@ void X86CodeGen::loadBaseVariable(BaseVariable *pVar, std::ostream &s)
 void X86CodeGen::initializeAssembler()
 {
     // First output the data section
-    m_ostream << ".data" << std::endl;
+    m_ostream << "section .data" << std::endl;
     m_ostream << std::endl;
-    m_ostream << ".text" << std::endl;
-    m_ostream << ".globl main_entry" << std::endl;
+    m_ostream << "section .text" << std::endl;
+    m_ostream << ".global main_entry" << std::endl;
     m_ostream << std::endl;
-    X86InstSet::emitJ("main_entry", m_ostream);
 }
 
 void X86CodeGen::createLabel(llvm::BasicBlock *pBlock)
@@ -86,12 +85,12 @@ bool X86CodeGen::runOnModule(llvm::Module& M)
         m_pTempStackSize = &getAnalysis<TemporaryStackSize>(*f);
         visitFunction(*f);
 
-        PM_FuncBasicBlock* pFuncBlock = m_pX86PatternMatch->getFuncBlock(f);
+        x86_PM_FuncBasicBlock* pFuncBlock = m_pX86PatternMatch->getFuncBlock(f);
         pFuncBlock->m_pFunction = f;
 
         for (unsigned int i = 0; i < pFuncBlock->m_blocks.size(); ++i)
         {
-            PM_BasicBlock* pBlock = pFuncBlock->m_blocks[i];
+            x86_PM_BasicBlock* pBlock = pFuncBlock->m_blocks[i];
 
             // Create a label for this id
             if (pBlock->getName() != "entry")
@@ -390,7 +389,7 @@ void X86CodeGen::visitCastInst(llvm::CastInst &I)
 
 void X86CodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
 {
-
+    int a = 10;
 }
 
 void X86CodeGen::visitCmpInst(llvm::CmpInst &I)

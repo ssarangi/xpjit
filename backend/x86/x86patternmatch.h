@@ -1,5 +1,5 @@
-#ifndef __MIPS_PATTERN_MATCH__
-#define __MIPS_PATTERN_MATCH__
+#ifndef __X86_PATTERN_MATCH__
+#define __X86_PATTERN_MATCH__
 
 #include <common/llvm_warnings_push.h>
 #include <llvm/IR/Module.h>
@@ -13,36 +13,36 @@
 
 class X86CodeGen;
 
-struct Pattern
+struct x86Pattern
 {
     virtual void emit(X86CodeGen* pCodeGen) = 0;
-    virtual ~Pattern() {}
+    virtual ~x86Pattern() {}
 };
 
-struct PM_SDAG
+struct x86_PM_SDAG
 {
-    PM_SDAG(Pattern* pattern, llvm::Instruction *pRoot) : m_pPattern(pattern), m_pRoot(pRoot)
+    x86_PM_SDAG(x86Pattern* pattern, llvm::Instruction *pRoot) : m_pPattern(pattern), m_pRoot(pRoot)
     {
 
     }
 
-    Pattern*           m_pPattern;
-    llvm::Instruction* m_pRoot;
+    x86Pattern*           m_pPattern;
+    llvm::Instruction*    m_pRoot;
 };
 
-struct PM_BasicBlock
+struct x86_PM_BasicBlock
 {
     unsigned int id;
     llvm::BasicBlock* pBB;
-    std::vector<PM_SDAG> m_dags;
+    std::vector<x86_PM_SDAG> m_dags;
 
     std::string getName() { return pBB->getName().str(); }
 };
 
-struct PM_FuncBasicBlock
+struct x86_PM_FuncBasicBlock
 {
-    PM_FuncBasicBlock() { }
-    ~PM_FuncBasicBlock()
+    x86_PM_FuncBasicBlock() { }
+    ~x86_PM_FuncBasicBlock()
     {
         for (auto block : m_blocks)
         {
@@ -50,12 +50,12 @@ struct PM_FuncBasicBlock
         }
     }
 
-    std::vector<PM_BasicBlock*> m_blocks;
-    llvm::DenseMap<llvm::BasicBlock*, PM_BasicBlock*> m_blockMap;
+    std::vector<x86_PM_BasicBlock*> m_blocks;
+    llvm::DenseMap<llvm::BasicBlock*, x86_PM_BasicBlock*> m_blockMap;
 
     llvm::Function *m_pFunction;
 
-    void addBlock(unsigned int id, llvm::BasicBlock* pBB, PM_BasicBlock* pPMBB)
+    void addBlock(unsigned int id, llvm::BasicBlock* pBB, x86_PM_BasicBlock* pPMBB)
     {
         pPMBB->id = id;
         pPMBB->pBB = pBB;
@@ -82,7 +82,7 @@ public:
 
     bool runOnModule(llvm::Module &M) override;
 
-    PM_FuncBasicBlock* getFuncBlock(llvm::Function* pF)
+    x86_PM_FuncBasicBlock* getFuncBlock(llvm::Function* pF)
     {
         assert(m_funcBlocks.find(pF) != m_funcBlocks.end());
         return m_funcBlocks[pF];
@@ -97,12 +97,12 @@ private:
     bool needInstruction(llvm::Instruction *pI);
     void setPatternRoot(llvm::Instruction *pI);
     
-    Pattern* match(llvm::Instruction *pI);
+    x86Pattern* match(llvm::Instruction *pI);
     bool matchSingleInstruction(llvm::Instruction *pI);
     bool matchBrWithCmpInstruction(llvm::Instruction *pI);
     void markAsUsed(llvm::Instruction *pI);
     
-    void addPattern(Pattern *pPattern)
+    void addPattern(x86Pattern *pPattern)
     {
         m_pCurrentPattern = pPattern;
         m_patterns.push_back(m_pCurrentPattern);
@@ -178,11 +178,11 @@ public:
     void visitUnaryInstruction(llvm::UnaryInstruction &I);
 
 private:
-    llvm::DenseMap<llvm::Function*, PM_FuncBasicBlock*> m_funcBlocks;
+    llvm::DenseMap<llvm::Function*, x86_PM_FuncBasicBlock*> m_funcBlocks;
     llvm::DenseSet<llvm::Instruction*>                   m_usedInstructions;
     llvm::Instruction*                                   m_pRoot;
-    Pattern*                                             m_pCurrentPattern;
-    std::vector<Pattern*>                                m_patterns;
+    x86Pattern*                                             m_pCurrentPattern;
+    std::vector<x86Pattern*>                                m_patterns;
 };
 
 #endif

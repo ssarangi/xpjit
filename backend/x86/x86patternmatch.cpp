@@ -87,7 +87,7 @@ void X86PatternMatch::codeGenBlock(llvm::BasicBlock *pBB)
     auto it = m_funcBlocks[pBB->getParent()]->m_blockMap.find(pBB);
     assert(it != m_funcBlocks[pBB->getParent()]->m_blockMap.end());
 
-    PM_BasicBlock *pBlock = it->second;
+    x86_PM_BasicBlock *pBlock = it->second;
 
     // Loop through the instructions bottom up
     for (i = instructionList.rbegin(), e = instructionList.rend(); i != e; ++i)
@@ -97,9 +97,9 @@ void X86PatternMatch::codeGenBlock(llvm::BasicBlock *pBB)
         if (needInstruction(&inst))
         {
             setPatternRoot(&inst);
-            Pattern *pPattern = match(&inst);
+            x86Pattern *pPattern = match(&inst);
             if (pPattern)
-                pBlock->m_dags.push_back(PM_SDAG(pPattern, m_pRoot));
+                pBlock->m_dags.push_back(x86_PM_SDAG(pPattern, m_pRoot));
         }
     }
 }
@@ -118,12 +118,12 @@ void X86PatternMatch::codeGenNode(llvm::DomTreeNode *pDomNode)
 
 void X86PatternMatch::createBasicBlocks(llvm::Function *pFunc)
 {
-    PM_FuncBasicBlock *pFuncBasicBlocks = new PM_FuncBasicBlock();
+    x86_PM_FuncBasicBlock *pFuncBasicBlocks = new x86_PM_FuncBasicBlock();
 
     int i = 0;
     for (llvm::BasicBlock& bb : *pFunc)
     {
-        PM_BasicBlock *pBasicBlock = new PM_BasicBlock();
+        x86_PM_BasicBlock *pBasicBlock = new x86_PM_BasicBlock();
         pFuncBasicBlocks->addBlock(i, &bb, pBasicBlock);
         ++i;
     }
@@ -131,7 +131,7 @@ void X86PatternMatch::createBasicBlocks(llvm::Function *pFunc)
     m_funcBlocks[pFunc] = pFuncBasicBlocks;
 }
 
-Pattern* X86PatternMatch::match(llvm::Instruction *pI)
+x86Pattern* X86PatternMatch::match(llvm::Instruction *pI)
 {
     m_pCurrentPattern = nullptr;
     visit(pI);
@@ -140,7 +140,7 @@ Pattern* X86PatternMatch::match(llvm::Instruction *pI)
 
 bool X86PatternMatch::matchSingleInstruction(llvm::Instruction* pI)
 {
-    struct SingleInstPattern : public Pattern
+    struct SingleInstPattern : public x86Pattern
     {
         llvm::Instruction *pInst;
         virtual void emit(X86CodeGen *pCodeGen)
@@ -160,7 +160,7 @@ bool X86PatternMatch::matchSingleInstruction(llvm::Instruction* pI)
 
 bool X86PatternMatch::matchBrWithCmpInstruction(llvm::Instruction *pI)
 {
-    struct BrWithCmpInstPattern : public Pattern
+    struct BrWithCmpInstPattern : public x86Pattern
     {
         llvm::BranchInst *pBrInst;
         llvm::CmpInst *pCmpInst;

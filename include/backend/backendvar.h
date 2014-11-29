@@ -1,6 +1,7 @@
 #ifndef __BACKEND_VAR__
 #define __BACKEND_VAR__
 
+#include <common/debug.h>
 #include <ostream>
 
 enum VarType
@@ -128,10 +129,15 @@ public:
 
     setClassInstance1(VarType::REGISTER, BaseVariable);
 
-    friend std::ostream& operator<<(std::ostream& out, const BackendRegister& reg)
+    friend std::ostream& operator<<(std::ostream& out, const BackendRegister &reg)
     {
         out << reg.m_regName.c_str();
         return out;
+    }
+
+    void print(llvm::raw_ostream& out)
+    {
+        out << m_regName;
     }
 
 private:

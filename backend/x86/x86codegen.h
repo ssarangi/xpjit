@@ -1,8 +1,9 @@
-#ifndef __MIPS_CODE_GEN__
-#define __MIPS_CODE_GEN__
+#ifndef __X86_CODE_GEN__
+#define __X86_CODE_GEN__
 
 #include <backend/iarchcodegen.h>
 #include "x86patternmatch.h"
+#include "LinearScan.h"
 #include "../tempstacksize.h"
 
 class X86CodeGen : public IArchCodeGen, public llvm::ModulePass, public llvm::InstVisitor<X86CodeGen>
@@ -12,6 +13,7 @@ public:
         : llvm::ModulePass(ID)
         , m_temporaryBytesUsed(0)
         , m_pX86PatternMatch(nullptr)
+        , m_pRegAllocator(nullptr)
     {
     }
 
@@ -21,6 +23,7 @@ public:
     {
         AU.addRequired<X86PatternMatch>();
         AU.addRequired<TemporaryStackSize>();
+        AU.addRequired<LinearScanAllocator>();
         AU.setPreservesAll();
     }
 
@@ -125,6 +128,7 @@ private:
 private:
     unsigned int m_temporaryBytesUsed;
     X86PatternMatch *m_pX86PatternMatch;
+    LinearScanAllocator *m_pRegAllocator;
 
 public:
     static char ID;

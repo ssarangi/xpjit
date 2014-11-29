@@ -2,6 +2,7 @@
 #define __LINEAR_SCAN__
 
 #include <midend/LiveRange.h>
+#include "x86defines.h"
 
 #include "common/llvm_warnings_push.h"
 #include <llvm/Pass.h>
@@ -33,12 +34,15 @@ public:
     static char ID; // Pass identification, replacement for typeid
     LinearScanAllocator()
         : llvm::FunctionPass(ID)
+        , m_stackLocation(0)
     {
     }
 
     virtual bool runOnFunction(llvm::Function &F);
 
-    void sortLiveInterval();
+    std::vector<LiveRangeInterval*> sortLiveInterval();
+    void expireOldIntervals(LiveRangeInterval *pInterval, std::set<LiveRangeInterval*> &active, std::stack<BackendRegister*> &free_registers);
+    void spillAtInterval(LiveRangeInterval *pInterval, std::set<LiveRangeInterval*> &active);
     void performLinearScan();
 
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
@@ -48,6 +52,11 @@ public:
         AU.setPreservesCFG();
     };
 
+private:
+    llvm::DenseMap<LiveRangeInterval*, BackendRegister*> m_liveRangeIntervalToBackendRegister;
+    llvm::DenseMap<LiveRangeInterval*, unsigned int> m_stackLocationMapping;
+    std::set<LiveRangeInterval*> m_seenInterval;
+    unsigned int m_stackLocation;
 };
 
 LinearScanAllocator *createLinearScanRegisterAllocationPass();

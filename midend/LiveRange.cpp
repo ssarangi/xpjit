@@ -13,6 +13,20 @@ char LiveRange::ID = 0;
 //  - a flag saying this is not an analysis pass
 llvm::RegisterPass<LiveRange> T("LiveRangeCustomAnalysis", "Live Range Custom analysis", false, true);
 
+bool operator<(const LiveRangeInterval& lhs, const LiveRangeInterval &rhs)
+{
+    bool result = false;
+    if (lhs.def_id < rhs.def_id)
+        result = true;
+
+    return result;
+}
+
+bool isEqual(const LiveRangeInterval &lhs, const LiveRangeInterval &rhs)
+{
+    return lhs.def_id == rhs.def_id;
+}
+
 LiveRange *createNewLiveRangePass()
 {
     LiveRange *pL = new LiveRange();
