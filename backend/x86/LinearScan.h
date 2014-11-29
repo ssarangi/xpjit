@@ -35,6 +35,7 @@ public:
     LinearScanAllocator()
         : llvm::FunctionPass(ID)
         , m_stackLocation(0)
+        , m_pLR(nullptr)
     {
     }
 
@@ -52,11 +53,23 @@ public:
         AU.setPreservesCFG();
     };
 
+    BaseVariable* getSymbol(llvm::Value *pV)
+    {
+        if (llvm::Instruction *pI = llvm::dyn_cast<llvm::Instruction>(pV))
+        {
+            LiveRangeInterval *pLRInterval = m_pLR->getInterval(pI);
+            assert(m_liveRangeIntervalToBackendRegister.find(pLRInterval) != m_liveRangeIntervalToBackendRegister.end());
+            return m_liveRangeIntervalToBackendRegister[pLRInterval];
+        }
+
+        return nullptr;
+    }
+
 private:
-    llvm::DenseMap<LiveRangeInterval*, BackendRegister*> m_liveRangeIntervalToBackendRegister;
-    llvm::DenseMap<LiveRangeInterval*, unsigned int> m_stackLocationMapping;
-    std::set<LiveRangeInterval*> m_seenInterval;
+    llvm::DenseMap<LiveRangeInterval*, BaseVariable*> m_liveRangeIntervalToBackendRegister;
     unsigned int m_stackLocation;
+
+    LiveRange *m_pLR;
 };
 
 LinearScanAllocator *createLinearScanRegisterAllocationPass();

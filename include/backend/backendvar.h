@@ -37,6 +37,18 @@ class BaseVariable
 {
 public:
     setClassInstance(VarType::BASE_VARIABLE);
+
+    virtual void print(llvm::raw_ostream& out) = 0;
+
+protected:
+    virtual void print(std::ostream &out) = 0;
+
+public:
+    friend std::ostream& operator<<(std::ostream &str, BaseVariable& data)
+    {
+        data.print(str);
+        return str;
+    }
 };
 
 class Immediate : public BaseVariable
@@ -73,6 +85,17 @@ public:
         return out;
     }
 
+protected:
+    void print(std::ostream &out)
+    {
+        if (m_dataType == I32)
+            out << m_data.i32;
+        else if (m_dataType == U32)
+            out << m_data.u32;
+        else
+            out << m_data.f32;
+    }
+
 private:
     union data
     {
@@ -97,6 +120,16 @@ public:
         else
             return m_data.u32;
     }
+
+    void print(llvm::raw_ostream& out)
+    {
+        if (m_dataType == I32)
+            out << "Immediate: " << m_data.i32 << "\n";
+        else if (m_dataType == F32)
+            out << "Immediate: " << m_data.f32 << "\n";
+        else
+            out << "Immediate: " << m_data.u32 << "\n";
+    }
 };
 
 class BackendVariable : public BaseVariable
@@ -114,7 +147,18 @@ public:
         return out;
     }
 
+    void print(llvm::raw_ostream& out)
+    {
+        out << " Stack Spill Loc: " << m_tempLocation << "\n";
+    }
+
     int getTempLocation() const { return m_tempLocation; }
+
+protected:
+    void print(std::ostream& out)
+    {
+        out << " Stack Spill Loc: " << m_tempLocation << "\n";
+    }
 
 private:
     int m_tempLocation;
@@ -136,6 +180,12 @@ public:
     }
 
     void print(llvm::raw_ostream& out)
+    {
+        out << m_regName;
+    }
+
+protected:
+    void print(std::ostream& out)
     {
         out << m_regName;
     }

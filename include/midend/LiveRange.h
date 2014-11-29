@@ -202,6 +202,12 @@ public:
     void visitPhiNode(llvm::PHINode *pPhi);
     bool interferes(llvm::Instruction *pA, llvm::Instruction *pB);
     const IntervalMapTy& getIntervalMap() const { return m_intervalMap; }
+    
+    LiveRangeInterval* getInterval(llvm::Instruction *pI)
+    {
+        assert(m_intervalMap.find(pI) != m_intervalMap.end());
+        return m_intervalMap[pI];
+    }
 
 private:
     // These are instructions which are black listed i.e. no live range interval needs to be

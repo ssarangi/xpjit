@@ -31,12 +31,6 @@ void X86CodeGen::storeTemporary(llvm::Instruction *pI)
 BaseVariable* X86CodeGen::getSymbol(llvm::Value* pV)
 {
     BaseVariable *pSymbol = nullptr;
-    // Check if we already have a symbol in the symbol table. If not the create a symbol
-    if (m_symbolTables[m_pCurrentFunction]->get(pV) != nullptr)
-    {
-        pSymbol = m_symbolTables[m_pCurrentFunction]->get(pV);
-        return pSymbol;
-    }
 
     // Check if the llvm value is a constant int
     if (llvm::Constant *pC = llvm::dyn_cast<llvm::Constant>(pV))
@@ -45,8 +39,13 @@ BaseVariable* X86CodeGen::getSymbol(llvm::Value* pV)
         if (llvm::ConstantInt *pCI = llvm::dyn_cast<llvm::ConstantInt>(pC))
         {
             pSymbol = new Immediate((int)pCI->getZExtValue());
-            m_symbolTables[m_pCurrentFunction]->set(pV, pSymbol);
+            // m_symbolTables[m_pCurrentFunction]->set(pV, pSymbol);
         }
+    }
+    else
+    {
+        // Check if we already have a symbol in the symbol table. If not the create a symbol
+        pSymbol = m_pRegAllocator->getSymbol(pV);
     }
 
     return pSymbol;
@@ -82,7 +81,8 @@ bool X86CodeGen::runOnModule(llvm::Module& M)
 
     for (llvm::Module::iterator f = M.begin(), fe = M.end(); f != fe; ++f)
     {
-        m_pTempStackSize = &getAnalysis<TemporaryStackSize>(*f);
+        m_pRegAllocator = &getAnalysis<LinearScanAllocator>(*f);
+        // m_pTempStackSize = &getAnalysis<TemporaryStackSize>(*f);
         visitFunction(*f);
 
         x86_PM_FuncBasicBlock* pFuncBlock = m_pX86PatternMatch->getFuncBlock(f);
@@ -389,7 +389,38 @@ void X86CodeGen::visitCastInst(llvm::CastInst &I)
 
 void X86CodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
 {
-    int a = 10;
+    COMMENT_STR_WITH_INSTR(I);
+
+    llvm::Instruction *pInst = llvm::cast<llvm::Instruction>(&I);
+
+    llvm::Value *pOp1 = I.getOperand(0);
+    llvm::Value *pOp2 = I.getOperand(1);
+
+    BaseVariable *pBop1 = getSymbol(pOp1);
+    BaseVariable *pBop2 = getSymbol(pOp2);
+
+    BaseVariable *pDst = getSymbol(&I);
+
+    switch (pInst->getOpcode())
+    {
+    case llvm::Instruction::Add:
+    case llvm::Instruction::FAdd:
+        X86InstSet::emitAdd(*pDst, *pBop1, *pBop2, m_ostream);
+        break;
+    case llvm::Instruction::Sub:
+    case llvm::Instruction::FSub:
+        X86InstSet::emitSub(*pDst, *pBop1, *pBop2, m_ostream);
+        break;
+    case llvm::Instruction::Mul:
+    case llvm::Instruction::FMul:
+        X86InstSet::emitMul(*pDst, *pBop1, *pBop2, m_ostream);
+        break;
+    case llvm::Instruction::FDiv:
+        X86InstSet::emitDiv(*pDst, *pBop1, *pBop2, m_ostream);
+        break;
+    }
+
+    std::string g = m_ostream.str();
 }
 
 void X86CodeGen::visitCmpInst(llvm::CmpInst &I)

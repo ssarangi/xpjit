@@ -93,22 +93,22 @@ void X86InstSet::emitJAL(std::string label, std::ostream &s)
     s << JAL << label.c_str() << std::endl;
 }
 
-void X86InstSet::emitAdd(BackendRegister &dstReg, BackendRegister &srcReg1, BackendRegister &srcReg2, std::ostream &s)
+void X86InstSet::emitAdd(BaseVariable &dstReg, BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s)
 {
     s << ADD << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
 }
 
-void X86InstSet::emitSub(BackendRegister &dstReg, BackendRegister &srcReg1, BackendRegister &srcReg2, std::ostream &s)
+void X86InstSet::emitSub(BaseVariable &dstReg, BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s)
 {
     s << SUB << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
 }
 
-void X86InstSet::emitMul(BackendRegister &dstReg, BackendRegister &srcReg1, BackendRegister &srcReg2, std::ostream &s)
+void X86InstSet::emitMul(BaseVariable &dstReg, BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s)
 {
     s << MUL << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
 }
 
-void X86InstSet::emitDiv(BackendRegister &dstReg, BackendRegister &srcReg1, BackendRegister &srcReg2, std::ostream &s)
+void X86InstSet::emitDiv(BaseVariable &dstReg, BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s)
 {
     s << DIV << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
 }

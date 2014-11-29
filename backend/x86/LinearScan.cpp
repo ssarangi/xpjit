@@ -22,8 +22,8 @@ LinearScanAllocator *createLinearScanRegisterAllocationPass()
 
 std::vector<LiveRangeInterval*> LinearScanAllocator::sortLiveInterval()
 {
-    LiveRange &LR = getAnalysis<LiveRange>();
-    const IntervalMapTy interval_map = LR.getIntervalMap();
+
+    const IntervalMapTy interval_map = m_pLR->getIntervalMap();
 
     // Sort the live range intervals first
     std::vector<LiveRangeInterval*> sorted_intervals;
@@ -54,22 +54,21 @@ void LinearScanAllocator::expireOldIntervals(LiveRangeInterval *pInterval, std::
 
         remove_intervals.insert(active_interval);
 
-        BackendRegister *pReg = m_liveRangeIntervalToBackendRegister[active_interval];
-        if (pReg == nullptr)
+        BaseVariable *pVar = m_liveRangeIntervalToBackendRegister[active_interval];
+
+        if (pVar->isInstanceOf(REGISTER))
         {
-            assert(m_seenInterval.find(active_interval) != m_seenInterval.end());
+            BackendRegister *pReg = static_cast<BackendRegister*>(pVar);
+            assert(pReg != nullptr);
+            free_registers.push(pReg);
+
+            assert(m_liveRangeIntervalToBackendRegister.find(active_interval) != m_liveRangeIntervalToBackendRegister.end());
+
+            g_outputStream << "Expiring interval (";
+            pReg->print(g_outputStream()); g_outputStream << "): ";
+            active_interval->pInstr->print(g_outputStream());
+            g_outputStream << "\n";
         }
-
-        assert(pReg != nullptr);
-        free_registers.push(pReg);
-
-        assert(m_liveRangeIntervalToBackendRegister.find(active_interval) != m_liveRangeIntervalToBackendRegister.end());
-
-        // m_liveRangeIntervalToBackendRegister.erase(active_interval);
-        g_outputStream << "Expiring interval (";
-        pReg->print(g_outputStream()); g_outputStream << "): ";
-        active_interval->pInstr->print(g_outputStream());
-        g_outputStream << "\n";
     }
 
     for (auto remove_interval : remove_intervals)
@@ -81,18 +80,20 @@ void LinearScanAllocator::spillAtInterval(LiveRangeInterval *pInterval, std::set
     // Find the longest interval from the end
     LiveRangeInterval *pSpill_interval = *(--active.end());
 
+    BackendVariable *pSpillVar = new BackendVariable(m_stackLocation);
+
     if (pSpill_interval->kill_id > pInterval->kill_id)
     {
         // Use the same register the spill interval was using
         m_liveRangeIntervalToBackendRegister[pInterval] = m_liveRangeIntervalToBackendRegister[pSpill_interval];
-        m_stackLocationMapping[pSpill_interval] = m_stackLocation;
+        m_liveRangeIntervalToBackendRegister[pSpill_interval] = pSpillVar;
         active.erase(pSpill_interval);
         m_liveRangeIntervalToBackendRegister.erase(pSpill_interval);
         active.insert(pInterval);
     }
     else
     {
-        m_stackLocationMapping[pInterval] = m_stackLocation;
+        m_liveRangeIntervalToBackendRegister[pInterval] = pSpillVar;
     }
 
     m_stackLocation += 4;
@@ -111,8 +112,6 @@ void LinearScanAllocator::performLinearScan()
 
     for (auto interval : sorted_intervals)
     {
-        m_seenInterval.insert(interval);
-
         // Expire old intervals
         expireOldIntervals(interval, active, free_registers);
 
@@ -132,6 +131,8 @@ bool LinearScanAllocator::runOnFunction(llvm::Function &F)
 {
     ADD_HEADER("SSA Deconstruction Pass");
 
+    m_pLR = &getAnalysis<LiveRange>();
+
     performLinearScan();
     
     g_outputStream << "\nRegisters allocated\n";
@@ -143,18 +144,6 @@ bool LinearScanAllocator::runOnFunction(llvm::Function &F)
         g_outputStream << " --> ";
         reg_mapping.second->print(g_outputStream());
         g_outputStream << " { " << reg_mapping.first->def_id << " , " << reg_mapping.first->kill_id << " }";
-        g_outputStream << "\n";
-    }
-
-    g_outputStream << "\nRegisters spilled\n";
-    g_outputStream << "-----------------------------------\n";
-
-    for (auto spill_mapping : m_stackLocationMapping)
-    {
-        spill_mapping.first->pInstr->print(g_outputStream());
-        g_outputStream << " --> ";
-        g_outputStream << spill_mapping.second;
-        g_outputStream << " { " << spill_mapping.first->def_id << " , " << spill_mapping.first->kill_id << " }";
         g_outputStream << "\n";
     }
 

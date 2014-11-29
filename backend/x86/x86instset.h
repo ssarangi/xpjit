@@ -29,10 +29,10 @@ public:
 
     static void emitAddiu(BackendRegister &dstReg, BackendRegister &srcReg, int imm, std::ostream &s);
 
-    static void emitAdd(BackendRegister &dstReg, BackendRegister &srcReg1, BackendRegister &srcReg2, std::ostream &s);
-    static void emitSub(BackendRegister &dstReg, BackendRegister &srcReg1, BackendRegister &srcReg2, std::ostream &s);
-    static void emitMul(BackendRegister &dstReg, BackendRegister &srcReg1, BackendRegister &srcReg2, std::ostream &s);
-    static void emitDiv(BackendRegister &dstReg, BackendRegister &srcReg1, BackendRegister &srcReg2, std::ostream &s);
+    static void emitAdd(BaseVariable &dstReg, BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s);
+    static void emitSub(BaseVariable &dstReg, BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s);
+    static void emitMul(BaseVariable &dstReg, BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s);
+    static void emitDiv(BaseVariable &dstReg, BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s);
 
     static void emitPush(BackendRegister &reg, std::ostream &s);
     static void emitPush(BackendRegister &reg, int offset, std::ostream &s);
