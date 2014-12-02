@@ -18,7 +18,7 @@
     std::string str;                            \
     llvm::raw_string_ostream os(str);           \
     INSTR.print(os);                            \
-    m_ostream << "# " << os.str() << std::endl; \
+    m_ostream << "; " << os.str() << std::endl; \
 }
 
 char X86CodeGen::ID = 0;
@@ -37,10 +37,7 @@ BaseVariable* X86CodeGen::getSymbol(llvm::Value* pV)
     {
         // So this is a constant. So see which one.
         if (llvm::ConstantInt *pCI = llvm::dyn_cast<llvm::ConstantInt>(pC))
-        {
             pSymbol = new Immediate((int)pCI->getZExtValue());
-            // m_symbolTables[m_pCurrentFunction]->set(pV, pSymbol);
-        }
     }
     else
     {
@@ -59,10 +56,10 @@ void X86CodeGen::loadBaseVariable(BaseVariable *pVar, std::ostream &s)
 void X86CodeGen::initializeAssembler()
 {
     // First output the data section
+    m_ostream << "global main_entry" << std::endl;
     m_ostream << "section .data" << std::endl;
     m_ostream << std::endl;
     m_ostream << "section .text" << std::endl;
-    m_ostream << ".global main_entry" << std::endl;
     m_ostream << std::endl;
 }
 
@@ -389,7 +386,7 @@ void X86CodeGen::visitCastInst(llvm::CastInst &I)
 
 void X86CodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
 {
-    COMMENT_STR_WITH_INSTR(I);
+    // COMMENT_STR_WITH_INSTR(I);
 
     llvm::Instruction *pInst = llvm::cast<llvm::Instruction>(&I);
 

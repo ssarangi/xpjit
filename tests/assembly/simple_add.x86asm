@@ -1,0 +1,9 @@
+global main_entry
+section .data
+
+section .text
+
+ add edx 10 20
+ mul ecx 20 5
+ mul ebx 2 ecx
+ add eax ebx edx
