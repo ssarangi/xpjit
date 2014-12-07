@@ -81,4 +81,25 @@ extern BackendRegister EBP;
 extern BackendRegister EIP;
 extern BackendRegister ESP;
 
+///////////////////////////// X86-64 Registers /////////////////////////////////
+extern BackendRegister RAX;
+extern BackendRegister RBX;
+extern BackendRegister RCX;
+extern BackendRegister RDX;
+
+extern BackendRegister RSI;
+extern BackendRegister RDI;
+
+extern BackendRegister RSP;
+extern BackendRegister RBP;
+
+extern BackendRegister R8;
+extern BackendRegister R9;
+extern BackendRegister R10;
+extern BackendRegister R11;
+extern BackendRegister R12;
+extern BackendRegister R13;
+extern BackendRegister R14;
+extern BackendRegister R15;
+
 #endif
