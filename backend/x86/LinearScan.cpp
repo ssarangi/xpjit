@@ -105,6 +105,11 @@ void LinearScanAllocator::performLinearScan()
     std::set<LiveRangeInterval*> active;
     std::stack<BackendRegister*> free_registers;
 
+    free_registers.push(&RAX);
+    free_registers.push(&RBX);
+    free_registers.push(&RCX);
+    free_registers.push(&RDX);
+
     free_registers.push(&R8);
     free_registers.push(&R9);
     free_registers.push(&R10);
@@ -113,11 +118,6 @@ void LinearScanAllocator::performLinearScan()
     free_registers.push(&R13);
     free_registers.push(&R14);
     free_registers.push(&R15);
-
-    free_registers.push(&RAX);
-    free_registers.push(&RBX);
-    free_registers.push(&RCX);
-    free_registers.push(&RDX);
 
     for (auto interval : sorted_intervals)
     {

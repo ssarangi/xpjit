@@ -3,7 +3,7 @@ section .data
 
 section .text
 
- add edx 10 20
- mul ecx 20 5
- mul ebx 2 ecx
- add eax ebx edx
+ add r15 10 20
+ mul r14 20 5
+ mul r13 2 r14
+ add r12 r13 r15
