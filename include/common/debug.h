@@ -14,12 +14,10 @@
 
 using namespace std;
 
-#if defined _DEBUG
 #define ICARUS_NOT_IMPLEMENTED(STR)      \
 {                                        \
     throw std::exception((const char*)(STR)); \
 }
-#endif
 
 #define ADD_HEADER(txt) \
 {                                                                                                         \
