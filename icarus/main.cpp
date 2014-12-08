@@ -142,6 +142,9 @@ int main(int argc, char *argv[])
 
     Compile(pfilename, pOutput);
 
+    std::string cmd = std::string("tools\\nasm.exe -f win64 ") + std::string(pOutput) + std::string(" -o output.o");
+
+    system(cmd.c_str());
     system("pause");
     return 0;
 }
