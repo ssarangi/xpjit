@@ -25,14 +25,14 @@ public:
     static void emitLoadAddress(BackendRegister &dstReg, char* pAddress, std::ostream &s);
     // static void emitLoadBool();
     // static void emitLoadString();
-    static void emitMove(BackendRegister &dstReg, BackendRegister &srcReg, std::ostream &s);
+    static void emitMov(BaseVariable &dstReg, BaseVariable &srcReg, std::ostream &s);
 
     static void emitAddiu(BackendRegister &dstReg, BackendRegister &srcReg, int imm, std::ostream &s);
 
-    static void emitAdd(BaseVariable &dstReg, BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s);
-    static void emitSub(BaseVariable &dstReg, BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s);
-    static void emitMul(BaseVariable &dstReg, BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s);
-    static void emitDiv(BaseVariable &dstReg, BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s);
+    static void emitAdd(BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s);
+    static void emitSub(BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s);
+    static void emitMul(BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s);
+    static void emitDiv(BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostream &s);
 
     static void emitPush(BackendRegister &reg, std::ostream &s);
     static void emitPush(BackendRegister &reg, int offset, std::ostream &s);
@@ -45,6 +45,8 @@ public:
     static void emitJ(std::string label, std::ostream &s);
     static void emitJR(BackendRegister &reg, std::ostream &s);
     static void emitJAL(std::string label, std::ostream &s);
+
+    static void emitComment(std::string comment, std::ostream &s);
 
     static std::string getBrCmpPredicateString(llvm::CmpInst::Predicate predicate);
 };

@@ -56,10 +56,15 @@ void X86CodeGen::loadBaseVariable(BaseVariable *pVar, std::ostream &s)
 void X86CodeGen::initializeAssembler()
 {
     // First output the data section
-    m_ostream << "global main_entry" << std::endl;
-    m_ostream << "section .data" << std::endl;
+    // m_ostream << "bits 64" << std::endl; - Nasm syntax
+    // m_ostream << "section .data" << std::endl;
+    m_ostream << ".686P" << std::endl;
+    m_ostream << ".model flat,c" << std::endl;
+    m_ostream << ".data" << std::endl;
     m_ostream << std::endl;
-    m_ostream << "section .text" << std::endl;
+    // m_ostream << "section .text" << std::endl;
+    m_ostream << ".code" << std::endl;
+    m_ostream << "public main_entry" << std::endl;
     m_ostream << std::endl;
 }
 
@@ -105,7 +110,7 @@ bool X86CodeGen::runOnModule(llvm::Module& M)
 
 void X86CodeGen::visitFunction(llvm::Function& F)
 {
-
+    m_ostream << F.getName().str() << "_entry:" << std::endl;
 }
 
 void X86CodeGen::visitBasicBlock(llvm::BasicBlock &BB)
@@ -401,20 +406,29 @@ void X86CodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
     switch (pInst->getOpcode())
     {
     case llvm::Instruction::Add:
-    case llvm::Instruction::FAdd:
-        X86InstSet::emitAdd(*pDst, *pBop1, *pBop2, m_ostream);
+
+        X86InstSet::emitMov(EAX, *pBop1, m_ostream);
+        X86InstSet::emitAdd(EAX, *pBop2, m_ostream);
+        X86InstSet::emitMov(*pDst, EAX, m_ostream);
         break;
     case llvm::Instruction::Sub:
-    case llvm::Instruction::FSub:
-        X86InstSet::emitSub(*pDst, *pBop1, *pBop2, m_ostream);
+        X86InstSet::emitMov(RAX, *pBop1, m_ostream);
+        X86InstSet::emitSub(RAX, *pBop2, m_ostream);
+        X86InstSet::emitMov(*pDst, RAX, m_ostream);
         break;
     case llvm::Instruction::Mul:
-    case llvm::Instruction::FMul:
-        X86InstSet::emitMul(*pDst, *pBop1, *pBop2, m_ostream);
+        X86InstSet::emitMov(RAX, *pBop1, m_ostream);
+        X86InstSet::emitMov(RBX, *pBop2, m_ostream);
+        X86InstSet::emitMul(RAX, RBX, m_ostream);
+        X86InstSet::emitMov(*pDst, RAX, m_ostream);
         break;
     case llvm::Instruction::FDiv:
-        X86InstSet::emitDiv(*pDst, *pBop1, *pBop2, m_ostream);
+        X86InstSet::emitDiv(*pBop1, *pBop2, m_ostream);
         break;
+    case llvm::Instruction::FAdd:
+    case llvm::Instruction::FSub:
+    case llvm::Instruction::FMul:
+        ICARUS_NOT_IMPLEMENTED("Float methods not implemented yet");
     }
 
     std::string g = m_ostream.str();

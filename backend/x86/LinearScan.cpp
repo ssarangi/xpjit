@@ -20,9 +20,47 @@ LinearScanAllocator *createLinearScanRegisterAllocationPass()
     return pPass;
 }
 
+bool LinearScanAllocator::assignRegistersForALU(LiveRangeInterval *pInterval)
+{
+    bool assigned_register = false;
+    // Check if the instruction is an ALU instruction or not.
+    llvm::Instruction *pI = pInterval->pInstr;
+    llvm::Value *pOp1 = pI->getOperand(0);
+
+    switch (pI->getOpcode())
+    {
+    case llvm::Instruction::Add:
+    case llvm::Instruction::Mul:
+        // Destination of the add instruction is the first operand. So we need to use the same register as the first
+        // operand.
+        if (!llvm::isa<llvm::Constant>(pOp1))
+        {
+            // Assign this register.
+            BaseVariable *pReg = getSymbol(pOp1);
+            if (pReg != nullptr)
+            {
+                pReg->print(g_outputStream());
+                g_outputStream.flush();
+                m_liveRangeIntervalToBackendRegister[pInterval] = pReg;
+                assigned_register = true;
+            }
+        }
+        break;
+    case llvm::Instruction::Sub:
+    case llvm::Instruction::FSub:
+        break;
+    case llvm::Instruction::FAdd:
+    case llvm::Instruction::FMul:
+        break;
+    case llvm::Instruction::FDiv:
+        break;
+    }
+
+    return assigned_register;
+}
+
 std::vector<LiveRangeInterval*> LinearScanAllocator::sortLiveInterval()
 {
-
     const IntervalMapTy interval_map = m_pLR->getIntervalMap();
 
     // Sort the live range intervals first
@@ -105,10 +143,11 @@ void LinearScanAllocator::performLinearScan()
     std::set<LiveRangeInterval*> active;
     std::stack<BackendRegister*> free_registers;
 
-    free_registers.push(&RAX);
-    free_registers.push(&RBX);
-    free_registers.push(&RCX);
-    free_registers.push(&RDX);
+    // Do not add these registers. For now we will use a simplistic register allocation scheme.
+    //free_registers.push(&RAX);
+    //free_registers.push(&RBX);
+    //free_registers.push(&RCX);
+    //free_registers.push(&RDX);
 
     free_registers.push(&R8);
     free_registers.push(&R9);
@@ -118,6 +157,14 @@ void LinearScanAllocator::performLinearScan()
     free_registers.push(&R13);
     free_registers.push(&R14);
     free_registers.push(&R15);
+
+    //// Precolor some of the intervals
+    //for (auto interval : sorted_intervals)
+    //{
+    //    interval->pInstr->print(g_outputStream());
+    //    g_outputStream << "\n";
+    //    assignRegistersForALU(interval);
+    //}
 
     for (auto interval : sorted_intervals)
     {
@@ -138,7 +185,7 @@ void LinearScanAllocator::performLinearScan()
 
 bool LinearScanAllocator::runOnFunction(llvm::Function &F)
 {
-    ADD_HEADER("SSA Deconstruction Pass");
+    ADD_HEADER("Linear Scan Register Allocator Pass");
 
     m_pLR = &getAnalysis<LiveRange>();
 

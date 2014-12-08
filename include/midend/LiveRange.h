@@ -42,6 +42,19 @@ live-through
 def-to-kill
 */
 
+struct Interval
+{
+    int start;
+    int end;
+    bool isLive; // Could be a hole.
+    void *pReg; // Till I find a good way to do this.
+
+    bool operator<(const Interval &rhs)
+    {
+        return start < rhs.start;
+    }
+};
+
 struct LiveRangeInterval
 {
     /*
@@ -58,6 +71,16 @@ struct LiveRangeInterval
     llvm::Instruction *pInstr;
     unsigned int instruction_id;
     BlockLayoutPass *pBlockLayout;
+    std::set<Interval*> intervals;
+
+private:
+    void copy_members(const LiveRangeInterval &rhs)
+    {
+        def_id = rhs.def_id;
+        kill_id = rhs.kill_id;
+
+        // Do not copy other members for now.
+    }
 
 public:
     LiveRangeInterval(llvm::Instruction *pI, BlockLayoutPass *pBLayout)
@@ -77,6 +100,45 @@ public:
         this->kill_offset = this->def_offset;
         instruction_id = pBlockLayout->getInstructionID(pI);
         this->def_id = instruction_id;
+    }
+
+    LiveRangeInterval(const LiveRangeInterval &rhs)
+    {
+        copy_members(rhs);
+    }
+
+    void splitInterval(llvm::Instruction *pInst)
+    {
+        unsigned int split_pt = pBlockLayout->getInstructionID(pInst);
+
+        Interval *pInterval = nullptr;
+        if (intervals.empty())
+        {
+            // This means no intervals have been set.
+            pInterval = new Interval();
+            pInterval->start = def_id;
+            pInterval->end = kill_id;
+            intervals.insert(pInterval);
+        }
+
+        // Find the last interval
+        std::set<Interval*>::iterator i = --intervals.end();
+
+        Interval *pNewInterval = new Interval();
+        pNewInterval->start = split_pt;
+        pNewInterval->end = (*i)->end;
+        (*i)->end = split_pt - 1;
+
+        intervals.insert(pNewInterval);
+    }
+
+    void assignRegister(int interval_start, void *pReg)
+    {
+        for (auto i : intervals)
+        {
+            if (i->start == interval_start)
+                i->pReg = pReg;
+        }
     }
 
     bool interferes(const LiveRangeInterval &LRI)
@@ -159,13 +221,25 @@ public:
             this->kill_offset = pBlockLayout->getInstructionOffset(pI);
         }
     }
+
+    bool operator=(const LiveRangeInterval& rhs)
+    {
+        copy_members(rhs);
+    }
 };
 
 bool operator<(const LiveRangeInterval& lhs, const LiveRangeInterval &rhs);
 
-struct PointerCompare {
-    bool operator()(const LiveRangeInterval* l, const LiveRangeInterval* r) {
+struct PointerCompare
+{
+    bool operator()(const LiveRangeInterval* l, const LiveRangeInterval* r)
+    {
         return l->def_id < r->def_id;
+    }
+
+    bool operator()(const Interval *pL, const Interval *pR)
+    {
+        return pL->start < pR->start;
     }
 };
 

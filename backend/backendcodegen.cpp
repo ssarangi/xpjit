@@ -34,11 +34,19 @@ void GenerateCode(CodeGenModule& M, std::string outputFile)
     std::ofstream file;
     file.open(outputFile);
 
-    file.write(pX86CodeGen->getAssembly().c_str(), pX86CodeGen->getAssembly().length());
+    // Add an end directive to end of asm
+    std::string asm_str = pX86CodeGen->getAssembly();
+    asm_str += "\nend";
+
+    file.write(asm_str.c_str(), asm_str.length());
+    file.close();
+
+    file.open("tests\\ASMRunner\\test.asm");
+    file.write(asm_str.c_str(), asm_str.length());
     file.close();
 
     g_outputStream << "-------------------------------------------------------------------\n";
     g_outputStream << "                         Code Generation                           \n";
     g_outputStream << "-------------------------------------------------------------------\n";
-    g_outputStream << pX86CodeGen->getAssembly();
+    g_outputStream << asm_str;
 }

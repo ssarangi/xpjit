@@ -1,3 +1,4 @@
+#include <direct.h>
 #include <backend/codegenpublic.h>
 
 #include <frontend/irtranslation.h>
@@ -140,6 +141,11 @@ int main(int argc, char *argv[])
     assert(pOutput != nullptr && "No output file specified");
 
     Compile(pfilename, pOutput);
+
+    char* buffer = _getcwd(NULL, 0);
+    
+    std::string full_path = std::string(buffer) + std::string("\\tests\\ASMRunner\\runasm.cmd");
+    system(full_path.c_str());
     system("pause");
     return 0;
 }

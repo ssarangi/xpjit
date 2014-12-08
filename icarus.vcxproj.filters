@@ -9,6 +9,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="asm">
+      <UniqueIdentifier>{b3c50ab9-d858-4799-b02a-03b5c6743f36}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icarus\Dot\dotwriter.h">
@@ -31,5 +34,10 @@
     <ClCompile Include="icarus\Dot\dotwriter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="executable_asm\executable.asm">
+      <Filter>asm</Filter>
+    </None>
   </ItemGroup>
 </Project>

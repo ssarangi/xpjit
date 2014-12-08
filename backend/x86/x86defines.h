@@ -9,30 +9,33 @@ X86 Instructions
 
 #define WORD_SIZE 4
 
-#define SW " sw "
-#define LW " lw "
-#define LI " li "
-#define LA " la "
+namespace X86
+{
+    const std::string SW = " sw ";
+    const std::string LW = " lw ";
+    const std::string LI = " li ";
+    const std::string LA = " la ";
 
-#define MOVE " move "
-#define NEG " neg "
-#define ADD " add "
-#define ADDI " addi "
-#define ADDIU " addiu "
-#define DIV " div "
-#define MUL " mul "
-#define SUB " sub "
-#define SLL " sll "
-#define BEQZ " beqz "
-#define BR " br "
-#define BEQ " beq "
-#define BNE " bne "
-#define BLEQ " bleq "
-#define BLT " blt "
-#define BGT " bgt "
+    const std::string MOV = " mov ";
+    const std::string NEG = " neg ";
+    const std::string ADD = " add ";
+    const std::string ADDI = " addi ";
+    const std::string ADDIU = " addiu ";
+    const std::string DIV = " div ";
+    const std::string MUL = " imul ";
+    const std::string SUB = " sub ";
+    const std::string SLL = " sll ";
+    const std::string BEQZ = " beqz ";
+    const std::string BR = " br ";
+    const std::string BEQ = " beq ";
+    const std::string BNE = " bne ";
+    const std::string BLEQ = " bleq ";
+    const std::string BLT = " blt ";
+    const std::string BGT = " bgt ";
 
-#define JR " jr "
-#define JAL " jal "
+    const std::string JR = " jr ";
+    const std::string JAL = " jal ";
+}
 
 enum X86_SYSCALLS
 {

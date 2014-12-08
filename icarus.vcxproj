@@ -108,6 +108,9 @@
       <Project>{e72f6d6e-1585-4c85-99e6-847569832e1b}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="executable_asm\executable.asm" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

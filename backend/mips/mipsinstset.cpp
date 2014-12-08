@@ -17,22 +17,22 @@ std::string MipsInstSet::getBrCmpPredicateString(llvm::CmpInst::Predicate predic
 
 void MipsInstSet::emitLoad(BackendRegister &dstReg, int offset, BackendRegister &srcReg, std::ostream& s)
 {
-    s << LW << dstReg << " " << offset << "(" << srcReg << ")" << std::endl;
+    s << MIPS::LW << dstReg << " " << offset << "(" << srcReg << ")" << std::endl;
 }
 
 void MipsInstSet::emitStore(BackendRegister &srcReg, int offset, BackendRegister &dstReg, std::ostream& s)
 {
-    s << SW << srcReg << " " << offset << "(" << dstReg << ")" << std::endl;
+    s << MIPS::SW << srcReg << " " << offset << "(" << dstReg << ")" << std::endl;
 }
 
 void MipsInstSet::emitLoadImm(BackendRegister &dstReg, Immediate &imm, std::ostream& s)
 {
-    s << LI << dstReg << " " << imm << std::endl;
+    s << MIPS::LI << dstReg << " " << imm << std::endl;
 }
 
 void MipsInstSet::emitLoadImm(BackendRegister &dstReg, int imm, std::ostream &s)
 {
-    s << LI << dstReg << " " << imm << std::endl;
+    s << MIPS::LI << dstReg << " " << imm << std::endl;
 }
 
 void MipsInstSet::emitLoadAddress(BackendRegister &dstReg, char* pAddress, std::ostream& s)
@@ -42,12 +42,12 @@ void MipsInstSet::emitLoadAddress(BackendRegister &dstReg, char* pAddress, std::
 
 void MipsInstSet::emitAddiu(BackendRegister &dstReg, BackendRegister &srcReg, int imm, std::ostream& s)
 {
-    s << ADDIU << dstReg << " " << srcReg << " " << imm << std::endl;
+    s << MIPS::ADDIU << dstReg << " " << srcReg << " " << imm << std::endl;
 }
 
 void MipsInstSet::emitMove(BackendRegister &dstReg, BackendRegister &srcReg, std::ostream &s)
 {
-    s << MOVE << dstReg << " " << srcReg << std::endl;
+    s << MIPS::MOV << dstReg << " " << srcReg << std::endl;
 }
 
 void MipsInstSet::emitPush(BackendRegister &reg, std::ostream& s)
@@ -91,30 +91,30 @@ void MipsInstSet::emitJ(std::string label, std::ostream &s)
 
 void MipsInstSet::emitJR(BackendRegister &reg, std::ostream &s)
 {
-    s << JR << reg << std::endl;
+    s << MIPS::JR << reg << std::endl;
 }
 
 void MipsInstSet::emitJAL(std::string label, std::ostream &s)
 {
-    s << JAL << label.c_str() << std::endl;
+    s << MIPS::JAL << label.c_str() << std::endl;
 }
 
 void MipsInstSet::emitAdd(BackendRegister &dstReg, BackendRegister &srcReg1, BackendRegister &srcReg2, std::ostream &s)
 {
-    s << ADD << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
+    s << MIPS::ADD << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
 }
 
 void MipsInstSet::emitSub(BackendRegister &dstReg, BackendRegister &srcReg1, BackendRegister &srcReg2, std::ostream &s)
 {
-    s << SUB << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
+    s << MIPS::SUB << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
 }
 
 void MipsInstSet::emitMul(BackendRegister &dstReg, BackendRegister &srcReg1, BackendRegister &srcReg2, std::ostream &s)
 {
-    s << MUL << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
+    s << MIPS::MUL << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
 }
 
 void MipsInstSet::emitDiv(BackendRegister &dstReg, BackendRegister &srcReg1, BackendRegister &srcReg2, std::ostream &s)
 {
-    s << DIV << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
+    s << MIPS::DIV << dstReg << " " << srcReg1 << " " << srcReg2 << std::endl;
 }

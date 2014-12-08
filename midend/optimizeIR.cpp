@@ -1,5 +1,6 @@
 #include "midend/optimizeIR.h"
 
+#include "RearrangeImmOperands.h"
 #include "midend/ConstantFolder.h"
 #include "midend/DominanceTreeConstructor.h"
 #include "midend/DominanceFrontier.h"
@@ -33,6 +34,9 @@ void OptimizeIR(llvm::Module& llvmModule)
     //Optimization Passes
     passMgr.add(new ConstantFolder());
     passMgr.add(llvm::createPromoteMemoryToRegisterPass());
+
+
+    passMgr.add(createRearrangeImmOpsPass());
     passMgr.add(createNewLoopInvariantCodeMotionPass());
     // passMgr.add(createStrongPhiEliminationPass());
     // passMgr.add(createSreedhar_SSADeconstructionPass());

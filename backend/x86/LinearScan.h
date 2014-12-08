@@ -45,6 +45,7 @@ public:
     void expireOldIntervals(LiveRangeInterval *pInterval, std::set<LiveRangeInterval*> &active, std::stack<BackendRegister*> &free_registers);
     void spillAtInterval(LiveRangeInterval *pInterval, std::set<LiveRangeInterval*> &active);
     void performLinearScan();
+    bool assignRegistersForALU(LiveRangeInterval *pInterval);
 
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
     {
@@ -58,7 +59,9 @@ public:
         if (llvm::Instruction *pI = llvm::dyn_cast<llvm::Instruction>(pV))
         {
             LiveRangeInterval *pLRInterval = m_pLR->getInterval(pI);
-            assert(m_liveRangeIntervalToBackendRegister.find(pLRInterval) != m_liveRangeIntervalToBackendRegister.end());
+            if (m_liveRangeIntervalToBackendRegister.find(pLRInterval) == m_liveRangeIntervalToBackendRegister.end())
+                return nullptr;
+
             return m_liveRangeIntervalToBackendRegister[pLRInterval];
         }
 
