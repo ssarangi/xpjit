@@ -56,15 +56,12 @@ void X86CodeGen::loadBaseVariable(BaseVariable *pVar, std::ostream &s)
 void X86CodeGen::initializeAssembler()
 {
     // First output the data section
-    // m_ostream << "bits 64" << std::endl; - Nasm syntax
-    // m_ostream << "section .data" << std::endl;
-    m_ostream << ".686P" << std::endl;
-    m_ostream << ".model flat,c" << std::endl;
-    m_ostream << ".data" << std::endl;
+    m_ostream << "bits 64" << std::endl;
+    m_ostream << "section .data" << std::endl;
+    m_ostream << "section .data" << std::endl;
     m_ostream << std::endl;
-    // m_ostream << "section .text" << std::endl;
-    m_ostream << ".code" << std::endl;
-    m_ostream << "public main_entry" << std::endl;
+    m_ostream << "section .text" << std::endl;
+    m_ostream << "global main_entry" << std::endl;
     m_ostream << std::endl;
 }
 
@@ -407,9 +404,9 @@ void X86CodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
     {
     case llvm::Instruction::Add:
 
-        X86InstSet::emitMov(EAX, *pBop1, m_ostream);
-        X86InstSet::emitAdd(EAX, *pBop2, m_ostream);
-        X86InstSet::emitMov(*pDst, EAX, m_ostream);
+        X86InstSet::emitMov(RAX, *pBop1, m_ostream);
+        X86InstSet::emitAdd(RAX, *pBop2, m_ostream);
+        X86InstSet::emitMov(*pDst, RAX, m_ostream);
         break;
     case llvm::Instruction::Sub:
         X86InstSet::emitMov(RAX, *pBop1, m_ostream);

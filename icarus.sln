@@ -15,8 +15,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "common\common.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_project", "vcproj\test_project.vcxproj", "{6B73F50A-5A3B-4ABA-B9C9-E494A0F85D70}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ASMRunner", "tests\ASMRunner\ASMRunner.vcxproj", "{04D513CD-E262-4EC2-8A1E-46DE87896960}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -47,8 +45,6 @@ Global
 		{6B73F50A-5A3B-4ABA-B9C9-E494A0F85D70}.Debug|Win32.Build.0 = Debug|Win32
 		{6B73F50A-5A3B-4ABA-B9C9-E494A0F85D70}.Release|Win32.ActiveCfg = Release|Win32
 		{6B73F50A-5A3B-4ABA-B9C9-E494A0F85D70}.Release|Win32.Build.0 = Release|Win32
-		{04D513CD-E262-4EC2-8A1E-46DE87896960}.Debug|Win32.ActiveCfg = Debug|Win32
-		{04D513CD-E262-4EC2-8A1E-46DE87896960}.Release|Win32.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

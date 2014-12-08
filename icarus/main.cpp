@@ -142,10 +142,6 @@ int main(int argc, char *argv[])
 
     Compile(pfilename, pOutput);
 
-    char* buffer = _getcwd(NULL, 0);
-    
-    std::string full_path = std::string(buffer) + std::string("\\tests\\ASMRunner\\runasm.cmd");
-    system(full_path.c_str());
     system("pause");
     return 0;
 }

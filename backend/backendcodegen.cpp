@@ -36,7 +36,6 @@ void GenerateCode(CodeGenModule& M, std::string outputFile)
 
     // Add an end directive to end of asm
     std::string asm_str = pX86CodeGen->getAssembly();
-    asm_str += "\nend";
 
     file.write(asm_str.c_str(), asm_str.length());
     file.close();
