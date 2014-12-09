@@ -15,6 +15,48 @@ std::string X86InstSet::getBrCmpPredicateString(llvm::CmpInst::Predicate predica
     return predicate_str;
 }
 
+void X86InstSet::emitPrologue(std::ostream &s)
+{
+    // First output the data section
+    s << "bits 64" << std::endl;
+    s << "section .data" << std::endl;
+    s << "section .data" << std::endl;
+    s << std::endl;
+    s << "section .text" << std::endl;
+    s << "global main_entry" << std::endl;
+    s << std::endl;
+}
+
+void X86InstSet::emitFunctionPrologue(std::ostream &s)
+{
+    // Emit the next part of prologue
+    //    push  rdi
+    //    sub   rsp, 16
+    //    mov   rdi, rsp
+    //    mov   ecx, 4
+    //    mov   eax, -858993460; ccccccccH
+    //    rep   stosd
+
+    s << "push rdi" << std::endl;
+    s << "sub rsp, 16" << std::endl;
+    s << "mov rdi, rsp" << std::endl;
+    s << "mov ecx, 4" << std::endl;
+    s << "mov eax, -858993460" << std::endl;
+    s << "rep stosd" << std::endl;
+}
+
+void X86InstSet::emitEpilogue(std::ostream &s)
+{
+    /*
+    add rsp, 16
+    pop rdi
+    ret 0
+    */
+    s << "add rsp, 16" << std::endl;
+    s << "pop rdi" << std::endl;
+    s << "ret 0" << std::endl;
+}
+
 void X86InstSet::emitLoad(BackendRegister &dstReg, int offset, BackendRegister &srcReg, std::ostream& s)
 {
     s << X86::LW << dstReg << " " << offset << "(" << srcReg << ")" << std::endl;

@@ -6,6 +6,12 @@ section .text
 global main_entry
 
 main_entry:
+push rdi
+sub rsp, 16
+mov rdi, rsp
+mov ecx, 4
+mov eax, -858993460
+rep stosd
  mov rax, 10
  add rax, 20
  mov r15, rax
@@ -20,3 +26,6 @@ main_entry:
  mov rax, r13
  add rax, r15
  mov r12, rax
+add rsp, 16
+pop rdi
+ret 0

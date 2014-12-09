@@ -25,6 +25,10 @@ public:
     static void emitLoadAddress(BackendRegister &dstReg, char* pAddress, std::ostream &s);
     // static void emitLoadBool();
     // static void emitLoadString();
+    static void emitPrologue(std::ostream &s);
+    static void emitEpilogue(std::ostream &s);
+    static void emitFunctionPrologue(std::ostream &s);
+
     static void emitMov(BaseVariable &dstReg, BaseVariable &srcReg, std::ostream &s);
 
     static void emitAddiu(BackendRegister &dstReg, BackendRegister &srcReg, int imm, std::ostream &s);

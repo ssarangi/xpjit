@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\tests\add_no_opt.cpp">
+    <ClCompile Include="..\tests\simple_add.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

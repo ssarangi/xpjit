@@ -55,14 +55,7 @@ void X86CodeGen::loadBaseVariable(BaseVariable *pVar, std::ostream &s)
 
 void X86CodeGen::initializeAssembler()
 {
-    // First output the data section
-    m_ostream << "bits 64" << std::endl;
-    m_ostream << "section .data" << std::endl;
-    m_ostream << "section .data" << std::endl;
-    m_ostream << std::endl;
-    m_ostream << "section .text" << std::endl;
-    m_ostream << "global main_entry" << std::endl;
-    m_ostream << std::endl;
+    X86InstSet::emitPrologue(m_ostream);
 }
 
 void X86CodeGen::createLabel(llvm::BasicBlock *pBlock)
@@ -108,6 +101,7 @@ bool X86CodeGen::runOnModule(llvm::Module& M)
 void X86CodeGen::visitFunction(llvm::Function& F)
 {
     m_ostream << F.getName().str() << "_entry:" << std::endl;
+    X86InstSet::emitFunctionPrologue(m_ostream);
 }
 
 void X86CodeGen::visitBasicBlock(llvm::BasicBlock &BB)
@@ -117,7 +111,7 @@ void X86CodeGen::visitBasicBlock(llvm::BasicBlock &BB)
 
 void X86CodeGen::visitReturnInst(llvm::ReturnInst &I)
 {
-
+    X86InstSet::emitEpilogue(m_ostream);
 }
 
 void X86CodeGen::visitBranchInst(llvm::BranchInst &I)
