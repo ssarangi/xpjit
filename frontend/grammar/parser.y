@@ -42,8 +42,9 @@ std::list<IcaValue*> parameterList;
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
-%token<integer> INTEGER NUMBER FLOAT VOID RETURN IF ELSE WHILE FOR BREAK EQUALS NEQUALS
+%token<integer> INTEGER NUMBER FLOAT VOID RETURN IF ELSE WHILE FOR BREAK EQUALS NEQUALS PRINT
 %token<string> IDENTIFIER
+%token<string> STRING_LITERAL
 
 %type<integer> datatype
 %type<value> expression func_call
@@ -112,11 +113,17 @@ statement: declaration
         builder->insertStatement(*new ExpressionStatement(*(Expression *)$1));
     }
     | return_stmt ';'{ builder->insertStatement(*$1);}
-    | while_statement { g_outputStream <<"done with while loop\n"; }
-    | break_statement ';' { g_outputStream <<"break\n"; builder->insertStatement(*$1); }
-    | if_else_statement { g_outputStream <<"if else"; }
+    | while_statement { g_outputStream << "done with while loop\n"; }
+    | break_statement ';' { g_outputStream << "break\n"; builder->insertStatement(*$1); }
+    | if_else_statement { g_outputStream << "if else"; }
+    | print_statement { g_outputStream << "print" }
     | ';' { g_outputStream <<"empty statement\n";}
     ;
+
+print_statement: PRINT '(' expression ')'
+    {
+        
+    }
 
 if_else_statement: IF '(' expression ')' 
     {
@@ -152,9 +159,10 @@ varList: IDENTIFIER { builder->addSymbol($1, getType(currentType)); }
     | varList',' IDENTIFIER { builder->addSymbol($3, getType(currentType)); }
     ;
     
-datatype: INTEGER   { g_outputStream <<"int "; $$ = currentType = Type::IntegerTy; }
-    | FLOAT     { g_outputStream <<"float "; $$ = currentType = Type::FloatTy; }
-    | VOID      { g_outputStream <<"void "; $$ = currentType = Type::VoidTy; }
+datatype: INTEGER   { g_outputStream << "int "; $$ = currentType = Type::IntegerTy; }
+    | FLOAT     { g_outputStream << "float "; $$ = currentType = Type::FloatTy; }
+    | VOID      { g_outputStream << "void "; $$ = currentType = Type::VoidTy; }
+    | STRING_LITERAL       { g_outputStream << "string"; $$ = currentType = Type::StringTy; }
     ;
     
 assignment: IDENTIFIER '=' expression ';'

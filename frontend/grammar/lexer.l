@@ -48,6 +48,8 @@ class Statement;
 
 ">=" { return MORETHANEQ; }
 
+L?\"(\\.|[^\\"])*\" { return(STRING_LITERAL); }
+
 [-+*/;=,)(\{\}] { return *yytext; }
 
 [0-9]+ { yylval.integer = atoi(yytext);  return NUMBER; }
