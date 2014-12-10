@@ -42,7 +42,7 @@ std::list<IcaValue*> parameterList;
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
-%token<integer> INTEGER NUMBER FLOAT VOID RETURN IF ELSE WHILE FOR BREAK EQUALS NEQUALS PRINT
+%token<integer> INTEGER NUMBER FLOAT VOID RETURN IF ELSE WHILE FOR BREAK EQUALS NEQUALS PRINTF
 %token<string> IDENTIFIER
 %token<string> STRING_LITERAL
 
@@ -120,9 +120,9 @@ statement: declaration
     | ';' { g_outputStream <<"empty statement\n";}
     ;
 
-print_statement: PRINT '(' expression ')'
+print_statement: PRINTF '(' expression ')' ';'
     {
-        
+        g_outputStream << "Print Statement found\n";
     }
 
 if_else_statement: IF '(' expression ')' 
@@ -182,6 +182,7 @@ return_stmt: RETURN expression { $$ = new ReturnStatement($2);};
     ; 
 
 expression: NUMBER { $$ = new Constant($1); }
+    | STRING_LITERAL { g_outputStream << "string found " << $$; }
     | IDENTIFIER {
         g_outputStream <<"identifier";
         Symbol *identifierSymbol = builder->getSymbol($1);
@@ -202,13 +203,14 @@ expression: NUMBER { $$ = new Constant($1); }
     | expression LESSTHANEQ expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::LTEQ); }
     | expression MORETHAN expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::GT); }
     | expression MORETHANEQ expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::GTEQ); }
+    | print_statement { g_outputStream << "Print Statement found\n" }
     | func_call { $$ = $1; }
     | '('expression')' { $$ = $2; }
     ;
     
 func_call: IDENTIFIER'('paramlist')'
     {
-        g_outputStream <<"function called";
+        g_outputStream <<"function called\n";
         std::list<Type*> paramTypeList;
         
         FunctionProtoType* fp = builder->getFunctionProtoType($1);

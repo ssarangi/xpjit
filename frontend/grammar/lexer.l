@@ -34,6 +34,8 @@ class Statement;
 
 "break" { return BREAK; }
 
+"printf" { return PRINTF; }
+
 "//".*\n ;
 
 "==" { return EQUALS; }
