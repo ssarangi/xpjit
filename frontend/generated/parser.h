@@ -22,7 +22,9 @@ typedef union
 #define	WHILE	272
 #define	FOR	273
 #define	BREAK	274
-#define	IDENTIFIER	275
+#define	PRINTF	275
+#define	IDENTIFIER	276
+#define	STRING_LITERAL	277
 
 
 extern YYSTYPE yylval;

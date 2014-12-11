@@ -34,6 +34,8 @@ class Statement;
 
 "break" { return BREAK; }
 
+"printf" { return PRINTF; }
+
 "//".*\n ;
 
 "==" { return EQUALS; }
@@ -47,6 +49,8 @@ class Statement;
 ">" { return MORETHAN; }
 
 ">=" { return MORETHANEQ; }
+
+L?\"(\\.|[^\\"])*\" { return(STRING_LITERAL); }
 
 [-+*/;=,)(\{\}] { return *yytext; }
 

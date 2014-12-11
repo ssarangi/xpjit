@@ -8,11 +8,12 @@ public:
     {
         VoidTy=0,
         BoolTy,
-        CharTy,	
+        CharTy,
         IntegerTy,
         FloatTy,
         DoubleTy,
         ArrayTy,
+        StringTy,
         StructTy
     };
 

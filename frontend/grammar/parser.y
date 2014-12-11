@@ -42,8 +42,9 @@ std::list<IcaValue*> parameterList;
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
-%token<integer> INTEGER NUMBER FLOAT VOID RETURN IF ELSE WHILE FOR BREAK EQUALS NEQUALS
+%token<integer> INTEGER NUMBER FLOAT VOID RETURN IF ELSE WHILE FOR BREAK EQUALS NEQUALS PRINTF
 %token<string> IDENTIFIER
+%token<string> STRING_LITERAL
 
 %type<integer> datatype
 %type<value> expression func_call
@@ -112,11 +113,17 @@ statement: declaration
         builder->insertStatement(*new ExpressionStatement(*(Expression *)$1));
     }
     | return_stmt ';'{ builder->insertStatement(*$1);}
-    | while_statement { g_outputStream <<"done with while loop\n"; }
-    | break_statement ';' { g_outputStream <<"break\n"; builder->insertStatement(*$1); }
-    | if_else_statement { g_outputStream <<"if else"; }
+    | while_statement { g_outputStream << "done with while loop\n"; }
+    | break_statement ';' { g_outputStream << "break\n"; builder->insertStatement(*$1); }
+    | if_else_statement { g_outputStream << "if else"; }
+    | print_statement { g_outputStream << "print" }
     | ';' { g_outputStream <<"empty statement\n";}
     ;
+
+print_statement: PRINTF '(' expression ')' ';'
+    {
+        g_outputStream << "Print Statement found\n";
+    }
 
 if_else_statement: IF '(' expression ')' 
     {
@@ -152,9 +159,10 @@ varList: IDENTIFIER { builder->addSymbol($1, getType(currentType)); }
     | varList',' IDENTIFIER { builder->addSymbol($3, getType(currentType)); }
     ;
     
-datatype: INTEGER   { g_outputStream <<"int "; $$ = currentType = Type::IntegerTy; }
-    | FLOAT     { g_outputStream <<"float "; $$ = currentType = Type::FloatTy; }
-    | VOID      { g_outputStream <<"void "; $$ = currentType = Type::VoidTy; }
+datatype: INTEGER   { g_outputStream << "int "; $$ = currentType = Type::IntegerTy; }
+    | FLOAT     { g_outputStream << "float "; $$ = currentType = Type::FloatTy; }
+    | VOID      { g_outputStream << "void "; $$ = currentType = Type::VoidTy; }
+    | STRING_LITERAL       { g_outputStream << "string"; $$ = currentType = Type::StringTy; }
     ;
     
 assignment: IDENTIFIER '=' expression ';'
@@ -174,6 +182,7 @@ return_stmt: RETURN expression { $$ = new ReturnStatement($2);};
     ; 
 
 expression: NUMBER { $$ = new Constant($1); }
+    | STRING_LITERAL { g_outputStream << "string found " << $$; }
     | IDENTIFIER {
         g_outputStream <<"identifier";
         Symbol *identifierSymbol = builder->getSymbol($1);
@@ -194,13 +203,14 @@ expression: NUMBER { $$ = new Constant($1); }
     | expression LESSTHANEQ expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::LTEQ); }
     | expression MORETHAN expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::GT); }
     | expression MORETHANEQ expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::GTEQ); }
+    | print_statement { g_outputStream << "Print Statement found\n" }
     | func_call { $$ = $1; }
     | '('expression')' { $$ = $2; }
     ;
     
 func_call: IDENTIFIER'('paramlist')'
     {
-        g_outputStream <<"function called";
+        g_outputStream <<"function called\n";
         std::list<Type*> paramTypeList;
         
         FunctionProtoType* fp = builder->getFunctionProtoType($1);
