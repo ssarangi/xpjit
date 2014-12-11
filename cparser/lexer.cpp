@@ -29,9 +29,33 @@ char Lexer::peekNextChar()
     return m_currentLineStr[m_currentColumnNo + 1];
 }
 
-char Lexer::gettok()
+bool Lexer::isDataType(Token token)
+{
+    if (token >= 0)
+        return false;
+
+    switch (token)
+    {
+    case tok_void:
+    case tok_int:
+    case tok_float:
+    case tok_double:
+    case tok_string:
+    case tok_char:
+        return true;
+    default:
+        return false;
+    }
+
+    return false;
+}
+
+SToken Lexer::gettok()
 {
     static char LastChar = ' ';
+    SToken stoken;
+    stoken.lineNo = m_currentLineNo;
+    stoken.columnNo = m_currentColumnNo;
 
     // skip any whitespace
     while (isspace(LastChar))
@@ -45,9 +69,12 @@ char Lexer::gettok()
             m_identifierStr += LastChar;
 
         Token token = isRecognizedToken(m_identifierStr);
-
         if (token == tok_undefined)
-            return tok_identifier;
+            stoken.tokenID = tok_identifier;
+        else
+            stoken.tokenID = token;
+
+        return stoken;
     }
 
     // Number: [0-9.]+
@@ -61,7 +88,8 @@ char Lexer::gettok()
         } while (isdigit(LastChar) || LastChar == '.');
 
         m_numVal = strtod(NumStr.c_str(), 0);
-        return tok_number;
+        stoken.tokenID = tok_number;
+        return stoken;
     }
 
     if (LastChar == '#')
@@ -76,15 +104,19 @@ char Lexer::gettok()
 
     // Check for the end of file. Don't eat the EOF
     if (LastChar == EOF)
-        return tok_eof;
+    {
+        stoken.tokenID = tok_eof;
+        return stoken;
+    }
 
     // Otherwise, just return the character as its ascii value
-    char ThisChar = LastChar;
-    LastChar = getNextChar();
-    return ThisChar;
+    char m_thisChar = LastChar;
+    m_lastChar = getNextChar();
+    stoken.tokenID = tok_ascii;
+    return stoken;
 }
 
-char Lexer::getNextToken()
+SToken Lexer::getNextToken()
 {
     return m_curTok = gettok();
 }
@@ -92,11 +124,11 @@ char Lexer::getNextToken()
 /// GetTokPrecedence - Get the precedence of the pending binary operator token.
 int Lexer::getTokPrecedence()
 {
-    if (!isascii(m_curTok))
+    if (!isascii(m_curTok.tokenID))
         return -1;
 
     // Make sure it's a declared binop.
-    int TokPrec = m_BinopPrecedence[m_curTok];
+    int TokPrec = m_BinopPrecedence[m_curTok.tokenID];
     if (TokPrec <= 0) return -1;
     return TokPrec;
 }

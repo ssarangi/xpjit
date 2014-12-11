@@ -4,6 +4,39 @@
 #include <string>
 #include <vector>
 
+enum DataTypesEnum
+{
+    VOID,
+    CHAR,
+    STRING,
+    INT,
+    FLOAT,
+    DOUBLE,
+    UNKNOWN
+};
+
+class DataTypeAST
+{
+public:
+    DataTypeAST(Token token)
+        : m_type(UNKNOWN)
+    {
+        switch (token)
+        {
+        case tok_void: m_type = VOID; break;
+        case tok_char: m_type = CHAR; break;
+        case tok_string: m_type = STRING; break;
+        case tok_int: m_type = INT; break;
+        case tok_float: m_type = FLOAT; break;
+        case tok_double: m_type = DOUBLE; break;
+        default: break;
+        }
+    }
+
+private:
+    DataTypesEnum m_type;
+};
+
 /// ExprAST - Base class for all expression nodes.
 class ExprAST
 {

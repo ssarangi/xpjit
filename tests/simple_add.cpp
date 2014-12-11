@@ -1,3 +1,6 @@
+asfljksf = 9;
+double b = 0.0;
+
 int main()
 {
     int a, b, c;

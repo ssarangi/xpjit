@@ -28,7 +28,7 @@
 //    tok_undefined = -65535,
 //};
 
-#define X(a, b, c) tok_##a = -b,
+#define X(a, b) tok_##a = -b,
 enum Token
 { 
 #include "tokens.h"
@@ -43,6 +43,13 @@ enum LEXER_MODE
     STANDALONE_MODE
 };
 
+struct SToken
+{
+    Token tokenID;
+    int lineNo;
+    int columnNo;
+};
+
 class Lexer
 {
 public:
@@ -52,11 +59,11 @@ public:
     char getNextChar();
     char peekNextChar();
 
-    char gettok();
+    SToken gettok();
 
     /// getNextToken reads another token from the
     /// lexer and updates CurTok with its results.
-    char getNextToken();
+    SToken getNextToken();
 
     /// GetTokPrecedence - Get the precedence of the pending binary operator token.
     int getTokPrecedence();
@@ -68,7 +75,7 @@ public:
         m_currentColumnNo = 0;
     }
 
-#define X(a, b, c)  if (std::string(#a) == token) return tok_##a;
+#define X(a, b)  if (std::string(#a) == token) return tok_##a;
     Token       isRecognizedToken(std::string token)
     {
         Token token_found = tok_undefined;
@@ -77,20 +84,24 @@ public:
     }
 #undef X
 
+    bool isDataType(Token token);
+
     std::string getIdentifierStr() const { return m_identifierStr; }
-    char        getCurrToken() const { return m_curTok; }
+    SToken       getCurrToken() const { return m_curTok; }
     double      getNumVal() const { return m_numVal; }
 
 private:
     /// CurTok/getNextToken - Provide a simple token buffer.  CurTok is the current
     /// token the parser is looking at.  
-    char                    m_curTok;
+    SToken                  m_curTok;
     std::string             m_currentLineStr;
     int                     m_currentLineNo;
     int                     m_currentColumnNo;
 
 
     std::string             m_identifierStr;
+    char                    m_lastChar;
+    char                    m_thisChar;
     double                  m_numVal;
 
     /// BinopPrecedence - This holds the precedence for each binary operator that is

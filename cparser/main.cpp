@@ -7,9 +7,6 @@
 
 int main(int argc, char **argv)
 {
-    // Prime the first token.
-    fprintf(stderr, "ready> ");
-    
     if (argc > 1)
     {
         std::string filename = argv[1];
