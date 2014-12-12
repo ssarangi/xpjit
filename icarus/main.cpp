@@ -23,6 +23,8 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/PassManager.h>
+#include <llvm/Support/ToolOutputFile.h>
+#include <llvm/Bitcode/ReaderWriter.h>
 #include <common/llvm_warnings_pop.h>
 
 extern IcarusModule* ParseFile(const char *filename); //using this for now. need to create a standard header file for lex
@@ -46,6 +48,15 @@ llvm::Function* findEntryFunc(llvm::Module& M)
 void genExecutable(CodeGenModule& module, std::string filename)
 {
     GenerateCode(module, filename);
+}
+
+void dumpBitCode(llvm::Module& M, std::string OutputFilename)
+{
+    std::error_code EC;
+    std::unique_ptr<llvm::tool_output_file> Out(
+        new llvm::tool_output_file(OutputFilename, EC, llvm::sys::fs::F_None));
+
+    llvm::WriteBitcodeToFile(&M, Out->os());
 }
 
 int Compile(char *fileName, char *pOutputFileName)
@@ -112,6 +123,8 @@ int Compile(char *fileName, char *pOutputFileName)
         moduleDumpFile.close();
     }
 
+    dumpBitCode(llvmModule, std::string("temp.bc"));
+
     CodeGenModule codeGenModule;
     codeGenModule.setLLVMModule(&llvmModule);
     codeGenModule.setLLVMEntryFunction(pEntryFunc);
@@ -142,9 +155,9 @@ int main(int argc, char *argv[])
 
     Compile(pfilename, pOutput);
 
-    std::string cmd = std::string("tools\\nasm.exe -f win64 ") + std::string(pOutput) + std::string(" -o output.o");
+    std::string pcmd = std::string("tools\\nasm.exe -f win64 ") + std::string(pOutput) + std::string(" -o output.o");
 
-    system(cmd.c_str());
+    system(pcmd.c_str());
     system("pause");
     return 0;
 }

@@ -100,6 +100,12 @@ public:
     void removeOutputStreamSubscriber(OutputStreamSubscriber* pSubscriber);
 
     llvm::raw_ostream& operator()() { return *m_pRawStringOStream; }
+
+    std::stringstream stringstream() 
+    {
+        std::stringstream stream(m_pRawStringOStream->str());
+        return stream;
+    }
     
     template <typename T>
     OutputStream& operator<<(const T& s)

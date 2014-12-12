@@ -40,6 +40,15 @@ void OptimizeIR(llvm::Module& llvmModule)
     passMgr.add(createNewLoopInvariantCodeMotionPass());
     // passMgr.add(createStrongPhiEliminationPass());
     // passMgr.add(createSreedhar_SSADeconstructionPass());
-    passMgr.add(createBudimlic_SSADeconstructionPass());
+    llvm::Pass *pPass = createBudimlic_SSADeconstructionPass();
+    passMgr.add(pPass);
+
+    //// Write the output file
+    //llvmModule.print(g_outputStream(), nullptr);
+    //std::stringstream stringstr = g_outputStream.stringstream();
+
+    //std::ifstream file_handle;
+    //file_handle.open()
+
     passMgr.run(llvmModule);
 }
