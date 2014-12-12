@@ -78,6 +78,8 @@ int check_type()
 
 "printf" { count(); return PRINTF; }
 
+"do" { count(); return DO; }
+
 "//".*\n ;
 
 "==" { count(); return EQUALS; }

@@ -65,13 +65,13 @@ void yyerror(std::string s)
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
-%token<integer> INTEGER NUMBER FLOAT VOID RETURN IF ELSE WHILE FOR BREAK EQUALS NEQUALS PRINTF NEWLINE
+%token<integer> INTEGER NUMBER FLOAT VOID RETURN IF ELSE DO WHILE FOR BREAK EQUALS NEQUALS PRINTF NEWLINE
 %token<string> IDENTIFIER
 %token<string> STRING_LITERAL
 
 %type<integer> datatype
 %type<value> expression func_call
-%type<statement> return_stmt assignment break_statement
+%type<statement> return_stmt assignment break_statement iteration_statement
 
 %start program
 
@@ -137,8 +137,17 @@ statement: declaration
     | break_statement ';' { builder->insertStatement(*$1); }
     | if_else_statement {  }
     | print_statement {  }
+    | iteration_statement
     | ';' { g_outputStream <<"empty statement\n";}
     ;
+
+iteration_statement
+    : WHILE '(' expression ')' statement
+    | DO statement WHILE '(' expression ')' ';'
+    | FOR '(' expression_statement expression_statement ')' statement
+    | FOR '(' expression_statement expression_statement expression ')' statement
+    ;
+
 
 print_statement: PRINTF '(' expression ')' ';'
     {
