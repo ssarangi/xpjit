@@ -5,7 +5,7 @@
 #include <vector>
 #include "ast.h"
 
-#define ERROR(TOK, STR) Error(TOK, STR, __FILE__, __LINE__);
+#define ERROR(TOK, STR) error(TOK, STR, __FILE__, __LINE__);
 
 /// Error* - These are little helper functions for error handling.
 class Parser
@@ -20,32 +20,34 @@ public:
 
     ~Parser() {}
 
-    ExprAST *Error(const SToken &token, const char *Str, const char* filename = __FILE__, int lineNo =__LINE__);
-    PrototypeAST *ErrorP(const char *Str);
+    ExprAST *error(const SToken &token, const char *Str, const char* filename = __FILE__, int lineNo =__LINE__);
+    PrototypeAST *errorP(const char *Str);
 
-    DataTypeAST* ParseDataType(SToken &token);
-    ExprAST* ParseExpression();
-    ExprAST* ParseIdentifierExpr();
-    ExprAST* ParseNumberExpr();
-    ExprAST* ParseParenExpr();
-    ExprAST* ParsePrimary();
-    ExprAST* ParseBinOpRHS(int ExprPrec, ExprAST *LHS);
+    DataTypeAST* parseDataType();
+    IdentifierTyAST* parseIdentifier();
+    ExprAST* parseExpression();
+    ExprAST* parseIdentifierExpr();
+    ExprAST* parseNumberExpr();
+    ExprAST* parseParenExpr();
+    ExprAST* parsePrimary();
+    ExprAST* parseBinOpRHS(int ExprPrec, ExprAST *LHS);
 
-    PrototypeAST *ParseFunctionDeclaration();
+    PrototypeAST *parseFunctionDeclaration();
 
-    FunctionAST *ParseDefinition();
-    FunctionAST *ParseTopLevelExpr();
+    FunctionAST *parseDefinition();
+    FunctionAST *parseTopLevelExpr();
 
-    PrototypeAST *ParseExtern();
+    PrototypeAST *parseExtern();
 
-    void HandleDefinition();
-    void HandleExtern();
-    void HandleTopLevelExpression();
-    void RunStandalone();
-    void ParseFile(std::string filename);
+    void handleDefinition();
+    void handleExtern();
+    void handleTopLevelExpression();
+    void runStandalone();
+    void parseFile(std::string filename);
 
 private:
     void setLineStr(std::string line, int lineNo);
+    bool assertAndAdvance(const Token& token);
 
 private:
     std::string                     m_currParseFile;

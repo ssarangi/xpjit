@@ -3,16 +3,17 @@
 #include "frontend/ASTBuilder.h"
 #include "common/debug.h"
 
-#include <cstdio>
+#include <stdio.h>
 #include <iostream>
 #include <vector>
 #include <string>
-#include <fstream>
+#include <stdarg.h>
 
 using namespace std;
 
 int yylex(void);
-extern void yyerror(string);
+// extern void yyerror(string);
+
 extern "C" FILE *yyin;
 void yyrestart( FILE *new_file );
 
@@ -24,6 +25,27 @@ static Debug& gDebug = Debug::getInstance();
 
 static ASTBuilder* builder;
 std::list<IcaValue*> parameterList;
+
+#include <stdio.h>
+
+extern char yytext[];
+extern int column;
+extern int lineNo;
+std::vector<std::string> lines;
+
+void yyerror(std::string s)
+{
+    fflush(stdout);
+    fprintf(stderr, "\n%s", lines[lineNo - 1].c_str());
+    std::string error_loc = std::string(" ");
+    
+    for (int i = 0; i < column; ++i)
+        error_loc += std::string(" ");
+    
+    fprintf(stderr, "\n%s^", error_loc.c_str());
+    fprintf(stderr, "\nError on Line %d, Column %d: %s", lineNo, column, s.c_str());
+}
+
 %}
 
 %union
@@ -38,11 +60,12 @@ std::list<IcaValue*> parameterList;
 %left '+' '-'
 %left  '*' '/'
 
+%locations
 %nonassoc '(' ')'
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
-%token<integer> INTEGER NUMBER FLOAT VOID RETURN IF ELSE WHILE FOR BREAK EQUALS NEQUALS PRINTF
+%token<integer> INTEGER NUMBER FLOAT VOID RETURN IF ELSE WHILE FOR BREAK EQUALS NEQUALS PRINTF NEWLINE
 %token<string> IDENTIFIER
 %token<string> STRING_LITERAL
 
@@ -61,7 +84,6 @@ program: program statement
 
 func_decl: datatype IDENTIFIER '(' arglist ')' ';' 
     { 
-        g_outputStream <<"function declaration\n";
         const std::string& string = $2;
         IcErr err = builder->addProtoType(string, getType($1), NULL);
         if(err != eNoErr)
@@ -87,7 +109,6 @@ arglist: datatype IDENTIFIER
 
 func_defn: datatype IDENTIFIER '(' arglist ')' '{' 
     {
-        g_outputStream <<"function definition\n";
         const std::string& string = $2;
         FunctionProtoType* fp = builder->getProtoType(string);//use current dataTypeList
         if(fp == NULL) //find the prototype in the module. if not found, add a new one
@@ -109,42 +130,39 @@ statement: declaration
     | assignment  { builder->insertStatement(*$1);}
     | expression';' 
     { 
-        g_outputStream <<"expression\n";
         builder->insertStatement(*new ExpressionStatement(*(Expression *)$1));
     }
     | return_stmt ';'{ builder->insertStatement(*$1);}
-    | while_statement { g_outputStream << "done with while loop\n"; }
-    | break_statement ';' { g_outputStream << "break\n"; builder->insertStatement(*$1); }
-    | if_else_statement { g_outputStream << "if else"; }
-    | print_statement { g_outputStream << "print" }
+    | while_statement { }
+    | break_statement ';' { builder->insertStatement(*$1); }
+    | if_else_statement {  }
+    | print_statement {  }
     | ';' { g_outputStream <<"empty statement\n";}
     ;
 
 print_statement: PRINTF '(' expression ')' ';'
     {
-        g_outputStream << "Print Statement found\n";
     }
 
 if_else_statement: IF '(' expression ')' 
     {
-        g_outputStream <<"if statement ";
         builder->insertStatement(*new BranchStatement(*(Expression*)$3));
     }
-        codeblock { g_outputStream <<"ending if block";  }
+        codeblock {  }
     iftail
     ;
 
 iftail: ELSE {
         builder->addBranch(*(Expression*)new Constant(1)); //a 'true' expression
     }
-    codeblock { g_outputStream <<"ending else block"; builder->endCodeBlock(); }
+    codeblock { builder->endCodeBlock(); }
     | %prec LOWER_THAN_ELSE //Refer http://stackoverflow.com/questions/1737460/how-to-find-shift-reduce-conflict-in-this-yacc-file
      { builder->endCodeBlock(); }
     ;
 
 
-while_statement: WHILE '(' expression ')' { g_outputStream <<"while statement\n"; builder->insertStatement(*new WhileStatement(*(Expression*)$3)); }
-    codeblock { g_outputStream <<"ending while loop\n"; builder->endCodeBlock(); }
+while_statement: WHILE '(' expression ')' { builder->insertStatement(*new WhileStatement(*(Expression*)$3)); }
+    codeblock { builder->endCodeBlock(); }
     ;
 
 codeblock: '{' statement_block '}'
@@ -153,27 +171,27 @@ codeblock: '{' statement_block '}'
 
 break_statement: BREAK { $$ = new BreakStatement(); }
     
-declaration: datatype varList ';' { g_outputStream <<"declaration "; currentType = -1; }
+declaration: datatype varList ';' { currentType = -1; }
 
 varList: IDENTIFIER { builder->addSymbol($1, getType(currentType)); }
     | varList',' IDENTIFIER { builder->addSymbol($3, getType(currentType)); }
     ;
     
-datatype: INTEGER   { g_outputStream << "int "; $$ = currentType = Type::IntegerTy; }
-    | FLOAT     { g_outputStream << "float "; $$ = currentType = Type::FloatTy; }
-    | VOID      { g_outputStream << "void "; $$ = currentType = Type::VoidTy; }
-    | STRING_LITERAL       { g_outputStream << "string"; $$ = currentType = Type::StringTy; }
+datatype: INTEGER          { $$ = currentType = Type::IntegerTy; }
+    | FLOAT                { $$ = currentType = Type::FloatTy; }
+    | VOID                 { $$ = currentType = Type::VoidTy; }
+    | STRING_LITERAL       { $$ = currentType = Type::StringTy; }
     ;
     
 assignment: IDENTIFIER '=' expression ';'
     { 
-        g_outputStream <<"assignment";
         Symbol *identifierSymbol = builder->getSymbol($1);
         if(identifierSymbol == NULL)
         {
             std::string error = std::string("Symbol not defined: ") + std::string($1);
             yyerror(error.c_str());
         }
+
         $$ = new Assignment(*new Variable(*identifierSymbol), *$3);
     }
 
@@ -182,9 +200,9 @@ return_stmt: RETURN expression { $$ = new ReturnStatement($2);};
     ; 
 
 expression: NUMBER { $$ = new Constant($1); }
-    | STRING_LITERAL { g_outputStream << "string found " << $$; }
-    | IDENTIFIER {
-        g_outputStream <<"identifier";
+    | STRING_LITERAL { }
+    | IDENTIFIER
+    {
         Symbol *identifierSymbol = builder->getSymbol($1);
         if(identifierSymbol == NULL)
         {
@@ -203,14 +221,13 @@ expression: NUMBER { $$ = new Constant($1); }
     | expression LESSTHANEQ expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::LTEQ); }
     | expression MORETHAN expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::GT); }
     | expression MORETHANEQ expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::GTEQ); }
-    | print_statement { g_outputStream << "Print Statement found\n" }
+    | print_statement { }
     | func_call { $$ = $1; }
     | '('expression')' { $$ = $2; }
     ;
     
 func_call: IDENTIFIER'('paramlist')'
     {
-        g_outputStream <<"function called\n";
         std::list<Type*> paramTypeList;
         
         FunctionProtoType* fp = builder->getFunctionProtoType($1);
@@ -226,20 +243,18 @@ paramlist: expression { parameterList.push_back($1); }
     ;
 %%
 
-void yyerror(string s) {
-    fprintf(stderr, "%s\n", s.c_str());
-    builder->pushError(s);
-}
-
-int yywrap (void ) {
+int yywrap (void )
+{
     return 1;
 }
 
-Type& getType(int parsedType){
-    switch(parsedType){
+Type& getType(int parsedType)
+{
+    switch(parsedType)
+    {
         case Type::IntegerTy:
         case Type::FloatTy:
-        case Type::VoidTy:		
+        case Type::VoidTy:
             return *new Type((Type::TypeID)parsedType);
             break;
         default: yyerror("Unknown type in getType()");
@@ -247,22 +262,40 @@ Type& getType(int parsedType){
     }
 }
 
-IcarusModule* ParseFile(const char *filename){
+IcarusModule* ParseFile(const char *filename)
+{
+    std::ifstream file_handle;
+    file_handle.open(filename);
+
+    while (!file_handle.eof())
+    {
+        std::string current_line = "";
+        std::getline(file_handle, current_line);
+        lines.push_back(current_line);
+    }
+
+    file_handle.close();
+
     FILE* fp = fopen(filename, "r");
     
-    if(!fp){
+    if(!fp)
+    {
         fprintf(stderr, "Oops! Couldn't open file %s\n!", filename);
         return NULL;
     }
-    
+
     builder = new ASTBuilder(); //!!!Check for memory leak
     yyrestart(fp);
+    
     if(gDebug.isYaccTraceOn())
         yydebug = 1; //set it to 1 for text based debugging, 5 for graph based debugging
+    
     yyparse();
-    if(builder->hasErrors()){
+    
+    if(builder->hasErrors())
+    {
         fprintf(stderr, "Stopping compilation as we found some syntax errors in %s\n!", filename);
         return NULL;
     }
-    return &builder->getModule();	
+    return &builder->getModule();
 }

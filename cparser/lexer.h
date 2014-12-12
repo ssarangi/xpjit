@@ -28,7 +28,7 @@
 //    tok_undefined = -65535,
 //};
 
-#define X(a, b) tok_##a = -b,
+#define X(tok_enum, tok_str, tok_id) tok_##tok_enum = -tok_id,
 enum Token
 { 
 #include "tokens.h"
@@ -75,7 +75,7 @@ public:
         m_currentColumnNo = 0;
     }
 
-#define X(a, b)  if (std::string(#a) == token) return tok_##a;
+#define X(tok_enum, tok_str, tok_id)  if (std::string(#tok_str) == token) return tok_##tok_enum;
     Token       isRecognizedToken(std::string token)
     {
         Token token_found = tok_undefined;
@@ -84,10 +84,19 @@ public:
     }
 #undef X
 
+#define X(tok_enum, tok_str, tok_id)  if (tok_##tok_enum == token && std::string(#tok_str) != std::string("\"----\"")) return std::string(#tok_str);
+    std::string getTokenStr(Token token)
+    {
+        std::string tok_str = m_identifierStr;
+#include "tokens.h"
+        return tok_str;
+    }
+#undef X
+
     bool isDataType(Token token);
 
     std::string getIdentifierStr() const { return m_identifierStr; }
-    SToken       getCurrToken() const { return m_curTok; }
+    SToken      getCurrToken() const { return m_curTok; }
     double      getNumVal() const { return m_numVal; }
 
 private:

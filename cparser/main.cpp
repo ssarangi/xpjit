@@ -12,7 +12,7 @@ int main(int argc, char **argv)
         std::string filename = argv[1];
         Lexer *pLexer = new Lexer(FILE_MODE);
         Parser *pParser = new Parser(pLexer);
-        pParser->ParseFile(filename);
+        pParser->parseFile(filename);
     }
     else
     {
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
         pLexer->getNextToken();
 
         // Run the main "interpreter loop" now.
-        pParser->RunStandalone();
+        pParser->runStandalone();
     }
 
     return 0;

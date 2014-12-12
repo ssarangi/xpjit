@@ -1,60 +1,102 @@
+%option nounistd
 %option noyywrap
 %option stack
+%option yylineno
+%option never-interactive
 %option outfile="lexer.cpp"
+
 %{
 class IcaValue;
 class Statement;
 
-#include "parser.h"
+#include "parser.hpp"
 #include <stdio.h>
 #include <string>
 
 #define YY_NEVER_INTERACTIVE 1 
-#define isatty _isatty
+// #define isatty _isatty
+
+/* handle locations */
+int yycolumn = 1;
+
+int column = 1;
+int lineNo = 1;
+
+void count()
+{
+    int i;
+
+    for (i = 0; yytext[i] != '\0'; i++)
+        if (yytext[i] == '\n')
+            column = 0;
+        else if (yytext[i] == '\t')
+            column += 8 - (column % 8);
+        else
+            column++;
+}
+
+
+int check_type()
+{
+/*
+* pseudo code --- this is what it should check
+*
+*   if (yytext == type_name)
+*       return(TYPE_NAME);
+*
+*   return(IDENTIFIER);
+*/
+
+/*
+*   it actually will only return IDENTIFIER
+*/
+
+    return(IDENTIFIER);
+}
 
 %}
 
 %% 
 
-"int" { return INTEGER; }
+"int" { count(); return INTEGER; }
 
-"float" { return FLOAT; }
+"float" { count(); return FLOAT; }
 
-"void" { return VOID; }
+"void" { count(); return VOID; }
 
-"return" { return RETURN; }
+"return" { count(); return RETURN; }
 
-"if" { return IF; }
+"if" { count(); return IF; }
 
-"else" { return ELSE; }
+"else" { count(); return ELSE; }
 
-"while" { return WHILE; }
+"while" { count(); return WHILE; }
 
-"for" { return FOR; }
+"for" { count(); return FOR; }
 
-"break" { return BREAK; }
+"break" { count(); return BREAK; }
 
-"printf" { return PRINTF; }
+"printf" { count(); return PRINTF; }
 
 "//".*\n ;
 
-"==" { return EQUALS; }
+"==" { count(); return EQUALS; }
 
-"!=" { return NEQUALS; }
+"!=" { count(); return NEQUALS; }
 
-"<" { return LESSTHAN; }
+"<" { count(); return LESSTHAN; }
 
-"<=" { return LESSTHANEQ; }
+"<=" { count(); return LESSTHANEQ; }
 
-">" { return MORETHAN; }
+">" { count(); return MORETHAN; }
 
-">=" { return MORETHANEQ; }
+">=" { count(); return MORETHANEQ; }
 
-L?\"(\\.|[^\\"])*\" { return(STRING_LITERAL); }
+L?\"(\\.|[^\\"])*\" { count(); return(STRING_LITERAL); }
 
-[-+*/;=,)(\{\}] { return *yytext; }
+[-+*/;=,)(\{\}] { count(); return *yytext; }
 
-[0-9]+ { yylval.integer = atoi(yytext);  return NUMBER; }
+[0-9]+ { yylval.integer = atoi(yytext);  count(); return NUMBER; }
 
 [a-zA-Z][a-zA-Z0-9]* { 
     yylval.string = (char*)calloc(yyleng+1, sizeof(char));
@@ -62,6 +104,6 @@ L?\"(\\.|[^\\"])*\" { return(STRING_LITERAL); }
     return IDENTIFIER; 
     }
 
-[ \t\n]+ ;
+[\n\r]          { lineNo++; column = 0; }
 %%
 

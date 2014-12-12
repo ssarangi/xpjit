@@ -33,8 +33,23 @@ public:
         }
     }
 
+    ~DataTypeAST() {}
+
 private:
     DataTypesEnum m_type;
+};
+
+class IdentifierTyAST
+{
+public:
+    IdentifierTyAST(std::string name)
+        : m_name(name)
+    {}
+
+    ~IdentifierTyAST() {}
+
+private:
+    std::string m_name;
 };
 
 /// ExprAST - Base class for all expression nodes.

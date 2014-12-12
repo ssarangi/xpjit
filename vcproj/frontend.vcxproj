@@ -96,7 +96,7 @@
   <ItemGroup>
     <CustomBuild Include="..\frontend\grammar\lexer.l">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\tools\flex.exe $(ProjectDir)..\frontend\grammar\lexer.l
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\tools\win_flex.exe $(ProjectDir)..\frontend\grammar\lexer.l
 copy $(ProjectDir)lexer.cpp $(SolutionDir)frontend\generated\lexer.cpp
 del $(ProjectDir)lexer.cpp</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Executing flex on %(FullPath)</Message>
@@ -109,16 +109,15 @@ del $(ProjectDir)lexer.cpp</Command>
 
 SET BISON_HAIRY=$(SolutionDir)tools\bison.hairy
 
-$(SolutionDir)tools\bison -o $(SolutionDir)frontend\generated\parser.cpp -d -t -v $(SolutionDir)frontend\grammar\parser.y --no-lines --verbose
-copy $(SolutionDir)frontend\generated\parser.cpp.h $(SolutionDir)frontend\generated\parser.h
-del $(SolutionDir)frontend\generated\parser.cpp.h
+$(SolutionDir)tools\win_bison -o $(SolutionDir)frontend\generated\parser.cpp -d -t -v $(SolutionDir)frontend\grammar\parser.y --no-lines --verbose
 
-del $(SolutionDir)frontend\generated\parser.cpp.output</Command>
+del $(SolutionDir)frontend\generated\parser.output</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Executing Bison on %(FullPath)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)frontend\generated\parser.cpp;$(SolutionDir)frontend\generated\parser.h</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\frontend\driver.h" />
     <ClInclude Include="..\frontend\generated\parser.h" />
     <ClInclude Include="..\include\frontend\ASTBuilder.h" />
     <ClInclude Include="..\include\frontend\irtranslation.h" />

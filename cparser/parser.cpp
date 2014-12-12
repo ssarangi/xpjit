@@ -2,9 +2,10 @@
 #include "parser.h"
 
 #include <fstream>
+#include <assert.h>
 
 /// Error* - These are little helper functions for error handling.
-ExprAST* Parser::Error(const SToken &token, const char *Str, const char* filename, int lineNo)
+ExprAST* Parser::error(const SToken &token, const char *Str, const char* filename, int lineNo)
 {
     /*
     File "syntax_error.py", line 7
@@ -27,9 +28,27 @@ ExprAST* Parser::Error(const SToken &token, const char *Str, const char* filenam
     return nullptr;
 }
 
-PrototypeAST* Parser::ErrorP(const char *Str)
+PrototypeAST* Parser::errorP(const char *Str)
 {
     return nullptr;
+}
+
+bool Parser::assertAndAdvance(const Token& token)
+{
+    bool correct_token = true;
+    if (token != m_pLexer->getCurrToken().tokenID)
+    {
+        SToken stoken;
+        stoken.tokenID = token;
+        stoken.lineNo = m_pLexer->getCurrToken().lineNo;
+        stoken.columnNo = m_pLexer->getCurrToken().columnNo;
+        std::string errMsg = "Expected token " + m_pLexer->getTokenStr(token) + std::string(" but got ") + m_pLexer->getTokenStr(m_pLexer->getCurrToken().tokenID);
+        error(stoken, errMsg.c_str());
+        correct_token = false;
+    }
+
+    m_pLexer->getNextToken();
+    return correct_token;
 }
 
 void Parser::setLineStr(std::string line, int lineNo)
@@ -40,11 +59,15 @@ void Parser::setLineStr(std::string line, int lineNo)
     m_pLexer->setCurrentLine(line, lineNo);
 }
 
-DataTypeAST* Parser::ParseDataType(SToken& token)
+DataTypeAST* Parser::parseDataType()
 {
+    Token data_ty = m_pLexer->getNextToken().tokenID;
+    if (!m_pLexer->isDataType(data_ty))
+        ERROR(m_pLexer->getCurrToken(), "Expected a datatype");
+
     DataTypeAST *pDatatype = nullptr;
 
-    switch (token.tokenID)
+    switch (data_ty)
     {
     case tok_char:
     case tok_string:
@@ -52,16 +75,30 @@ DataTypeAST* Parser::ParseDataType(SToken& token)
     case tok_int:
     case tok_float:
     case tok_double:
-        pDatatype = new DataTypeAST(token.tokenID);
+        pDatatype = new DataTypeAST(data_ty);
+    default:
+        assert(0 && "Unknown datatype");
     }
 
     return pDatatype;
 }
 
+IdentifierTyAST* Parser::parseIdentifier()
+{
+    IdentifierTyAST *pIdentifier = nullptr;
+    Token identifier_token = m_pLexer->getNextToken().tokenID;
+    if (assertAndAdvance(tok_identifier))
+    {
+        pIdentifier = new IdentifierTyAST(m_pLexer->getIdentifierStr());
+    }
+
+    return pIdentifier;
+}
+
 /// identifierexpr
 ///   ::= identifier
 ///   ::= identifier '(' expression* ')'
-ExprAST* Parser::ParseIdentifierExpr()
+ExprAST* Parser::parseIdentifierExpr()
 {
     std::string IdName = m_pLexer->getIdentifierStr();
 
@@ -77,7 +114,7 @@ ExprAST* Parser::ParseIdentifierExpr()
     {
         while (1)
         {
-            ExprAST *Arg = ParseExpression();
+            ExprAST *Arg = parseExpression();
             if (!Arg) return 0;
             Args.push_back(Arg);
 
@@ -96,7 +133,7 @@ ExprAST* Parser::ParseIdentifierExpr()
 }
 
 /// numberexpr ::= number
-ExprAST* Parser::ParseNumberExpr()
+ExprAST* Parser::parseNumberExpr()
 {
     ExprAST *Result = new NumberExprAST(m_pLexer->getNumVal());
     m_pLexer->getNextToken(); // consume the number
@@ -104,10 +141,10 @@ ExprAST* Parser::ParseNumberExpr()
 }
 
 /// parenexpr ::= '(' expression ')'
-ExprAST* Parser::ParseParenExpr()
+ExprAST* Parser::parseParenExpr()
 {
     m_pLexer->getNextToken();  // eat (.
-    ExprAST *V = ParseExpression();
+    ExprAST *V = parseExpression();
     if (!V) return 0;
 
     if (m_pLexer->getCurrToken().tokenID != ')')
@@ -120,7 +157,7 @@ ExprAST* Parser::ParseParenExpr()
 ///   ::= identifierexpr
 ///   ::= numberexpr
 ///   ::= parenexpr
-ExprAST* Parser::ParsePrimary()
+ExprAST* Parser::parsePrimary()
 {
     //switch (m_pLexer->getCurrToken())
     //{
@@ -134,7 +171,7 @@ ExprAST* Parser::ParsePrimary()
 
 /// binoprhs
 ///   ::= ('+' primary)*
-ExprAST* Parser::ParseBinOpRHS(int ExprPrec, ExprAST *LHS)
+ExprAST* Parser::parseBinOpRHS(int ExprPrec, ExprAST *LHS)
 {
     // If this is a binop, find its precedence.
     while (1) {
@@ -150,14 +187,14 @@ ExprAST* Parser::ParseBinOpRHS(int ExprPrec, ExprAST *LHS)
         m_pLexer->getNextToken();  // eat binop
 
         // Parse the primary expression after the binary operator.
-        ExprAST *RHS = ParsePrimary();
+        ExprAST *RHS = parsePrimary();
         if (!RHS) return 0;
 
         // If BinOp binds less tightly with RHS than the operator after RHS, let
         // the pending operator take RHS as its LHS.
         int NextPrec = m_pLexer->getTokPrecedence();
         if (TokPrec < NextPrec) {
-            RHS = ParseBinOpRHS(TokPrec + 1, RHS);
+            RHS = parseBinOpRHS(TokPrec + 1, RHS);
             if (RHS == 0) return 0;
         }
 
@@ -169,26 +206,26 @@ ExprAST* Parser::ParseBinOpRHS(int ExprPrec, ExprAST *LHS)
 /// expression
 ///   ::= primary binoprhs
 ///
-ExprAST* Parser::ParseExpression()
+ExprAST* Parser::parseExpression()
 {
-    ExprAST *LHS = ParsePrimary();
+    ExprAST *LHS = parsePrimary();
     if (!LHS) return 0;
 
-    return ParseBinOpRHS(0, LHS);
+    return parseBinOpRHS(0, LHS);
 }
 
 /// prototype
 ///   ::= id '(' id* ')'
-PrototypeAST* Parser::ParseFunctionDeclaration()
+PrototypeAST* Parser::parseFunctionDeclaration()
 {
     if (m_pLexer->getCurrToken().tokenID != tok_identifier)
-        return ErrorP("Expected function name in prototype");
+        return errorP("Expected function name in prototype");
 
     std::string FnName = m_pLexer->getIdentifierStr();
     m_pLexer->getNextToken();
 
     if (m_pLexer->getCurrToken().tokenID != '(')
-        return ErrorP("Expected '(' in prototype");
+        return errorP("Expected '(' in prototype");
 
     std::vector<std::string> ArgNames;
     while (m_pLexer->getNextToken().tokenID == tok_identifier)
@@ -201,11 +238,11 @@ PrototypeAST* Parser::ParseFunctionDeclaration()
             break;
 
         if (next_token != COMMA)
-            return ErrorP("Expected ',' in function declaration");
+            return errorP("Expected ',' in function declaration");
     }
 
     if (m_pLexer->getCurrToken().tokenID != ')')
-        return ErrorP("Expected ')' in prototype");
+        return errorP("Expected ')' in prototype");
 
     // success.
     m_pLexer->getNextToken();  // eat ')'.
@@ -214,28 +251,27 @@ PrototypeAST* Parser::ParseFunctionDeclaration()
 }
 
 /// definition ::= datatype identifer '(' args ')' '{' block_statement '}'
-FunctionAST* Parser::ParseDefinition()
+FunctionAST* Parser::parseDefinition()
 {
-    Token func_ret_ty = m_pLexer->getCurrToken().tokenID;
-    if (!m_pLexer->isDataType(func_ret_ty))
-        ERROR(m_pLexer->getCurrToken(), "Expected a datatype");
+    DataTypeAST *pDataType = parseDataType();
 
-    if (!m_pLexer->isDataType(func_ret_ty))
+    assertAndAdvance(tok_lbrace);
+    if (!pDataType)
         return nullptr;  // We did not match a return type. So its not a function definition
 
     m_pLexer->getNextToken();  // eat def.
-    PrototypeAST *Proto = ParseFunctionDeclaration();
+    PrototypeAST *Proto = parseFunctionDeclaration();
     if (Proto == 0) return 0;
 
-    if (ExprAST *E = ParseExpression())
+    if (ExprAST *E = parseExpression())
         return new FunctionAST(Proto, E);
     return 0;
 }
 
 /// toplevelexpr ::= expression
-FunctionAST* Parser::ParseTopLevelExpr()
+FunctionAST* Parser::parseTopLevelExpr()
 {
-    if (ExprAST *E = ParseExpression())
+    if (ExprAST *E = parseExpression())
     {
         // Make an anonymous proto.
         PrototypeAST *Proto = new PrototypeAST("", std::vector<std::string>());
@@ -245,19 +281,19 @@ FunctionAST* Parser::ParseTopLevelExpr()
 }
 
 /// external ::= 'extern' prototype
-PrototypeAST* Parser::ParseExtern()
+PrototypeAST* Parser::parseExtern()
 {
     m_pLexer->getNextToken();  // eat extern.
-    return ParseFunctionDeclaration();
+    return parseFunctionDeclaration();
 }
 
 //===----------------------------------------------------------------------===//
 // Top-Level parsing
 //===----------------------------------------------------------------------===//
 
-void Parser::HandleDefinition()
+void Parser::handleDefinition()
 {
-    if (ParseDefinition())
+    if (parseDefinition())
     {
         fprintf(stderr, "Parsed a function definition.\n");
     }
@@ -268,9 +304,9 @@ void Parser::HandleDefinition()
     }
 }
 
-void Parser::HandleExtern()
+void Parser::handleExtern()
 {
-    if (ParseExtern())
+    if (parseExtern())
     {
         fprintf(stderr, "Parsed an extern\n");
     }
@@ -284,17 +320,16 @@ void Parser::HandleExtern()
 
 /// definition ::= datatype identifier '(' args ')' '{' block_statement '}'
 ///            ::= datatype identifier = expression ';'
-void Parser::HandleTopLevelExpression()
+void Parser::handleTopLevelExpression()
 {
-    SToken datatype = m_pLexer->getNextToken();
-    DataTypeAST *pDataType = ParseDataType(datatype);
+    DataTypeAST *pDataType = parseDataType();
 
     // Evaluate a top-level expression into an anonymous function.
-    if (FunctionAST *pFuncAST = ParseDefinition())
+    if (FunctionAST *pFuncAST = parseDefinition())
     {
         // Do something here.
     }
-    else if (ParseTopLevelExpr())
+    else if (parseTopLevelExpr())
     {
         fprintf(stderr, "Parsed a top-level expr\n");
     }
@@ -306,7 +341,7 @@ void Parser::HandleTopLevelExpression()
 }
 
 /// top ::= definition | external | expression | ';'
-void Parser::RunStandalone()
+void Parser::runStandalone()
 {
     while (1)
     {
@@ -321,7 +356,7 @@ void Parser::RunStandalone()
     }
 }
 
-void Parser::ParseFile(std::string filename)
+void Parser::parseFile(std::string filename)
 {
     std::ifstream file_handle;
     file_handle.open(filename);
@@ -343,7 +378,7 @@ void Parser::ParseFile(std::string filename)
         //case tok_extern: HandleExtern(); break;
         //default:         HandleTopLevelExpression(); break;
         //}
-        HandleTopLevelExpression();
+        handleTopLevelExpression();
     }
 
     file_handle.close();

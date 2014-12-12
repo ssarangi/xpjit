@@ -1,6 +1,3 @@
-asfljksf = 9;
-double b = 0.0;
-
 int main()
 {
     int a, b, c;
@@ -10,5 +7,6 @@ int main()
     a = a + b;
     b = b * 5;
     c = c * b + a;
+    asfljksf = 9;
     return c;
 }

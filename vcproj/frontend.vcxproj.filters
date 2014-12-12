@@ -87,5 +87,8 @@
     <ClInclude Include="..\include\frontend\irtranslation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\frontend\driver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
