@@ -21,10 +21,10 @@ public:
     ~Parser() {}
 
     ExprAST *error(const SToken &token, const char *Str, const char* filename = __FILE__, int lineNo =__LINE__);
-    PrototypeAST *errorP(const char *Str);
+    FunctionDeclAST *errorP(const char *Str);
 
     DataTypeAST* parseDataType();
-    IdentifierTyAST* parseIdentifier();
+    IdentifierAST* parseIdentifier();
     ExprAST* parseExpression();
     ExprAST* parseIdentifierExpr();
     ExprAST* parseNumberExpr();
@@ -32,21 +32,27 @@ public:
     ExprAST* parsePrimary();
     ExprAST* parseBinOpRHS(int ExprPrec, ExprAST *LHS);
 
-    PrototypeAST *parseFunctionDeclaration();
+    ExprAST* parseVariableDeclaration();
 
-    FunctionAST *parseDefinition();
+    FunctionDeclAST *parseFunctionDeclaration();
+
+    ArgsAST     *parseFuncArgs(Token open_token, Token close_token);
+    FunctionAST *parseFuncDefinition(DataTypeAST *pRetTy, IdentifierAST *pFuncName);
     FunctionAST *parseTopLevelExpr();
 
-    PrototypeAST *parseExtern();
+    FunctionDeclAST *parseExtern();
 
-    void handleDefinition();
     void handleExtern();
     void handleTopLevelExpression();
     void runStandalone();
     void parseFile(std::string filename);
 
+    void advance() { m_pLexer->getNextToken(); }
+    SToken curr_token() { return m_pLexer->getCurrToken(); }
+
 private:
     void setLineStr(std::string line, int lineNo);
+    bool assertToken(const Token& token);
     bool assertAndAdvance(const Token& token);
 
 private:

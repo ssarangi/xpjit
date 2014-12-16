@@ -14,7 +14,8 @@
     X(rbrace,       "}",                          14)    \
     X(lparen,       "(",                          15)    \
     X(rparen,       ")",                          16)    \
-    X(ascii,        "----",                       65534)    \
+    X(semicolon,    ";",                          17)    \
+    X(ascii,        "----",                       65534) \
     X(undefined,    "----",                       65535)
 
 TOKENS

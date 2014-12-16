@@ -5,29 +5,6 @@
 #include <string>
 #include <map>
 
-//enum Token
-//{
-//    tok_eof = -1,
-//
-//    // Commands
-//    tok_def = -2,
-//    tok_extern = -3,
-//
-//    // primary
-//    tok_identifier = -4,
-//    tok_number = -5,
-//
-//    // data types
-//    tok_int = -6,
-//    tok_float = -7,
-//    tok_double = -8,
-//    tok_void = -9,
-//    tok_string = -10,
-//    tok_char = -11,
-//
-//    tok_undefined = -65535,
-//};
-
 #define X(tok_enum, tok_str, tok_id) tok_##tok_enum = -tok_id,
 enum Token
 { 
@@ -75,7 +52,7 @@ public:
         m_currentColumnNo = 0;
     }
 
-#define X(tok_enum, tok_str, tok_id)  if (std::string(#tok_str) == token) return tok_##tok_enum;
+#define X(tok_enum, tok_str, tok_id)  { if (std::string(tok_str) == token) return tok_##tok_enum; }
     Token       isRecognizedToken(std::string token)
     {
         Token token_found = tok_undefined;
@@ -98,6 +75,9 @@ public:
     std::string getIdentifierStr() const { return m_identifierStr; }
     SToken      getCurrToken() const { return m_curTok; }
     double      getNumVal() const { return m_numVal; }
+
+    int         getLineNo() const { return m_currentLineNo; }
+    int         getColumnNo() const { return m_currentColumnNo; }
 
 private:
     /// CurTok/getNextToken - Provide a simple token buffer.  CurTok is the current

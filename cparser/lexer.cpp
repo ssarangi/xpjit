@@ -109,6 +109,34 @@ SToken Lexer::gettok()
         return stoken;
     }
 
+    if (LastChar == '(')
+    {
+        stoken.tokenID = tok_lparen;
+        LastChar = getNextChar();
+        return stoken;
+    }
+
+    if (LastChar == ')')
+    {
+        stoken.tokenID = tok_rparen;
+        LastChar = getNextChar();
+        return stoken;
+    }
+
+    if (LastChar == '{')
+    {
+        stoken.tokenID = tok_lbrace;
+        LastChar = getNextChar();
+        return stoken;
+    }
+
+    if (LastChar == '}')
+    {
+        stoken.tokenID = tok_rbrace;
+        LastChar = getNextChar();
+        return stoken;
+    }
+
     // Otherwise, just return the character as its ascii value
     char m_thisChar = LastChar;
     m_lastChar = getNextChar();

@@ -39,14 +39,14 @@ private:
     DataTypesEnum m_type;
 };
 
-class IdentifierTyAST
+class IdentifierAST
 {
 public:
-    IdentifierTyAST(std::string name)
+    IdentifierAST(std::string name)
         : m_name(name)
     {}
 
-    ~IdentifierTyAST() {}
+    ~IdentifierAST() {}
 
 private:
     std::string m_name;
@@ -71,11 +71,15 @@ public:
 /// VariableExprAST - Expression class for referencing a variable, like "a".
 class VariableExprAST : public ExprAST
 {
-    std::string Name;
 public:
-    VariableExprAST(const std::string &name)
-        : Name(name)
+    VariableExprAST(const DataTypeAST *pDataType, const IdentifierAST *pIdentifier)
+        : m_pIdentifier(pIdentifier)
+        , m_pDataType(pDataType)
     {}
+
+private:
+    const DataTypeAST    *m_pDataType;
+    const IdentifierAST  *m_pIdentifier;
 };
 
 /// BinaryExprAST - Expression class for a binary operator.
@@ -100,21 +104,34 @@ public:
 /// PrototypeAST - This class represents the "prototype" for a function,
 /// which captures its name, and its argument names (thus implicitly the number
 /// of arguments the function takes).
-class PrototypeAST
+class FunctionDeclAST
 {
     std::string Name;
     std::vector<std::string> Args;
 public:
-    PrototypeAST(const std::string &name, const std::vector<std::string> &args)
+    FunctionDeclAST(const std::string &name, const std::vector<std::string> &args)
         : Name(name), Args(args)
     {}
+};
+
+/// ArgsAST - This class represents the function arguments. All the function arguments
+/// are supposed to be stored in a list
+class ArgsAST
+{
+public:
+    ArgsAST()
+    {}
+
+    void addArg(ExprAST *pArg) { m_args.push_back(pArg); }
+private:
+    std::vector<ExprAST*> m_args;
 };
 
 /// FunctionAST - This class represents a function definition itself.
 class FunctionAST
 {
 public:
-    FunctionAST(PrototypeAST *proto, ExprAST *body)
+    FunctionAST(FunctionDeclAST *proto, ExprAST *body)
     {}
 };
 
