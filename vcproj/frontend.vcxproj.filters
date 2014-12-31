@@ -51,9 +51,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\frontend\generated\parser.h">
-      <Filter>generated</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\frontend\ASTBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -89,6 +86,9 @@
     </ClInclude>
     <ClInclude Include="..\frontend\driver.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\frontend\generated\parser.hpp">
+      <Filter>generated</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

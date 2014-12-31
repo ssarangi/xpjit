@@ -102,13 +102,13 @@ void DotWriter::Visit(Symbol& )
 void DotWriter::Visit(IcarusModule& m)
 {
     std::string moduleID = getNextName();
-    m_fileStream<<moduleID<<"[label=\"Module: "<<m.getName()<<"\"]"<<endl;
+    m_fileStream<<moduleID << "[label=\"Module: " << m.getName() << "\"]" << endl;
     std::list<Function*>& funcList = m.getFunctions();
     for(std::list<Function*>::const_iterator funcIter = funcList.begin(); funcIter != funcList.end() ; ++funcIter)
     {
         std::string funcID = getNextName();
-        m_fileStream<<funcID<<"[label=\"Function: "<<(*funcIter)->getName()<<"\"]"<<endl;
-        m_fileStream<<moduleID<<"->"<<funcID<<endl;
+        m_fileStream << funcID << "[label=\"Function: " << (*funcIter)->getName() << "\"]" << endl;
+        m_fileStream << moduleID << "->" << funcID << endl;
     }
 }
 

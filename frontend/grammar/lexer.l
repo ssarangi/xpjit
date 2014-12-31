@@ -8,6 +8,7 @@
 %{
 class IcaValue;
 class Statement;
+class RetList;
 
 #include "parser.hpp"
 #include <stdio.h>
@@ -58,6 +59,12 @@ int check_type()
 
 %% 
 
+"[" { count(); return LSQUARE; }
+
+"]" { count(); return RSQUARE; }
+
+"function" { count(); return FUNCTION; }
+
 "int" { count(); return INTEGER; }
 
 "float" { count(); return FLOAT; }
@@ -106,6 +113,7 @@ L?\"(\\.|[^\\"])*\" { count(); return(STRING_LITERAL); }
     return IDENTIFIER; 
     }
 
-[\n\r]          { lineNo++; column = 0; }
+[\n\r]   { lineNo++; column = 0; }
+
 %%
 

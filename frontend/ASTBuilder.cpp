@@ -3,6 +3,7 @@
 ASTBuilder::ASTBuilder()
     : m_module(*new IcarusModule("globalModule"))
     , m_curFunction(NULL)
+    , m_retListStructureCount(0)
 {
 }
 
@@ -15,7 +16,7 @@ IcErr ASTBuilder::addSymbol(Symbol& s)
 
 IcErr ASTBuilder::addFunction(Function& f)
 {
-    IcErr err = m_module.addFunction(f);	
+    IcErr err = m_module.addFunction(f);
     if(!err)
         m_curFunction = &f;
     return err;

@@ -1,0 +1,5 @@
+function firstmethod [int] (int a, int b) {
+}
+
+function secondmethod [int] (int a, int b) {
+}

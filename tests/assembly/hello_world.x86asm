@@ -1,0 +1,7 @@
+bits 64
+section .data
+section .data
+
+section .text
+global main_entry
+

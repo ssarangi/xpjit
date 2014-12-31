@@ -44,6 +44,7 @@ void yyerror(std::string s)
     
     fprintf(stderr, "\n%s^", error_loc.c_str());
     fprintf(stderr, "\nError on Line %d, Column %d: %s", lineNo, column, s.c_str());
+    builder->pushError(s);
 }
 
 %}
@@ -65,9 +66,11 @@ void yyerror(std::string s)
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
+%token<integer> FUNCTION
+
 %token<integer> INTEGER NUMBER FLOAT VOID RETURN IF ELSE DO WHILE FOR BREAK EQUALS NEQUALS PRINTF NEWLINE
 %token<string> IDENTIFIER
-%token<string> STRING_LITERAL
+%token<string> STRING_LITERAL LSQUARE RSQUARE
 
 %type<integer> datatype
 %type<value> expression func_call
@@ -76,18 +79,24 @@ void yyerror(std::string s)
 %start program
 
 %%
-program: program statement
-    | program func_decl
+program:
     | program func_defn
-    |
     ;
 
-func_decl: datatype IDENTIFIER '(' arglist ')' ';' 
-    { 
-        const std::string& string = $2;
-        IcErr err = builder->addProtoType(string, getType($1), NULL);
-        if(err != eNoErr)
-            yyerror(errMsg[err]);
+datatype: INTEGER          { $$ = currentType = Type::IntegerTy; }
+    | FLOAT                { $$ = currentType = Type::FloatTy; }
+    | VOID                 { $$ = currentType = Type::VoidTy; }
+    | STRING_LITERAL       { $$ = currentType = Type::StringTy; }
+    ;
+
+retlist : datatype
+    {
+        builder->incrementRetListCount();
+
+    }
+    | retlist ',' datatype
+    {
+        // builder->pushDataType(&getType($3));
     }
     ;
     
@@ -105,21 +114,28 @@ arglist: datatype IDENTIFIER
     }
     |
     ;
-//as and when we find the identifiers , we need to add them to a list and use them while constructing the prototype/func
+    
+    // as and when we find the identifiers , we need to add them to a list and use them while
+    // constructing the prototype/func
 
-func_defn: datatype IDENTIFIER '(' arglist ')' '{' 
+func_defn: FUNCTION IDENTIFIER LSQUARE retlist RSQUARE '(' arglist ')' '{' 
     {
-        const std::string& string = $2;
-        FunctionProtoType* fp = builder->getProtoType(string);//use current dataTypeList
-        if(fp == NULL) //find the prototype in the module. if not found, add a new one
-            builder->addProtoType(string, getType($1), &fp);
+        const std::string& funcName = $2;
+        FunctionProtoType* fp = builder->getProtoType(funcName); //use current dataTypeList
+        
+        // find the prototype in the module. if not found, add a new one
+        if(fp == NULL)
+            builder->addProtoType(funcName, getType($4), &fp);
+
         IcErr err = builder->addFunction(*fp);
         if(err != eNoErr)
             yyerror(errMsg[err]);
     }
 
     statement_block '}' 
-    {   //we should clear the m_curFunction after this, so that any global decl will not be a part of prev function's symtab
+    {
+        // we should clear the m_curFunction after this, so that any global decl will not be a
+        // part of prev function's symtab
         builder->endCodeBlock();
     }
     ;
@@ -144,8 +160,6 @@ statement: declaration
 iteration_statement
     : WHILE '(' expression ')' statement
     | DO statement WHILE '(' expression ')' ';'
-    | FOR '(' expression_statement expression_statement ')' statement
-    | FOR '(' expression_statement expression_statement expression ')' statement
     ;
 
 
@@ -183,15 +197,9 @@ break_statement: BREAK { $$ = new BreakStatement(); }
 declaration: datatype varList ';' { currentType = -1; }
 
 varList: IDENTIFIER { builder->addSymbol($1, getType(currentType)); }
-    | varList',' IDENTIFIER { builder->addSymbol($3, getType(currentType)); }
+    | varList ',' IDENTIFIER { builder->addSymbol($3, getType(currentType)); }
     ;
-    
-datatype: INTEGER          { $$ = currentType = Type::IntegerTy; }
-    | FLOAT                { $$ = currentType = Type::FloatTy; }
-    | VOID                 { $$ = currentType = Type::VoidTy; }
-    | STRING_LITERAL       { $$ = currentType = Type::StringTy; }
-    ;
-    
+        
 assignment: IDENTIFIER '=' expression ';'
     { 
         Symbol *identifierSymbol = builder->getSymbol($1);
@@ -298,12 +306,18 @@ IcarusModule* ParseFile(const char *filename)
     
     if(gDebug.isYaccTraceOn())
         yydebug = 1; //set it to 1 for text based debugging, 5 for graph based debugging
+
+    if (0)
+    {
+        extern int yydebug;
+        yydebug = 1;
+    }
     
     yyparse();
     
     if(builder->hasErrors())
     {
-        fprintf(stderr, "Stopping compilation as we found some syntax errors in %s\n!", filename);
+        fprintf(stderr, "\nStopping compilation as we found some syntax errors in %s\n!", filename);
         return NULL;
     }
     return &builder->getModule();

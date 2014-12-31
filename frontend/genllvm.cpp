@@ -219,7 +219,7 @@ llvm::Value* Function::genLLVM(GenLLVM* g)
     g->getBuilder().SetInsertPoint(BB);
 
     //Set names for the arguments and allocate them
-    //assert that number of symbols equal number of elements in typelist
+    //assert that number of symbols equal number of elements in type list
     llvm::Function::arg_iterator argIter = F->arg_begin();
     for(std::list<Symbol*>::iterator symIter = getArgSymbolList().begin();
         argIter != F->arg_end(); ++argIter, ++symIter)

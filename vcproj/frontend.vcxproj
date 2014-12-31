@@ -118,7 +118,7 @@ del $(SolutionDir)frontend\generated\parser.output</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\frontend\driver.h" />
-    <ClInclude Include="..\frontend\generated\parser.h" />
+    <ClInclude Include="..\frontend\generated\parser.hpp" />
     <ClInclude Include="..\include\frontend\ASTBuilder.h" />
     <ClInclude Include="..\include\frontend\irtranslation.h" />
     <ClInclude Include="..\include\frontend\CompEA.h" />

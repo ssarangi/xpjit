@@ -4,6 +4,8 @@
 #include <frontend/irtranslation.h>
 #include <frontend/Type.h>
 
+#include <unordered_map>
+
 class ASTBuilder
 { 
     //This will be a builder class only and won't be necessary for further optimizations in the code
@@ -36,16 +38,24 @@ public:
     //some helpers
     void pushDataType(Type* type) { m_dataTypeList.push_back(type); }
     void pushArgName(Symbol *arg) { m_argNameList.push_back(arg); }
+    void incrementRetListCount() { ++m_retListStructureCount; }
+    void addRetList(int index, RetList *pRetList) { m_returnList[index] = pRetList; }
+
     void pushError(std::string error) { m_errorList.push_back(error); }
     bool hasErrors() { return m_errorList.size() != 0; }
 private:
     Function* m_curFunction;//can be null
     IcarusModule& m_module;
 
+    int m_retListStructureCount;
+
     //some helpers during building of AST
     std::list<Type*> m_dataTypeList; //to store the data types of the arguments while constructing the argList
-    std::list<Symbol*> m_argNameList;	
+    std::list<Type*> m_returnList;
+    std::list<Symbol*> m_argNameList;
     std::list<std::string> m_errorList;
+
+    std::unordered_map<int, RetList*> m_funcReturns;
 };
 
 #endif //ASTBUILDER_H

@@ -46,8 +46,13 @@ public:
     virtual llvm::Value* genLLVM(GenLLVM*) = 0;
 };
 
+class RetList
+{
+
+};
+
 /*
-Constant should have a datatype and a value
+Constant should have a data type and a value
 */
 class Constant: public Expression 
 {
@@ -154,7 +159,7 @@ public:
     //Visitors
     virtual void accept(IClassVisitor &visitor) = 0;
     
-private:	
+private:
 };
 
 class Assignment : public Statement
@@ -284,7 +289,7 @@ class SymbolTable
 public:
     //Getter-Setters
     IcErr add(Symbol& sym);
-    std::list<Symbol*>& getSymbols() { return m_symbols; }	
+    std::list<Symbol*>& getSymbols() { return m_symbols; }
 
     //Visitors
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
@@ -301,13 +306,15 @@ public:
     {}
     
     virtual IcErr addStatement(Statement& s) = 0;
-    virtual bool endCodeBlock();  //return true if it accepted the request of ending a codeblock, false if no codeblocks were found to end
+    // return true if it accepted the request of ending a code block,
+    // false if no code blocks were found to end
+    virtual bool endCodeBlock();
     virtual Statement* getCurrentStatement();
 protected:
     ControlFlowStatement *m_currentInsertStatement;
 };
 
-//each branch in an ifelse
+//each branch in an if else
 class Branch 
 {
 public:
@@ -325,7 +332,7 @@ private:
     Expression& m_condition;
     std::list<Statement*> m_statementList;
     ControlFlowStatement* m_currentInsertStatement;
-    Branch();	
+    Branch();
     
 };
 
@@ -416,17 +423,16 @@ public:
     friend std::ostream& operator<<(std::ostream& stream, const Function& f);
 
     //Visitors
-    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }	
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
 private:
     std::list<Statement*> m_statementList;
     FunctionProtoType& m_protoType;
     std::list<Symbol*> m_argSymbolList;
-    SymbolTable& m_symbolTable; //we should have a table for the function locals. this will get precendence over the global one	
+    SymbolTable& m_symbolTable; // we should have a table for the function locals. this will get precedence over the global one
     ControlFlowStatement* m_currentInsertStatement;
 
     //prevent unintended c++ synthesis
     Function();
-    
 };
 
 class IcarusModule
