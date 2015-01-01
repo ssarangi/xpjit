@@ -20,9 +20,6 @@
     <ClCompile Include="..\frontend\ASTBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\frontend\genIL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\frontend\genllvm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -55,9 +52,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\frontend\CompEA.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\frontend\genIL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\frontend\genllvm.h">

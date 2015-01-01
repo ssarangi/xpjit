@@ -3,7 +3,6 @@
 
 #include <frontend/irtranslation.h>
 #include <frontend/PrintVisitor.h>
-#include <frontend/genIL.h>
 #include <frontend/genllvm.h>
 #include <frontend/findentryfunc.h>
 
@@ -66,9 +65,6 @@ int Compile(char *fileName, char *pOutputFileName)
     
     if(pIcarusModule == nullptr)
         return -1; //there was some syntax error. Hence we skip all other checks
-
-    GenIL *myILGen = new GenIL(*pIcarusModule);
-    pIcarusModule = myILGen->generateIL();
 
     if(gDebug.isDotGen())
     {

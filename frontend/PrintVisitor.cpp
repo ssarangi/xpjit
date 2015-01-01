@@ -49,8 +49,10 @@ void PrintVisitor::Visit(IcaAssignment& a)
 void PrintVisitor::Visit(IcaReturnStatement& r)
 {
     cout<<"Return: "<<endl;
-    if(r.getReturnValue() != NULL)
-        r.getReturnValue()->accept(*this);
+    if(r.getReturnValue().size() != 0)
+    {
+        //r.getReturnValue()->accept(*this);
+    }
 }
 
 void PrintVisitor::Visit(IcaFunctionProtoType&)

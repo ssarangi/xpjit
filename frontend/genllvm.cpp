@@ -109,12 +109,31 @@ llvm::Value* IcaAssignment::genLLVM(GenLLVM* g)
 
 llvm::Value* IcaReturnStatement::genLLVM(GenLLVM* g)
 {
-    if(getReturnValue() != NULL)
+    if (m_values.size() == 0)
+        return g->getBuilder().CreateRetVoid();
+    else if (m_values.size() == 1)
+        return g->getBuilder().CreateRet(m_values[0]->genLLVM(g));
+    else
     {
-        return g->getBuilder().CreateRet(getReturnValue()->genLLVM(g));//,"");
-    }
+        llvm::Value *pAlloca = g->getBuilder().CreateAlloca(g->getCurrentFunc()->getReturnType());
+        llvm::Type *pFuncRetType = g->getCurrentFunc()->getReturnType();
+        
+        // Check the types we have for the function return type
+        auto retTypes = m_pParent->getProtoType().getReturnType();
 
-    return g->getBuilder().CreateRetVoid();
+        assert(m_values.size() == retTypes.size());
+
+        for (unsigned i = 0; i < retTypes.size(); ++i)
+        {
+            llvm::Value *pExpr = m_values[i]->genLLVM(g);
+            llvm::Value *pElement = g->getBuilder().CreateStructGEP(pAlloca, i);
+            g->getBuilder().CreateStore(pExpr, pElement);
+        }
+
+        return g->getBuilder().CreateRet(g->getBuilder().CreateLoad(pAlloca));
+    }
+    
+    return nullptr;
 }
 
 llvm::Value* IcaExpressionStatement::genLLVM(GenLLVM* g)
@@ -215,6 +234,8 @@ llvm::Value* IcaFunction::genLLVM(GenLLVM* g)
     llvm::FunctionType *FT = &getFunctionType(getProtoType(), g);
     llvm::Function *F = static_cast<llvm::Function*>(g->getModule().getOrInsertFunction(getName(), FT));
 
+    g->setCurrentFunc(F);
+
     BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "entry", F);
     g->getBuilder().SetInsertPoint(BB);
 
@@ -253,7 +274,8 @@ llvm::Value* IcarusModule::genLLVM(GenLLVM* g)
     {
         (*funcIter)->genLLVM(g);
     }
-    return NULL; //we wont use it anyway. This function should actually return nothing
+
+    return nullptr; //we wont use it anyway. This function should actually return nothing
 }
 
 void GenLLVM::generateLLVM(IcarusModule &m)

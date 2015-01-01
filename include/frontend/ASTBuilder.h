@@ -43,6 +43,8 @@ public:
 
     void pushError(std::string error) { m_errorList.push_back(error); }
     bool hasErrors() { return m_errorList.size() != 0; }
+
+    IcaFunction *getCurrentFunction() { return m_curFunction; }
 private:
     IcaFunction* m_curFunction;//can be null
     IcarusModule& m_module;

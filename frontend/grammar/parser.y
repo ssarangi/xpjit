@@ -51,10 +51,11 @@ void yyerror(std::string s)
 
 %union
 {
-    char*   string;
-    int     integer;
-    IcaValue*   value;
-    IcaStatement*  statement;
+    char         *string;
+    int           integer;
+    IcaValue     *value;
+    IcaStatement *statement;
+    std::vector<IcaValue*> *exprList;
 }
 
 %left EQUALS NEQUALS LESSTHAN LESSTHANEQ MORETHAN MORETHANEQ
@@ -67,14 +68,38 @@ void yyerror(std::string s)
 %nonassoc ELSE
 
 %token<integer> FUNCTION
+%token<integer> INTEGER
+%token<integer> NUMBER
+%token<integer> FLOAT
+%token<integer> VOID
+%token<integer> RETURN
+%token<integer> IF
+%token<integer> ELSE
+%token<integer> DO
+%token<integer> WHILE
+%token<integer> FOR 
+%token<integer> BREAK
+%token<integer> EQUALS
+%token<integer> NEQUALS
+%token<integer> PRINTF
+%token<integer> NEWLINE
 
-%token<integer> INTEGER NUMBER FLOAT VOID RETURN IF ELSE DO WHILE FOR BREAK EQUALS NEQUALS PRINTF NEWLINE
 %token<string> IDENTIFIER
-%token<string> STRING_LITERAL LSQUARE RSQUARE
+%token<string> STRING_LITERAL
+%token<string> LSQUARE
+%token<string> RSQUARE
 
 %type<integer> datatype
-%type<value> expression func_call
-%type<statement> return_stmt assignment break_statement iteration_statement
+
+%type<exprList> expression_list
+
+%type<value> expression
+%type<value> func_call
+
+%type<statement> return_stmt
+%type<statement> assignment
+%type<statement> break_statement
+%type<statement> iteration_statement
 
 %start program
 
@@ -212,8 +237,9 @@ assignment: IDENTIFIER '=' expression ';'
         $$ = new IcaAssignment(*new IcaVariable(*identifierSymbol), *$3);
     }
 
-return_stmt: RETURN expression { $$ = new IcaReturnStatement($2);};
-    | RETURN { $$ = new IcaReturnStatement(NULL); }
+return_stmt: RETURN LSQUARE expression_list RSQUARE { $$ = new IcaReturnStatement(builder->getCurrentFunction(), *$3); }
+    | RETURN expression { $$ = new IcaReturnStatement(builder->getCurrentFunction(), $2); };
+    | RETURN { $$ = new IcaReturnStatement(builder->getCurrentFunction(), nullptr); }
     ; 
 
 expression: NUMBER { $$ = new IcaConstant($1); }
@@ -242,7 +268,13 @@ expression: NUMBER { $$ = new IcaConstant($1); }
     | func_call { $$ = $1; }
     | '('expression')' { $$ = $2; }
     ;
-    
+
+expression_list:
+    /*blank*/ { $$=new vector<IcaValue*>(); }
+    |expression { $$=new vector<IcaValue*>(); $$->push_back($1); }
+    |expression_list ',' expression { $1->push_back($3);$$=$1; }
+    ;
+
 func_call: IDENTIFIER'('paramlist')'
     {
         std::vector<IcaType*> paramTypeList;

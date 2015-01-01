@@ -7,12 +7,14 @@
 
 %{
 /* External Symbols */
+#include <stdio.h>
+#include <string>
+#include <vector>
+
 class IcaValue;
 class IcaStatement;
 
 #include "parser.hpp"
-#include <stdio.h>
-#include <string>
 
 #define YY_NEVER_INTERACTIVE 1 
 // #define isatty _isatty

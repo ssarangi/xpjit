@@ -33,16 +33,16 @@ class IcaValue
 public:
     virtual void accept(IClassVisitor &) {}
     virtual CompEA* codegen() = 0;
-    virtual IcaValue* genIL(GenIL*) = 0;
     virtual llvm::Value* genLLVM(GenLLVM*) = 0;
 };
+
+typedef std::vector<IcaValue*> IcaValueList;
 
 class IcaExpression: public IcaValue 
 {
 public:
     virtual void accept(IClassVisitor &) = 0;
     virtual CompEA* codegen() = 0;
-    virtual IcaValue* genIL(GenIL*) = 0;
     virtual llvm::Value* genLLVM(GenLLVM*) = 0;
 };
 
@@ -58,7 +58,6 @@ public:
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
     virtual CompEA* codegen();
 
-    virtual IcaValue* genIL(GenIL*);
     virtual llvm::Value* genLLVM(GenLLVM*);
     
     int getValue(){ return m_value; }
@@ -80,7 +79,6 @@ public:
     
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
     virtual CompEA* codegen();
-    virtual IcaValue* genIL(GenIL*);
     virtual llvm::Value* genLLVM(GenLLVM*);
 private:
     IcaSymbol& m_symbol;//check this
@@ -117,7 +115,6 @@ public:
     //Visitors
     virtual void accept(IClassVisitor &visitor) { visitor.Visit(*this); }
     virtual CompEA* codegen();
-    virtual IcaValue* genIL(GenIL*);
     virtual llvm::Value* genLLVM(GenLLVM*);
 private:
     IcaValue& m_left;
@@ -141,7 +138,6 @@ public:
     //Visitors
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
     virtual CompEA* codegen();
-    virtual IcaValue* genIL(GenIL*);
     virtual llvm::Value* genLLVM(GenLLVM*);
 private:
     IcaFunctionProtoType& m_functionProtoType;
@@ -172,7 +168,6 @@ public:
     //Visitors
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
     virtual CompEA* codegen();
-    virtual IcaValue* genIL(GenIL*);
     virtual llvm::Value* genLLVM(GenLLVM*);
 private:
     IcaVariable& m_lval;
@@ -183,20 +178,30 @@ private:
 class IcaReturnStatement : public IcaStatement 
 {
 public:
-    IcaReturnStatement(IcaValue *value)
-        : m_value(value)
-    {}
+    IcaReturnStatement(IcaFunction *pParent, IcaValue *pValue)
+        : m_pParent(pParent)
+    {
+        if (pValue != nullptr)
+            m_values.push_back(pValue);
+    }
+
+    IcaReturnStatement(IcaFunction *pParent, std::vector<IcaValue*>& values)
+        : m_pParent(pParent)
+    {
+        m_values = values;
+    }
 
     //Getter-Setters
-    IcaValue* getReturnValue() { return m_value; }
+    std::vector<IcaValue*> getReturnValue() { return m_values; }
     
-    //Visitors	
+    //Visitors
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
     virtual CompEA* codegen();
-    virtual IcaValue* genIL(GenIL*);
     virtual llvm::Value* genLLVM(GenLLVM*);
+
 private:
-    IcaValue *m_value; //return statement can have NULL expression
+    std::vector<IcaValue*> m_values; // return statement can have NULL expression
+    IcaFunction *m_pParent;
     IcaReturnStatement();
 };
 
@@ -212,7 +217,6 @@ public:
     //Visitors	
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
     virtual CompEA* codegen();
-    virtual IcaValue* genIL(GenIL*);
     virtual llvm::Value* genLLVM(GenLLVM*);
 private:
     IcaExpression& m_expression;
@@ -226,7 +230,6 @@ public:
     //Visitors
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
     virtual CompEA* codegen() { return nullptr; }
-    virtual IcaValue* genIL(GenIL*);
     virtual llvm::Value* genLLVM(GenLLVM*);
 };
 
@@ -341,7 +344,6 @@ public:
     IcaBranchStatement(IcaExpression& condition);
     
     virtual CompEA* codegen();
-    virtual IcaValue* genIL(GenIL*);
     virtual llvm::Value* genLLVM(GenLLVM*);
 
     virtual IcErr addStatement(IcaStatement& s);
@@ -368,7 +370,6 @@ public:
     {}
 
     virtual CompEA* codegen() { return nullptr; }
-    virtual IcaValue* genIL(GenIL*);
     virtual llvm::Value* genLLVM(GenLLVM*);
 
     virtual IcErr addStatement(IcaStatement& s);
@@ -411,7 +412,6 @@ public:
     bool endCodeBlock();
 
     virtual CompEA* codegen();
-    virtual IcaValue* genIL(GenIL*);
     virtual llvm::Value* genLLVM(GenLLVM*);
 
     //overloaded operators
@@ -450,7 +450,6 @@ public:
     IcErr insertStatement(IcaFunction& f, IcaStatement& s);
 
     virtual CompEA* codegen();
-    virtual IcaValue* genIL(GenIL*);
     virtual llvm::Value* genLLVM(GenLLVM*);
 
     //overloaded operators

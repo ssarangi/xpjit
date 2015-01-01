@@ -89,7 +89,6 @@
     <ClCompile Include="..\frontend\findentryfunc.cpp" />
     <ClCompile Include="..\frontend\generated\lexer.cpp" />
     <ClCompile Include="..\frontend\generated\parser.cpp" />
-    <ClCompile Include="..\frontend\genIL.cpp" />
     <ClCompile Include="..\frontend\genllvm.cpp" />
     <ClCompile Include="..\frontend\PrintVisitor.cpp" />
   </ItemGroup>
@@ -123,7 +122,6 @@ del $(SolutionDir)frontend\generated\parser.output</Command>
     <ClInclude Include="..\include\frontend\irtranslation.h" />
     <ClInclude Include="..\include\frontend\CompEA.h" />
     <ClInclude Include="..\include\frontend\findentryfunc.h" />
-    <ClInclude Include="..\include\frontend\genIL.h" />
     <ClInclude Include="..\include\frontend\genllvm.h" />
     <ClInclude Include="..\include\frontend\IClassVisitor.h" />
     <ClInclude Include="..\include\frontend\parser.h" />

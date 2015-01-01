@@ -25,7 +25,11 @@ public:
     llvm::Type* getLLVMType(IcaType& type);
     llvm::Type* GenLLVM::getLLVMType(std::vector<IcaType*>& typeList);
 
+    void setCurrentFunc(llvm::Function *pF) { m_pCurrFunc = pF; }
+    llvm::Function *getCurrentFunc() { return m_pCurrFunc; }
+
 private:
+    llvm::Function *m_pCurrFunc;
     llvm::IRBuilder<>& m_irBuilder;
     llvm::Module& m_module;
     std::map<std::string, llvm::Value*> m_namedValues; //to hold the temp allocations in the function

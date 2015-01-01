@@ -64,8 +64,10 @@ void DotWriter::Visit(IcaAssignment& a){
 void DotWriter::Visit(IcaReturnStatement& r)
 {
     m_fileStream<<"Return: "<<endl;
-    if(r.getReturnValue() != NULL)
-        r.getReturnValue()->accept(*this);
+    if(r.getReturnValue().size() != 0)
+    {
+        // r.getReturnValue()->accept(*this);
+    }
 }
 
 void DotWriter::Visit(IcaFunctionProtoType&)
