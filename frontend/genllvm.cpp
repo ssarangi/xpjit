@@ -118,12 +118,12 @@ llvm::Value* IcaReturnStatement::genLLVM(GenLLVM* g)
         llvm::Value *pAlloca = g->getBuilder().CreateAlloca(g->getCurrentFunc()->getReturnType());
         llvm::Type *pFuncRetType = g->getCurrentFunc()->getReturnType();
         
-        // Check the types we have for the function return type
-        auto retTypes = m_pParent->getProtoType().getReturnType();
+        llvm::Type *pCurrentFuncRetType = g->getCurrentFunc()->getReturnType();
 
-        assert(m_values.size() == retTypes.size());
+        assert(pCurrentFuncRetType->isAggregateType());
+        assert(m_values.size() == pCurrentFuncRetType->getStructNumElements());
 
-        for (unsigned i = 0; i < retTypes.size(); ++i)
+        for (unsigned i = 0; i < pCurrentFuncRetType->getStructNumElements(); ++i)
         {
             llvm::Value *pExpr = m_values[i]->genLLVM(g);
             llvm::Value *pElement = g->getBuilder().CreateStructGEP(pAlloca, i);

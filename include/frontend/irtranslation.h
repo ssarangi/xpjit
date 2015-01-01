@@ -178,15 +178,13 @@ private:
 class IcaReturnStatement : public IcaStatement 
 {
 public:
-    IcaReturnStatement(IcaFunction *pParent, IcaValue *pValue)
-        : m_pParent(pParent)
+    IcaReturnStatement(IcaValue *pValue)
     {
         if (pValue != nullptr)
             m_values.push_back(pValue);
     }
 
-    IcaReturnStatement(IcaFunction *pParent, std::vector<IcaValue*>& values)
-        : m_pParent(pParent)
+    IcaReturnStatement(std::vector<IcaValue*>& values)
     {
         m_values = values;
     }
@@ -201,7 +199,6 @@ public:
 
 private:
     std::vector<IcaValue*> m_values; // return statement can have NULL expression
-    IcaFunction *m_pParent;
     IcaReturnStatement();
 };
 

@@ -237,9 +237,9 @@ assignment: IDENTIFIER '=' expression ';'
         $$ = new IcaAssignment(*new IcaVariable(*identifierSymbol), *$3);
     }
 
-return_stmt: RETURN LSQUARE expression_list RSQUARE { $$ = new IcaReturnStatement(builder->getCurrentFunction(), *$3); }
-    | RETURN expression { $$ = new IcaReturnStatement(builder->getCurrentFunction(), $2); };
-    | RETURN { $$ = new IcaReturnStatement(builder->getCurrentFunction(), nullptr); }
+return_stmt: RETURN LSQUARE expression_list RSQUARE { $$ = new IcaReturnStatement(*$3); }
+    | RETURN expression { $$ = new IcaReturnStatement($2); };
+    | RETURN { $$ = new IcaReturnStatement(nullptr); }
     ; 
 
 expression: NUMBER { $$ = new IcaConstant($1); }
