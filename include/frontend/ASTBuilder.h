@@ -2,7 +2,7 @@
 #define ASTBUILDER_H
 
 #include <frontend/irtranslation.h>
-#include <frontend/Type.h>
+#include <frontend/IcaType.h>
 
 #include <unordered_map>
 
@@ -12,50 +12,48 @@ class ASTBuilder
 public:
     ASTBuilder();
 
-    IcErr addSymbol(Symbol& s);
-    Symbol* addSymbol(char *name, Type& type);
-    Symbol* getSymbol(std::string name); //temporary. Need more than a name, like scope etc.
+    IcErr addSymbol(IcaSymbol& s);
+    IcaSymbol* addSymbol(char *name, IcaType& type);
+    IcaSymbol* getSymbol(std::string name); //temporary. Need more than a name, like scope etc.
     
-    IcErr addFunction(Function& f);
-    IcErr addFunction(FunctionProtoType& fp);
+    IcErr addFunction(IcaFunction& f);
+    IcErr addFunction(IcaFunctionProtoType& fp);
     
-    IcErr insertStatement(Statement& s);
-    Statement* getCurrentStatement();
-    IcErr addBranch(Expression& s);
+    IcErr insertStatement(IcaStatement& s);
+    IcaStatement* getCurrentStatement();
+    IcErr addBranch(IcaExpression& s);
     
-    IcErr addProtoType(FunctionProtoType& fp);
-    IcErr addProtoType(const std::string& name, Type returnType, FunctionProtoType **fp);
-    FunctionProtoType* getProtoType(const std::string name, std::list<Type*> dataTypes);
-    FunctionProtoType* getProtoType(const std::string name) { return getProtoType(name, m_dataTypeList); }
+    IcErr addProtoType(IcaFunctionProtoType& fp);
+    IcErr addProtoType(const std::string& name, IcaFunctionProtoType **fp);
+    IcaFunctionProtoType* getProtoType(const std::string name, std::vector<IcaType*> dataTypes);
+    IcaFunctionProtoType* getProtoType(const std::string name) { return getProtoType(name, m_dataTypeList); }
     
     
-    Function* getFunction(const std::string name);
-    FunctionProtoType* getFunctionProtoType(const std::string& name);
+    IcaFunction* getFunction(const std::string name);
+    IcaFunctionProtoType* getFunctionProtoType(const std::string& name);
     bool endCodeBlock();
 
     IcarusModule& getModule() { return m_module; }
 
     //some helpers
-    void pushDataType(Type* type) { m_dataTypeList.push_back(type); }
-    void pushArgName(Symbol *arg) { m_argNameList.push_back(arg); }
+    void pushDataType(IcaType* type) { m_dataTypeList.push_back(type); }
+    void pushRetType(IcaType* type) { m_retTypeList.push_back(type); }
+    void pushArgName(IcaSymbol *arg) { m_argNameList.push_back(arg); }
     void incrementRetListCount() { ++m_retListStructureCount; }
-    void addRetList(int index, RetList *pRetList) { m_returnList[index] = pRetList; }
 
     void pushError(std::string error) { m_errorList.push_back(error); }
     bool hasErrors() { return m_errorList.size() != 0; }
 private:
-    Function* m_curFunction;//can be null
+    IcaFunction* m_curFunction;//can be null
     IcarusModule& m_module;
 
     int m_retListStructureCount;
 
     //some helpers during building of AST
-    std::list<Type*> m_dataTypeList; //to store the data types of the arguments while constructing the argList
-    std::list<Type*> m_returnList;
-    std::list<Symbol*> m_argNameList;
-    std::list<std::string> m_errorList;
-
-    std::unordered_map<int, RetList*> m_funcReturns;
+    std::vector<IcaType*> m_dataTypeList; //to store the data types of the arguments while constructing the argList
+    std::vector<IcaType*> m_retTypeList;
+    std::vector<IcaSymbol*> m_argNameList;
+    std::vector<std::string> m_errorList;
 };
 
 #endif //ASTBUILDER_H

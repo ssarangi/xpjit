@@ -6,9 +6,9 @@
 %option outfile="lexer.cpp"
 
 %{
+/* External Symbols */
 class IcaValue;
-class Statement;
-class RetList;
+class IcaStatement;
 
 #include "parser.hpp"
 #include <stdio.h>

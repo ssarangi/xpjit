@@ -3,7 +3,7 @@ typedef union
     char*	string;
     int 	integer;
     IcaValue*	value;
-    Statement* 	statement;
+    IcaStatement* 	statement;
 } YYSTYPE;
 #define	EQUALS	258
 #define	NEQUALS	259

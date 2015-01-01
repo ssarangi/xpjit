@@ -61,7 +61,7 @@ void dumpBitCode(llvm::Module& M, std::string OutputFilename)
 
 int Compile(char *fileName, char *pOutputFileName)
 {
-    g_outputStream << "Compiling file: " << fileName;
+    g_outputStream << "Compiling file: " << fileName << "\n";
     pIcarusModule = ParseFile(fileName);
     
     if(pIcarusModule == nullptr)
@@ -91,12 +91,14 @@ int Compile(char *fileName, char *pOutputFileName)
         pIcarusModule = nullptr;
     }
 
+    g_outputStream << "\n";
     g_outputStream << "-------------------------------------------------------------------\n";
     g_outputStream << "                         Before Optimization                       \n";
     g_outputStream << "-------------------------------------------------------------------\n";
     if (gDebug.isDebuggable())
     {
         llvmModule.print(g_outputStream(), nullptr);
+        g_outputStream.flush();
     }
 
     if(gDebug.isOptimizing())

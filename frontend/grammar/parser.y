@@ -18,13 +18,13 @@ extern "C" FILE *yyin;
 void yyrestart( FILE *new_file );
 
 //for types
-Type& getType(int parsedType);
+IcaType& getType(int parsedType);
 int currentType = -1;
 
 static Debug& gDebug = Debug::getInstance();
 
 static ASTBuilder* builder;
-std::list<IcaValue*> parameterList;
+std::vector<IcaValue*> parameterList;
 
 #include <stdio.h>
 
@@ -54,7 +54,7 @@ void yyerror(std::string s)
     char*   string;
     int     integer;
     IcaValue*   value;
-    Statement*  statement;
+    IcaStatement*  statement;
 }
 
 %left EQUALS NEQUALS LESSTHAN LESSTHANEQ MORETHAN MORETHANEQ
@@ -83,33 +83,32 @@ program:
     | program func_defn
     ;
 
-datatype: INTEGER          { $$ = currentType = Type::IntegerTy; }
-    | FLOAT                { $$ = currentType = Type::FloatTy; }
-    | VOID                 { $$ = currentType = Type::VoidTy; }
-    | STRING_LITERAL       { $$ = currentType = Type::StringTy; }
+datatype: INTEGER          { $$ = currentType = IcaType::IntegerTy; }
+    | FLOAT                { $$ = currentType = IcaType::FloatTy; }
+    | VOID                 { $$ = currentType = IcaType::VoidTy; }
+    | STRING_LITERAL       { $$ = currentType = IcaType::StringTy; }
     ;
 
 retlist : datatype
     {
-        builder->incrementRetListCount();
-
+        builder->pushRetType(&getType($1));
     }
     | retlist ',' datatype
     {
-        // builder->pushDataType(&getType($3));
+        builder->pushDataType(&getType($3));
     }
     ;
     
 arglist: datatype IDENTIFIER 
     {
         builder->pushDataType(&getType($1));
-        Symbol *sym = builder->addSymbol($2, getType($1));
+        IcaSymbol *sym = builder->addSymbol($2, getType($1));
         builder->pushArgName(sym);
     }
     | arglist ',' datatype IDENTIFIER 
     {
         builder->pushDataType(&getType($3));
-        Symbol *sym = builder->addSymbol($4, getType($3));
+        IcaSymbol *sym = builder->addSymbol($4, getType($3));
         builder->pushArgName(sym);
     }
     |
@@ -121,14 +120,15 @@ arglist: datatype IDENTIFIER
 func_defn: FUNCTION IDENTIFIER LSQUARE retlist RSQUARE '(' arglist ')' '{' 
     {
         const std::string& funcName = $2;
-        FunctionProtoType* fp = builder->getProtoType(funcName); //use current dataTypeList
+        IcaFunctionProtoType* fp = builder->getProtoType(funcName); //use current dataTypeList
         
         // find the prototype in the module. if not found, add a new one
         if(fp == NULL)
-            builder->addProtoType(funcName, getType($4), &fp);
+            builder->addProtoType(funcName, &fp);
 
         IcErr err = builder->addFunction(*fp);
-        if(err != eNoErr)
+        
+        if (err != eNoErr)
             yyerror(errMsg[err]);
     }
 
@@ -139,14 +139,14 @@ func_defn: FUNCTION IDENTIFIER LSQUARE retlist RSQUARE '(' arglist ')' '{'
         builder->endCodeBlock();
     }
     ;
-    
+
 statement_block: statement_block statement |  ;
     
 statement: declaration 
     | assignment  { builder->insertStatement(*$1);}
     | expression';' 
     { 
-        builder->insertStatement(*new ExpressionStatement(*(Expression *)$1));
+        builder->insertStatement(*new IcaExpressionStatement(*(IcaExpression *)$1));
     }
     | return_stmt ';'{ builder->insertStatement(*$1);}
     | while_statement { }
@@ -169,14 +169,14 @@ print_statement: PRINTF '(' expression ')' ';'
 
 if_else_statement: IF '(' expression ')' 
     {
-        builder->insertStatement(*new BranchStatement(*(Expression*)$3));
+        builder->insertStatement(*new IcaBranchStatement(*(IcaExpression*)$3));
     }
         codeblock {  }
     iftail
     ;
 
 iftail: ELSE {
-        builder->addBranch(*(Expression*)new Constant(1)); //a 'true' expression
+        builder->addBranch(*(IcaExpression*)new IcaConstant(1)); //a 'true' expression
     }
     codeblock { builder->endCodeBlock(); }
     | %prec LOWER_THAN_ELSE //Refer http://stackoverflow.com/questions/1737460/how-to-find-shift-reduce-conflict-in-this-yacc-file
@@ -184,7 +184,7 @@ iftail: ELSE {
     ;
 
 
-while_statement: WHILE '(' expression ')' { builder->insertStatement(*new WhileStatement(*(Expression*)$3)); }
+while_statement: WHILE '(' expression ')' { builder->insertStatement(*new IcaWhileStatement(*(IcaExpression*)$3)); }
     codeblock { builder->endCodeBlock(); }
     ;
 
@@ -192,7 +192,7 @@ codeblock: '{' statement_block '}'
     | statement
     ;
 
-break_statement: BREAK { $$ = new BreakStatement(); }
+break_statement: BREAK { $$ = new IcaBreakStatement(); }
     
 declaration: datatype varList ';' { currentType = -1; }
 
@@ -202,42 +202,42 @@ varList: IDENTIFIER { builder->addSymbol($1, getType(currentType)); }
         
 assignment: IDENTIFIER '=' expression ';'
     { 
-        Symbol *identifierSymbol = builder->getSymbol($1);
+        IcaSymbol *identifierSymbol = builder->getSymbol($1);
         if(identifierSymbol == NULL)
         {
             std::string error = std::string("Symbol not defined: ") + std::string($1);
             yyerror(error.c_str());
         }
 
-        $$ = new Assignment(*new Variable(*identifierSymbol), *$3);
+        $$ = new IcaAssignment(*new IcaVariable(*identifierSymbol), *$3);
     }
 
-return_stmt: RETURN expression { $$ = new ReturnStatement($2);};
-    | RETURN { $$ = new ReturnStatement(NULL);}
+return_stmt: RETURN expression { $$ = new IcaReturnStatement($2);};
+    | RETURN { $$ = new IcaReturnStatement(NULL); }
     ; 
 
-expression: NUMBER { $$ = new Constant($1); }
+expression: NUMBER { $$ = new IcaConstant($1); }
     | STRING_LITERAL { }
     | IDENTIFIER
     {
-        Symbol *identifierSymbol = builder->getSymbol($1);
+        IcaSymbol *identifierSymbol = builder->getSymbol($1);
         if(identifierSymbol == NULL)
         {
             std::string error = std::string("Symbol not defined: ") + std::string($1);
             yyerror(error.c_str());
         }
-        $$ = new Variable(*identifierSymbol);
+        $$ = new IcaVariable(*identifierSymbol);
     }
-    | expression '+' expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::Add); }
-    | expression '-' expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::Sub); }
-    | expression '*' expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::Mul); }
-    | expression '/' expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::Div); }
-    | expression EQUALS expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::EQ); }
-    | expression NEQUALS expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::NE); }
-    | expression LESSTHAN expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::LT); }
-    | expression LESSTHANEQ expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::LTEQ); }
-    | expression MORETHAN expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::GT); }
-    | expression MORETHANEQ expression { $$ = new BinopExpression(*$1, *$3, BinopExpression::GTEQ); }
+    | expression '+' expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::Add); }
+    | expression '-' expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::Sub); }
+    | expression '*' expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::Mul); }
+    | expression '/' expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::Div); }
+    | expression EQUALS expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::EQ); }
+    | expression NEQUALS expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::NE); }
+    | expression LESSTHAN expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::LT); }
+    | expression LESSTHANEQ expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::LTEQ); }
+    | expression MORETHAN expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::GT); }
+    | expression MORETHANEQ expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::GTEQ); }
     | print_statement { }
     | func_call { $$ = $1; }
     | '('expression')' { $$ = $2; }
@@ -245,12 +245,12 @@ expression: NUMBER { $$ = new Constant($1); }
     
 func_call: IDENTIFIER'('paramlist')'
     {
-        std::list<Type*> paramTypeList;
+        std::vector<IcaType*> paramTypeList;
         
-        FunctionProtoType* fp = builder->getFunctionProtoType($1);
+        IcaFunctionProtoType* fp = builder->getFunctionProtoType($1);
         if(fp == NULL)
             yyerror("Function not found");
-        $$ = new FunctionCall(*fp, parameterList);
+        $$ = new IcaFunctionCall(*fp, parameterList);
         parameterList.clear();
     }
 
@@ -265,14 +265,14 @@ int yywrap (void )
     return 1;
 }
 
-Type& getType(int parsedType)
+IcaType& getType(int parsedType)
 {
     switch(parsedType)
     {
-        case Type::IntegerTy:
-        case Type::FloatTy:
-        case Type::VoidTy:
-            return *new Type((Type::TypeID)parsedType);
+        case IcaType::IntegerTy:
+        case IcaType::FloatTy:
+        case IcaType::VoidTy:
+            return *new IcaType((IcaType::TypeID)parsedType);
             break;
         default: yyerror("Unknown type in getType()");
             break;

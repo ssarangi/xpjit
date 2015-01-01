@@ -3,36 +3,36 @@
 
 //class forward declarations
 class IcaValue;
-class Expression;
-class Variable;
-class BinopExpression;
-class FunctionCall;
-class Statement;
-class Assignment;
-class ReturnStatement;
-class FunctionProtoType;
-class Function;
-class SymbolTable;
-class Symbol;
+class IcaExpression;
+class IcaVariable;
+class IcaBinopExpression;
+class IcaFunctionCall;
+class IcaStatement;
+class IcaAssignment;
+class IcaReturnStatement;
+class IcaFunctionProtoType;
+class IcaFunction;
+class IcaSymbolTable;
+class IcaSymbol;
 class IcarusModule;
-class ExpressionStatement;
+class IcaExpressionStatement;
 
 class IClassVisitor
 {
 public:
     virtual void Visit(IcaValue& ) = 0;
-    virtual void Visit(Expression&) = 0;
-    virtual void Visit(Variable&) = 0;
-    virtual void Visit(BinopExpression&) = 0;
-    virtual void Visit(FunctionCall&) = 0;
-    virtual void Visit(Statement&) = 0;
-    virtual void Visit(Assignment&) = 0;
-    virtual void Visit(ExpressionStatement&) = 0;
-    virtual void Visit(ReturnStatement&) = 0;
-    virtual void Visit(FunctionProtoType&) = 0;
-    virtual void Visit(Function&) = 0;
-    virtual void Visit(SymbolTable&) = 0;	
-    virtual void Visit(Symbol& ) = 0;
+    virtual void Visit(IcaExpression&) = 0;
+    virtual void Visit(IcaVariable&) = 0;
+    virtual void Visit(IcaBinopExpression&) = 0;
+    virtual void Visit(IcaFunctionCall&) = 0;
+    virtual void Visit(IcaStatement&) = 0;
+    virtual void Visit(IcaAssignment&) = 0;
+    virtual void Visit(IcaExpressionStatement&) = 0;
+    virtual void Visit(IcaReturnStatement&) = 0;
+    virtual void Visit(IcaFunctionProtoType&) = 0;
+    virtual void Visit(IcaFunction&) = 0;
+    virtual void Visit(IcaSymbolTable&) = 0;	
+    virtual void Visit(IcaSymbol& ) = 0;
     virtual void Visit(IcarusModule& ) = 0;
 };
 //don't forget to add the const visitor

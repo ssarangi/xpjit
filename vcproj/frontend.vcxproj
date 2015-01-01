@@ -129,7 +129,7 @@ del $(SolutionDir)frontend\generated\parser.output</Command>
     <ClInclude Include="..\include\frontend\parser.h" />
     <ClInclude Include="..\include\frontend\PrintVisitor.h" />
     <ClInclude Include="..\include\frontend\SSAConstructor.h" />
-    <ClInclude Include="..\include\frontend\Type.h" />
+    <ClInclude Include="..\include\frontend\IcaType.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\common\common.vcxproj">

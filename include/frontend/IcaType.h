@@ -1,7 +1,7 @@
 #ifndef TYPE_H
 #define TYPE_H
 
-class Type
+class IcaType
 {
 public:
     enum TypeID 
@@ -17,7 +17,7 @@ public:
         StructTy
     };
 
-    explicit Type(TypeID id) : m_typeID(id){}
+    explicit IcaType(TypeID id) : m_typeID(id){}
     TypeID getTypeID() { return m_typeID; }
 private:
     TypeID m_typeID;

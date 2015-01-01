@@ -8,17 +8,17 @@ void PrintVisitor::Visit(IcaValue& )
 
 }
 
-void PrintVisitor::Visit(Expression&)
+void PrintVisitor::Visit(IcaExpression&)
 {
 
 }
 
-void PrintVisitor::Visit(Variable& v)
+void PrintVisitor::Visit(IcaVariable& v)
 {
     cout<<"Variable: "<<v.getSymbol().getName()<<endl;
 }
 
-void PrintVisitor::Visit(BinopExpression& b)
+void PrintVisitor::Visit(IcaBinopExpression& b)
 {
     cout<<"Binary Expression: "<<endl;
     b.getLeftValue().accept(*this);
@@ -26,61 +26,61 @@ void PrintVisitor::Visit(BinopExpression& b)
     b.getRightValue().accept(*this);
 }
 
-void PrintVisitor::Visit(FunctionCall& f)
+void PrintVisitor::Visit(IcaFunctionCall& f)
 {
     cout<<"Function Call: "<<f.getFunctionProtoType().getName()<<endl;
-    std::list<IcaValue*>::const_iterator iter = f.getParamList().begin();
+    std::vector<IcaValue*>::const_iterator iter = f.getParamList().begin();
     for(; iter != f.getParamList().end(); ++iter)
         (*iter)->accept(*this);
 }
 
-void PrintVisitor::Visit(Statement&)
+void PrintVisitor::Visit(IcaStatement&)
 {
     cout<<"Statement :"<<endl;
 }
 
-void PrintVisitor::Visit(Assignment& a)
+void PrintVisitor::Visit(IcaAssignment& a)
 {
     cout<<"Assignment: "<<endl;
     a.getLVal().accept(*this);
     a.getRVal().accept(*this);
 }
 
-void PrintVisitor::Visit(ReturnStatement& r)
+void PrintVisitor::Visit(IcaReturnStatement& r)
 {
     cout<<"Return: "<<endl;
     if(r.getReturnValue() != NULL)
         r.getReturnValue()->accept(*this);
 }
 
-void PrintVisitor::Visit(FunctionProtoType&)
+void PrintVisitor::Visit(IcaFunctionProtoType&)
 {
 
 }
 
-void PrintVisitor::Visit(ExpressionStatement& e)
+void PrintVisitor::Visit(IcaExpressionStatement& e)
 {
     cout<<"ExpressionStatement: "<<endl;
     e.getExpression().accept(*this);
 }
 
-void PrintVisitor::Visit(Function& f)
+void PrintVisitor::Visit(IcaFunction& f)
 {
     cout<<"Function: "<<f.getName()<<endl;
-    std::list<Statement*> statementList = f.getStatements();
-    std::list<Statement*>::const_iterator iter = statementList.begin();
+    std::vector<IcaStatement*> statementList = f.getStatements();
+    std::vector<IcaStatement*>::const_iterator iter = statementList.begin();
     for(; iter != statementList.end(); ++iter)
     {
         (*iter)->accept(*this);
     }
 }
 
-void PrintVisitor::Visit(SymbolTable&)
+void PrintVisitor::Visit(IcaSymbolTable&)
 {
 
 }
 
-void PrintVisitor::Visit(Symbol& )
+void PrintVisitor::Visit(IcaSymbol& )
 {
 
 }
@@ -88,8 +88,8 @@ void PrintVisitor::Visit(Symbol& )
 void PrintVisitor::Visit(IcarusModule& m)
 {
     cout<<"Module: "<<m.getName()<<endl;
-    std::list<Function*>& funcList = m.getFunctions();
-    for(std::list<Function*>::const_iterator funcIter = funcList.begin(); funcIter != funcList.end() ; ++funcIter)
+    std::vector<IcaFunction*>& funcList = m.getFunctions();
+    for (std::vector<IcaFunction*>::const_iterator funcIter = funcList.begin(); funcIter != funcList.end(); ++funcIter)
     {
         (*funcIter)->accept(*this);
     }

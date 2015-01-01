@@ -20,17 +20,17 @@ inline llvm::LLVMContext& getGlobalContext()
     return llvm::getGlobalContext();
 }
 
-llvm::Value* Constant::genLLVM(GenLLVM* g)
+llvm::Value* IcaConstant::genLLVM(GenLLVM* g)
 {
     return g->getBuilder().getInt32(getValue());
 }
 
-llvm::Value* Variable::genLLVM(GenLLVM* g)
+llvm::Value* IcaVariable::genLLVM(GenLLVM* g)
 {
     return g->getBuilder().CreateLoad(g->getNamedValues()[getSymbol().getName()],"");
 }
 
-llvm::Value* BinopExpression::genLLVM(GenLLVM* g)
+llvm::Value* IcaBinopExpression::genLLVM(GenLLVM* g)
 {
     llvm::IRBuilder<>& builder = g->getBuilder();
 
@@ -73,10 +73,10 @@ llvm::Value* BinopExpression::genLLVM(GenLLVM* g)
 }
 
 //Helper function to get a llvm function type from our function
-llvm::FunctionType& getFunctionType(FunctionProtoType& fp, GenLLVM *g)
+llvm::FunctionType& getFunctionType(IcaFunctionProtoType& fp, GenLLVM *g)
 {
     std::vector<llvm::Type*> args;
-    std::list<Type*>::iterator argTypeIter = fp.getTypeList().begin();
+    std::vector<IcaType*>::iterator argTypeIter = fp.getTypeList().begin();
     for(; argTypeIter != fp.getTypeList().end(); ++argTypeIter)
     {
         args.push_back(g->getLLVMType(**argTypeIter));
@@ -86,11 +86,11 @@ llvm::FunctionType& getFunctionType(FunctionProtoType& fp, GenLLVM *g)
     return *FT;
 }
 
-llvm::Value* FunctionCall::genLLVM(GenLLVM* g)
+llvm::Value* IcaFunctionCall::genLLVM(GenLLVM* g)
 {
     std::vector<llvm::Value*> paramArrayRef;
-    std::list<IcaValue*> paramList = getParamList();
-    std::list<IcaValue*>::iterator paramIter = paramList.begin();	
+    std::vector<IcaValue*> paramList = getParamList();
+    std::vector<IcaValue*>::iterator paramIter = paramList.begin();
     for(; paramIter != paramList.end(); ++paramIter)
     {
         paramArrayRef.push_back((*paramIter)->genLLVM(g));
@@ -102,12 +102,12 @@ llvm::Value* FunctionCall::genLLVM(GenLLVM* g)
     return g->getBuilder().CreateCall(F, *new llvm::ArrayRef<llvm::Value*>(paramArrayRef), "");
 }
 
-llvm::Value* Assignment::genLLVM(GenLLVM* g)
+llvm::Value* IcaAssignment::genLLVM(GenLLVM* g)
 {
     return g->getBuilder().CreateStore(getRVal().genLLVM(g),g->getNamedValues()[getLVal().getSymbol().getName()], false);
 }
 
-llvm::Value* ReturnStatement::genLLVM(GenLLVM* g)
+llvm::Value* IcaReturnStatement::genLLVM(GenLLVM* g)
 {
     if(getReturnValue() != NULL)
     {
@@ -117,12 +117,12 @@ llvm::Value* ReturnStatement::genLLVM(GenLLVM* g)
     return g->getBuilder().CreateRetVoid();
 }
 
-llvm::Value* ExpressionStatement::genLLVM(GenLLVM* g)
+llvm::Value* IcaExpressionStatement::genLLVM(GenLLVM* g)
 {
     return getExpression().genLLVM(g);
 }
 
-llvm::Value* WhileStatement::genLLVM(GenLLVM *g)
+llvm::Value* IcaWhileStatement::genLLVM(GenLLVM *g)
 {
     llvm::IRBuilder<>& builder = g->getBuilder();
 
@@ -143,7 +143,7 @@ llvm::Value* WhileStatement::genLLVM(GenLLVM *g)
 
     builder.SetInsertPoint(whileBodyBB);
 
-    std::list<Statement*>::iterator sIter = getStatements().begin();
+    std::vector<IcaStatement*>::iterator sIter = getStatements().begin();
     for(; sIter != getStatements().end(); ++sIter)
         (*sIter)->genLLVM(g);
 
@@ -153,13 +153,13 @@ llvm::Value* WhileStatement::genLLVM(GenLLVM *g)
     return nullptr;
 }
 
-llvm::Value* BreakStatement::genLLVM(GenLLVM* g)
+llvm::Value* IcaBreakStatement::genLLVM(GenLLVM* g)
 {
     return nullptr;
 }
 
 //Generation should be 
-llvm::Value* BranchStatement::genLLVM(GenLLVM* g)
+llvm::Value* IcaBranchStatement::genLLVM(GenLLVM* g)
 {
     llvm::IRBuilder<>& builder = g->getBuilder();
 
@@ -182,11 +182,11 @@ llvm::Value* BranchStatement::genLLVM(GenLLVM* g)
 
     builder.CreateBr(basicBlocks[0]); //jump to first if condition
 
-    std::list<Branch*>::const_iterator branchIter = getBranches().begin();
+    std::vector<IcaBranch*>::const_iterator branchIter = getBranches().begin();
     unsigned int i = 0;
     for(; branchIter != getBranches().end(); ++branchIter, i+=2)
     {
-        Branch* branch = *branchIter;
+        IcaBranch* branch = *branchIter;
 
         builder.SetInsertPoint(basicBlocks[i]);
         llvm::Value* condition = branch->getCondition().genLLVM(g);
@@ -196,8 +196,8 @@ llvm::Value* BranchStatement::genLLVM(GenLLVM* g)
         builder.CreateCondBr(condition, basicBlocks[i+1], basicBlocks[i+2]);
         builder.SetInsertPoint(basicBlocks[i+1]);
 
-        std::list<Statement*> statements = branch->getStatements();
-        std::list<Statement*>::const_iterator stmtIter = statements.begin();
+        std::vector<IcaStatement*> statements = branch->getStatements();
+        std::vector<IcaStatement*>::const_iterator stmtIter = statements.begin();
         for(; stmtIter != statements.end(); ++stmtIter)
             (*stmtIter)->genLLVM(g);
 
@@ -210,7 +210,7 @@ llvm::Value* BranchStatement::genLLVM(GenLLVM* g)
     return nullptr;
 }
 
-llvm::Value* Function::genLLVM(GenLLVM* g)
+llvm::Value* IcaFunction::genLLVM(GenLLVM* g)
 {
     llvm::FunctionType *FT = &getFunctionType(getProtoType(), g);
     llvm::Function *F = static_cast<llvm::Function*>(g->getModule().getOrInsertFunction(getName(), FT));
@@ -221,7 +221,7 @@ llvm::Value* Function::genLLVM(GenLLVM* g)
     //Set names for the arguments and allocate them
     //assert that number of symbols equal number of elements in type list
     llvm::Function::arg_iterator argIter = F->arg_begin();
-    for(std::list<Symbol*>::iterator symIter = getArgSymbolList().begin();
+    for (std::vector<IcaSymbol*>::iterator symIter = getArgSymbolList().begin();
         argIter != F->arg_end(); ++argIter, ++symIter)
     {
         argIter->setName((*symIter)->getName());
@@ -233,13 +233,13 @@ llvm::Value* Function::genLLVM(GenLLVM* g)
     }
 
     //assume only the local symbols are visited now
-    std::list<Symbol*>::iterator symIter = getSymbols().begin();
+    std::vector<IcaSymbol*>::iterator symIter = getSymbols().begin();
     for(; symIter != getSymbols().end(); ++symIter)
     {
         g->getNamedValues()[(*symIter)->getName()] = g->getBuilder().CreateAlloca(g->getLLVMType((*symIter)->getType()), 0, (*symIter)->getName());
     }
 
-    std::list<Statement*>::iterator sIter = getStatements().begin();
+    std::vector<IcaStatement*>::iterator sIter = getStatements().begin();
     for(; sIter != getStatements().end(); ++sIter)
         (*sIter)->genLLVM(g);
 
@@ -248,8 +248,8 @@ llvm::Value* Function::genLLVM(GenLLVM* g)
 
 llvm::Value* IcarusModule::genLLVM(GenLLVM* g)
 {
-    std::list<Function*>& funcList = getFunctions();
-    for(std::list<Function*>::const_iterator funcIter = funcList.begin(); funcIter != funcList.end() ; ++funcIter)
+    std::vector<IcaFunction*>& funcList = getFunctions();
+    for (std::vector<IcaFunction*>::const_iterator funcIter = funcList.begin(); funcIter != funcList.end(); ++funcIter)
     {
         (*funcIter)->genLLVM(g);
     }
@@ -269,16 +269,37 @@ GenLLVM::GenLLVM()
 
 //Helpers
 
-llvm::Type* GenLLVM::getLLVMType(Type& type)
+llvm::Type* GenLLVM::getLLVMType(IcaType& type)
 {
     switch(type.getTypeID())
     {
-    case Type::IntegerTy:
+    case IcaType::IntegerTy:
         return llvm::Type::getInt32Ty(getGlobalContext());
-    case Type::FloatTy:
+    case IcaType::FloatTy:
         return llvm::Type::getFloatTy(getGlobalContext());
-    case Type::VoidTy:
+    case IcaType::VoidTy:
         return llvm::Type::getVoidTy(getGlobalContext());
 
     }
+}
+
+llvm::Type* GenLLVM::getLLVMType(std::vector<IcaType*>& typeList)
+{
+    llvm::Type *pRetType = nullptr;
+
+    if (typeList.size() == 0)
+        pRetType = llvm::Type::getVoidTy(m_module.getContext());
+    else if (typeList.size() == 1)
+        pRetType = getLLVMType(*typeList[0]);
+    else
+    {
+        std::vector<llvm::Type*> typeArrRef;
+        for (IcaType* t : typeList)
+            typeArrRef.push_back(getLLVMType(*t));
+
+        // Create a structure for this type
+        pRetType = llvm::StructType::create(m_module.getContext(), typeArrRef);
+    }
+
+    return pRetType;
 }

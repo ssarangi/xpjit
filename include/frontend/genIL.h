@@ -16,7 +16,7 @@ public:
 
     IcarusModule* generateIL();
     ASTBuilder& getBuilder() { return m_astBuilder; }
-    Variable& getNextVariable();
+    IcaVariable& getNextVariable();
 private:
     IcarusModule& m_module;
     ASTBuilder& m_astBuilder;
