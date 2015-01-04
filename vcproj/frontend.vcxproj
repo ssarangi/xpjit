@@ -91,6 +91,7 @@
     <ClCompile Include="..\frontend\generated\parser.cpp" />
     <ClCompile Include="..\frontend\genllvm.cpp" />
     <ClCompile Include="..\frontend\PrintVisitor.cpp" />
+    <ClCompile Include="..\frontend\SemanticAnalysis.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\frontend\grammar\lexer.l">
@@ -120,12 +121,12 @@ del $(SolutionDir)frontend\generated\parser.output</Command>
     <ClInclude Include="..\frontend\generated\parser.hpp" />
     <ClInclude Include="..\include\frontend\ASTBuilder.h" />
     <ClInclude Include="..\include\frontend\irtranslation.h" />
-    <ClInclude Include="..\include\frontend\CompEA.h" />
     <ClInclude Include="..\include\frontend\findentryfunc.h" />
     <ClInclude Include="..\include\frontend\genllvm.h" />
     <ClInclude Include="..\include\frontend\IClassVisitor.h" />
     <ClInclude Include="..\include\frontend\parser.h" />
     <ClInclude Include="..\include\frontend\PrintVisitor.h" />
+    <ClInclude Include="..\include\frontend\SemanticAnalysis.h" />
     <ClInclude Include="..\include\frontend\SSAConstructor.h" />
     <ClInclude Include="..\include\frontend\IcaType.h" />
   </ItemGroup>

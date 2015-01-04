@@ -16,21 +16,18 @@ public:
     IcaSymbol* addSymbol(char *name, IcaType& type);
     IcaSymbol* getSymbol(std::string name); //temporary. Need more than a name, like scope etc.
     
+    IcErr addFunction(const std::string& name);
     IcErr addFunction(IcaFunction& f);
-    IcErr addFunction(IcaFunctionProtoType& fp);
     
     IcErr insertStatement(IcaStatement& s);
     IcaStatement* getCurrentStatement();
     IcErr addBranch(IcaExpression& s);
     
-    IcErr addProtoType(IcaFunctionProtoType& fp);
-    IcErr addProtoType(const std::string& name, IcaFunctionProtoType **fp);
-    IcaFunctionProtoType* getProtoType(const std::string name, std::vector<IcaType*> dataTypes);
-    IcaFunctionProtoType* getProtoType(const std::string name) { return getProtoType(name, m_dataTypeList); }
-    
+    IcaFunction* getProtoType(const std::string name, std::vector<IcaType*> dataTypes);
+    IcaFunction* getProtoType(const std::string name) { return getProtoType(name, m_dataTypeList); }
     
     IcaFunction* getFunction(const std::string name);
-    IcaFunctionProtoType* getFunctionProtoType(const std::string& name);
+    IcaFunction* getFunctionProtoType(const std::string& name);
     bool endCodeBlock();
 
     IcarusModule& getModule() { return m_module; }
@@ -43,6 +40,8 @@ public:
 
     void pushError(std::string error) { m_errorList.push_back(error); }
     bool hasErrors() { return m_errorList.size() != 0; }
+
+    void reset() { m_retTypeList.clear(); m_dataTypeList.clear(); m_argNameList.clear(); }
 
     IcaFunction *getCurrentFunction() { return m_curFunction; }
 private:

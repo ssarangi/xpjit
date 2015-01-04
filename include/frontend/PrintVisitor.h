@@ -12,10 +12,10 @@ public:
     virtual void Visit(IcaBinopExpression&);
     virtual void Visit(IcaFunctionCall&);
     virtual void Visit(IcaStatement&);
-    virtual void Visit(IcaExpressionStatement&);	
+    virtual void Visit(IcaExpressionStatement&);
+    virtual void Visit(IcaMultiVarAssignment&);
     virtual void Visit(IcaAssignment&);
     virtual void Visit(IcaReturnStatement&);
-    virtual void Visit(IcaFunctionProtoType&);
     virtual void Visit(IcaFunction&);
     virtual void Visit(IcaSymbolTable&);	
     virtual void Visit(IcaSymbol& );

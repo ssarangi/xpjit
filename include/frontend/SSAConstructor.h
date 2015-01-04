@@ -26,7 +26,7 @@ private:
     //set of globals that we figure out using the findGlobalNames function
     
     void findGlobalNames();
-    void rename();    
+    void rename();
 };
 
 static llvm::RegisterPass<SSAConstructor> ssac("ssaconstructor", "ssa constructor", false /* true - read only pass */, true /* analysis pass*/);

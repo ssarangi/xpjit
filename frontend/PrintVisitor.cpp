@@ -26,6 +26,11 @@ void PrintVisitor::Visit(IcaBinopExpression& b)
     b.getRightValue().accept(*this);
 }
 
+void PrintVisitor::Visit(IcaMultiVarAssignment& A)
+{
+    // TODO: Implement
+}
+
 void PrintVisitor::Visit(IcaFunctionCall& f)
 {
     cout<<"Function Call: "<<f.getFunctionProtoType().getName()<<endl;
@@ -53,11 +58,6 @@ void PrintVisitor::Visit(IcaReturnStatement& r)
     {
         //r.getReturnValue()->accept(*this);
     }
-}
-
-void PrintVisitor::Visit(IcaFunctionProtoType&)
-{
-
 }
 
 void PrintVisitor::Visit(IcaExpressionStatement& e)

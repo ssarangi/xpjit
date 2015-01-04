@@ -51,6 +51,11 @@ void DotWriter::Visit(IcaFunctionCall& f)
     m_fileStream<<"}"<<endl;
 }
 
+void DotWriter::Visit(IcaMultiVarAssignment& v)
+{
+      // TODO Implement
+}
+
 void DotWriter::Visit(IcaStatement&)
 {
 }
@@ -68,11 +73,6 @@ void DotWriter::Visit(IcaReturnStatement& r)
     {
         // r.getReturnValue()->accept(*this);
     }
-}
-
-void DotWriter::Visit(IcaFunctionProtoType&)
-{
-
 }
 
 void DotWriter::Visit(IcaExpressionStatement& e)

@@ -14,19 +14,20 @@ IcErr ASTBuilder::addSymbol(IcaSymbol& s)
     return m_module.addSymbol(s);
 }
 
-IcErr ASTBuilder::addFunction(IcaFunction& f)
+IcErr ASTBuilder::addFunction(const std::string& name)
 {
-    IcErr err = m_module.addFunction(f);
-    if(!err)
-        m_curFunction = &f;
+    IcaFunction *pF = new IcaFunction(name, m_dataTypeList, m_retTypeList, m_argNameList);
+    IcErr err = m_module.addFunction(*pF);
+
+    if (!err)
+        m_curFunction = pF;
+
     return err;
 }
 
-IcErr ASTBuilder::addFunction(IcaFunctionProtoType& fp)
+IcErr ASTBuilder::addFunction(IcaFunction& f)
 {
-    IcaFunction& f = *new IcaFunction(fp, m_argNameList);
     IcErr err = m_module.addFunction(f);
-    m_argNameList.clear();
     if(!err)
         m_curFunction = &f;
     return err;
@@ -37,22 +38,7 @@ IcErr ASTBuilder::insertStatement(IcaStatement& s)
     return m_curFunction->addStatement(s);
 }
 
-IcErr ASTBuilder::addProtoType(IcaFunctionProtoType& fp)
-{
-    return m_module.addProtoType(fp);
-}
-
-IcErr ASTBuilder::addProtoType(const std::string& name, IcaFunctionProtoType **fpPtr)
-{
-    IcaFunctionProtoType& fp = *new IcaFunctionProtoType(name, m_dataTypeList, m_retTypeList);
-    IcErr err = m_module.addProtoType(fp);
-    m_dataTypeList.clear();
-    if(fpPtr != NULL)
-        *fpPtr = &fp;
-    return err;
-}
-
-IcaFunctionProtoType* ASTBuilder::getProtoType(const std::string name, std::vector<IcaType*> dataTypes)
+IcaFunction* ASTBuilder::getProtoType(const std::string name, std::vector<IcaType*> dataTypes)
 {
     return m_module.getProtoType(name, dataTypes);
 }
@@ -87,7 +73,7 @@ IcaFunction* ASTBuilder::getFunction(const std::string name)
     return m_module.getFunction(name);
 }
 
-IcaFunctionProtoType* ASTBuilder::getFunctionProtoType(const std::string& name)
+IcaFunction* ASTBuilder::getFunctionProtoType(const std::string& name)
 {
     return m_module.getProtoType(name);
 }

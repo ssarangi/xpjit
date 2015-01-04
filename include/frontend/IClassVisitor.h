@@ -10,12 +10,12 @@ class IcaFunctionCall;
 class IcaStatement;
 class IcaAssignment;
 class IcaReturnStatement;
-class IcaFunctionProtoType;
 class IcaFunction;
 class IcaSymbolTable;
 class IcaSymbol;
 class IcarusModule;
 class IcaExpressionStatement;
+class IcaMultiVarAssignment;
 
 class IClassVisitor
 {
@@ -28,8 +28,8 @@ public:
     virtual void Visit(IcaStatement&) = 0;
     virtual void Visit(IcaAssignment&) = 0;
     virtual void Visit(IcaExpressionStatement&) = 0;
+    virtual void Visit(IcaMultiVarAssignment&) = 0;
     virtual void Visit(IcaReturnStatement&) = 0;
-    virtual void Visit(IcaFunctionProtoType&) = 0;
     virtual void Visit(IcaFunction&) = 0;
     virtual void Visit(IcaSymbolTable&) = 0;	
     virtual void Visit(IcaSymbol& ) = 0;

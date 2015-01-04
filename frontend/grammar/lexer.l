@@ -115,6 +115,7 @@ L?\"(\\.|[^\\"])*\" { count(); return(STRING_LITERAL); }
     return IDENTIFIER; 
     }
 
+[\t] { column += 4; }
 [\n\r]   { lineNo++; column = 0; }
 
 %%

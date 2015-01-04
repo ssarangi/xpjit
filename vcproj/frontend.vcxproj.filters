@@ -38,6 +38,9 @@
     <ClCompile Include="..\frontend\irtranslation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\frontend\SemanticAnalysis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\frontend\grammar\lexer.l">
@@ -49,9 +52,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\frontend\ASTBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\frontend\CompEA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\frontend\genllvm.h">
@@ -82,6 +82,9 @@
       <Filter>generated</Filter>
     </ClInclude>
     <ClInclude Include="..\include\frontend\IcaType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\frontend\SemanticAnalysis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

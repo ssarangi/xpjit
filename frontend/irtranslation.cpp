@@ -96,26 +96,6 @@ IcaStatement* IcaControlFlowStatement::getCurrentStatement()
         return m_currentInsertStatement->getCurrentStatement();	
 }
 
-//--------------FunctionProtoType---------------
-bool IcaFunctionProtoType::operator==(const IcaFunctionProtoType& fpOther) const
-{
-    if(m_name != fpOther.m_name)
-        return false;
-    if(m_argTypeList.size() != fpOther.m_argTypeList.size())
-        return false;
-    unsigned int n = m_argTypeList.size();
-
-    std::vector<IcaType*>::const_iterator typeIter = m_argTypeList.begin();
-    std::vector<IcaType*>::const_iterator otherTypeIter = fpOther.m_argTypeList.begin();
-
-    for(unsigned int i = 0 ; i < n ; ++i, ++typeIter, ++otherTypeIter)
-    {
-        if(*typeIter != *otherTypeIter)
-            return false;	
-    }
-    return true;
-}
-
 //--------------Function------------------
 IcErr IcaFunction::addStatement(IcaStatement& s)
 {
@@ -185,7 +165,6 @@ IcarusModule::IcarusModule(const std::string& name): m_name(name), m_symbolTable
 {
 }
 
-
 IcErr IcarusModule::addFunction(IcaFunction& func)
 {
     //do error handling later
@@ -199,30 +178,23 @@ IcErr IcarusModule::addSymbol(IcaSymbol& sym)
     return m_symbolTable.add(sym);
 }
 
-IcErr IcarusModule::addProtoType(IcaFunctionProtoType& fp)
+IcaFunction* IcarusModule::getProtoType(const std::string name, std::vector<IcaType*>& dataTypes)
 {
-    //do error handling later
-    m_funcProtoList.push_back(&fp);
-    return eNoErr;
-}
+    IcaFunction* fp = new IcaFunction(name, dataTypes, std::vector<IcaType*>(), std::vector<IcaSymbol*>()); //no need of return type for comparing prototypes
+    std::vector<IcaFunction*>::iterator protoIter = m_functionList.begin();
 
-IcaFunctionProtoType* IcarusModule::getProtoType(const std::string name, std::vector<IcaType*>& dataTypes)
-{
-    IcaFunctionProtoType& fp = *new IcaFunctionProtoType(name, dataTypes, std::vector<IcaType*>()); //no need of return type for comparing prototypes
-    std::vector<IcaFunctionProtoType*>::const_iterator protoIter = m_funcProtoList.begin();
-
-    for(; protoIter != m_funcProtoList.end(); ++protoIter)
+    for(; protoIter != m_functionList.end(); ++protoIter)
     {
-        if(**protoIter == fp)
+        if(*protoIter == fp)
             return *protoIter;
     }
     return NULL; //not found
 }
 
-IcaFunctionProtoType* IcarusModule::getProtoType(const std::string name)
+IcaFunction* IcarusModule::getProtoType(const std::string name)
 {
-    std::vector<IcaFunctionProtoType*>::const_iterator protoIter = m_funcProtoList.begin();
-    for(; protoIter != m_funcProtoList.end(); ++protoIter)
+    std::vector<IcaFunction*>::const_iterator protoIter = m_functionList.begin();
+    for(; protoIter != m_functionList.end(); ++protoIter)
     {
         if((*protoIter)->getName() == name)
             return *protoIter;
@@ -263,72 +235,3 @@ IcaFunction* IcarusModule::getFunction(const std::string name)
 }
 
 //------------------Code generator methods
-
-CompEA* IcaConstant::codegen()
-{
-    return nullptr;
-}
-
-CompEA* IcaVariable::codegen()
-{
-    return nullptr;
-}
-
-CompEA* IcaBinopExpression::codegen()
-{
-    return nullptr;
-}
-
-CompEA* IcaFunctionCall::codegen()
-{
-    return nullptr;
-}
-
-CompEA* IcaAssignment::codegen()
-{
-    CompEA *right = m_lval.codegen();	
-    CompEA *left = m_rval.codegen();
-    cout<<"lea "<<right;
-    cout<<"mov "<<"["<<left<<"],"<<right;
-    return nullptr; //we wont use it anyway
-}
-
-CompEA* IcaReturnStatement::codegen()
-{
-    return nullptr;
-}
-
-CompEA* IcaExpressionStatement::codegen()
-{
-    return nullptr;
-}
-
-CompEA* IcaBranchStatement::codegen()
-{
-    return nullptr;
-}
-
-CompEA* IcaFunction::codegen()
-{
-    cout<<"Creating code for function"<<getName()<<endl;
-    std::vector<IcaStatement*> statementList = getStatements();
-    std::vector<IcaStatement*>::const_iterator iter = statementList.begin();
-
-    for(; iter != statementList.end(); ++iter)
-    {
-        (*iter)->codegen();
-    }
-
-    return nullptr;
-}
-
-CompEA* IcarusModule::codegen()
-{
-    std::vector<IcaFunction*>& funcList = getFunctions();
-    for (std::vector<IcaFunction*>::const_iterator funcIter = funcList.begin(); funcIter != funcList.end(); ++funcIter)
-    {
-        (*funcIter)->codegen();
-    }
-
-    return nullptr;
-}

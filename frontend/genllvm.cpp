@@ -13,6 +13,8 @@
 #include <llvm/ADT/StringRef.h>
 #include <common/llvm_warnings_pop.h>
 
+#include <common/debug.h>
+
 using llvm::BasicBlock;
 inline llvm::LLVMContext& getGlobalContext()
 {
@@ -73,16 +75,17 @@ llvm::Value* IcaBinopExpression::genLLVM(GenLLVM* g)
 }
 
 //Helper function to get a llvm function type from our function
-llvm::FunctionType& getFunctionType(IcaFunctionProtoType& fp, GenLLVM *g)
+llvm::FunctionType& getFunctionType(IcaFunction* fp, GenLLVM *g)
 {
     std::vector<llvm::Type*> args;
-    std::vector<IcaType*>::iterator argTypeIter = fp.getTypeList().begin();
-    for(; argTypeIter != fp.getTypeList().end(); ++argTypeIter)
+    std::vector<IcaType*>::iterator argTypeIter = fp->getTypeList().begin();
+    for(; argTypeIter != fp->getTypeList().end(); ++argTypeIter)
     {
         args.push_back(g->getLLVMType(**argTypeIter));
     }
 
-    llvm::FunctionType *FT = llvm::FunctionType::get(g->getLLVMType(fp.getReturnType()), *new llvm::ArrayRef<llvm::Type*>(args), false);
+    std::string ret_type_name = fp->getName() + "_ret_type";
+    llvm::FunctionType *FT = llvm::FunctionType::get(g->getLLVMType(fp->getReturnType(), ret_type_name), *new llvm::ArrayRef<llvm::Type*>(args), false);
     return *FT;
 }
 
@@ -96,10 +99,63 @@ llvm::Value* IcaFunctionCall::genLLVM(GenLLVM* g)
         paramArrayRef.push_back((*paramIter)->genLLVM(g));
     }
 
-    llvm::FunctionType *FT = &getFunctionType(getFunctionProtoType(), g);
+    llvm::FunctionType *FT = &getFunctionType(&getFunctionProtoType(), g);
     llvm::Function *F = static_cast<llvm::Function*>(g->getModule().getOrInsertFunction(getFunctionProtoType().getName(), FT));
 
-    return g->getBuilder().CreateCall(F, *new llvm::ArrayRef<llvm::Value*>(paramArrayRef), "");
+    llvm::Value *pCall = g->getBuilder().CreateCall(F, *new llvm::ArrayRef<llvm::Value*>(paramArrayRef), "");
+
+    llvm::Value *pRetVal = nullptr;
+
+    if (F->getReturnType()->isAggregateType())
+    {
+        llvm::Value *pAlloc = g->getBuilder().CreateAlloca(F->getReturnType());
+        g->getBuilder().CreateStore(pCall, pAlloc);
+        pRetVal = pAlloc;
+    }
+    else
+        pRetVal = pCall;
+    
+    return pRetVal;
+}
+
+llvm::Value* IcaMultiVarAssignment::genLLVM(GenLLVM* g)
+{
+    // Verify that all the types of the function returns match with function prototype
+    auto retTypesList = m_pFuncCall->getFunctionProtoType().getReturnType();
+
+    if (retTypesList.size() != m_multiVarList.size())
+    {
+        g_outputStream << "Error: Call doesn't match return line numbers\n";
+    }
+
+    unsigned int i = 0;
+
+    auto symbols = m_pFuncCall->getFunctionProtoType().getSymbols();
+
+    llvm::Value *pRetVal = m_pFuncCall->genLLVM(g);
+
+    if (m_multiVarList.size() == 0)
+    {
+        // Do nothing for now
+    }
+    else if (m_multiVarList.size() == 1)
+    {
+        g->getNamedValues()[m_multiVarList[0]]->dump();
+        g->getBuilder().CreateStore(pRetVal, g->getNamedValues()[m_multiVarList[0]], false);
+    }
+    else
+    {
+        for (unsigned int i = 0; i < m_multiVarList.size(); ++i)
+        {
+            if (m_multiVarList[i] != "")
+            {
+                llvm::Value *pLoad = g->getBuilder().CreateLoad(g->getBuilder().CreateStructGEP(pRetVal, i));
+                g->getBuilder().CreateStore(pLoad, g->getNamedValues()[m_multiVarList[i]], false);
+            }
+        }
+    }
+
+    return nullptr;
 }
 
 llvm::Value* IcaAssignment::genLLVM(GenLLVM* g)
@@ -231,8 +287,10 @@ llvm::Value* IcaBranchStatement::genLLVM(GenLLVM* g)
 
 llvm::Value* IcaFunction::genLLVM(GenLLVM* g)
 {
-    llvm::FunctionType *FT = &getFunctionType(getProtoType(), g);
+    llvm::FunctionType *FT = &getFunctionType(this, g);
     llvm::Function *F = static_cast<llvm::Function*>(g->getModule().getOrInsertFunction(getName(), FT));
+
+    m_pLLVMFunc = F;
 
     g->setCurrentFunc(F);
 
@@ -305,9 +363,12 @@ llvm::Type* GenLLVM::getLLVMType(IcaType& type)
     }
 }
 
-llvm::Type* GenLLVM::getLLVMType(std::vector<IcaType*>& typeList)
+llvm::Type* GenLLVM::getLLVMType(std::vector<IcaType*>& typeList, std::string name)
 {
     llvm::Type *pRetType = nullptr;
+
+    if (m_types.find(name) != m_types.end())
+        return m_types[name];
 
     if (typeList.size() == 0)
         pRetType = llvm::Type::getVoidTy(m_module.getContext());
@@ -320,8 +381,10 @@ llvm::Type* GenLLVM::getLLVMType(std::vector<IcaType*>& typeList)
             typeArrRef.push_back(getLLVMType(*t));
 
         // Create a structure for this type
-        pRetType = llvm::StructType::create(m_module.getContext(), typeArrRef);
+        pRetType = llvm::StructType::create(m_module.getContext(), typeArrRef, name);
     }
+
+    m_types[name] = pRetType;
 
     return pRetType;
 }

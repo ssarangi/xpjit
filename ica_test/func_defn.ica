@@ -2,6 +2,16 @@ function firstmethod [int] (int a, int b) {
 	return 4;
 }
 
-function secondmethod [int] (int a, int b) {
+function secondmethod [int, int] (int a, int b) {
 	return [4,5];
+}
+
+function main [void] () {
+	int a, b, c, d;
+	c = 3;
+	d = 4;
+	[a] = firstmethod(c, d);
+	[a, b] = secondmethod(c, d);
+
+	return 0;
 }

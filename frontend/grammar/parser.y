@@ -55,7 +55,9 @@ void yyerror(std::string s)
     int           integer;
     IcaValue     *value;
     IcaStatement *statement;
+
     std::vector<IcaValue*> *exprList;
+    std::vector<std::string> *identList;
 }
 
 %left EQUALS NEQUALS LESSTHAN LESSTHANEQ MORETHAN MORETHANEQ
@@ -101,12 +103,20 @@ void yyerror(std::string s)
 %type<statement> break_statement
 %type<statement> iteration_statement
 
+%type<identList> ident_list_allow_null
+
 %start program
 
 %%
 program:
     | program func_defn
     ;
+
+ident_list_allow_null:
+    /* blank */ { $$ = new std::vector<std::string>(); $$->push_back(""); }
+    | IDENTIFIER { $$ = new std::vector<std::string>(); $$->push_back($1); }
+    | ident_list_allow_null ',' IDENTIFIER { $1->push_back($3); $$ = $1; }
+    | ident_list_allow_null ',' { $1->push_back(""); $$ = $1; }
 
 datatype: INTEGER          { $$ = currentType = IcaType::IntegerTy; }
     | FLOAT                { $$ = currentType = IcaType::FloatTy; }
@@ -120,7 +130,7 @@ retlist : datatype
     }
     | retlist ',' datatype
     {
-        builder->pushDataType(&getType($3));
+        builder->pushRetType(&getType($3));
     }
     ;
     
@@ -145,16 +155,13 @@ arglist: datatype IDENTIFIER
 func_defn: FUNCTION IDENTIFIER LSQUARE retlist RSQUARE '(' arglist ')' '{' 
     {
         const std::string& funcName = $2;
-        IcaFunctionProtoType* fp = builder->getProtoType(funcName); //use current dataTypeList
-        
-        // find the prototype in the module. if not found, add a new one
-        if(fp == NULL)
-            builder->addProtoType(funcName, &fp);
 
-        IcErr err = builder->addFunction(*fp);
-        
+        IcErr err = builder->addFunction(funcName);
+
         if (err != eNoErr)
             yyerror(errMsg[err]);
+
+        builder->reset();
     }
 
     statement_block '}' 
@@ -200,7 +207,8 @@ if_else_statement: IF '(' expression ')'
     iftail
     ;
 
-iftail: ELSE {
+iftail: ELSE
+    {
         builder->addBranch(*(IcaExpression*)new IcaConstant(1)); //a 'true' expression
     }
     codeblock { builder->endCodeBlock(); }
@@ -224,7 +232,7 @@ declaration: datatype varList ';' { currentType = -1; }
 varList: IDENTIFIER { builder->addSymbol($1, getType(currentType)); }
     | varList ',' IDENTIFIER { builder->addSymbol($3, getType(currentType)); }
     ;
-        
+
 assignment: IDENTIFIER '=' expression ';'
     { 
         IcaSymbol *identifierSymbol = builder->getSymbol($1);
@@ -235,6 +243,10 @@ assignment: IDENTIFIER '=' expression ';'
         }
 
         $$ = new IcaAssignment(*new IcaVariable(*identifierSymbol), *$3);
+    }
+    | LSQUARE ident_list_allow_null RSQUARE '=' func_call ';'
+    {
+        $$ = new IcaMultiVarAssignment(*$2, static_cast<IcaFunctionCall*>($5));
     }
 
 return_stmt: RETURN LSQUARE expression_list RSQUARE { $$ = new IcaReturnStatement(*$3); }
@@ -275,11 +287,11 @@ expression_list:
     |expression_list ',' expression { $1->push_back($3);$$=$1; }
     ;
 
-func_call: IDENTIFIER'('paramlist')'
+func_call: IDENTIFIER'(' paramlist ')'
     {
         std::vector<IcaType*> paramTypeList;
         
-        IcaFunctionProtoType* fp = builder->getFunctionProtoType($1);
+        IcaFunction* fp = builder->getFunctionProtoType($1);
         if(fp == NULL)
             yyerror("Function not found");
         $$ = new IcaFunctionCall(*fp, parameterList);

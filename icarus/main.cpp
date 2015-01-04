@@ -5,6 +5,7 @@
 #include <frontend/PrintVisitor.h>
 #include <frontend/genllvm.h>
 #include <frontend/findentryfunc.h>
+#include <frontend/SemanticAnalysis.h>
 
 #include "unistd.h"
 #include <common/debug.h>
@@ -86,6 +87,10 @@ int Compile(char *fileName, char *pOutputFileName)
         delete pIcarusModule;
         pIcarusModule = nullptr;
     }
+
+    llvm::PassManager mpm;
+    mpm.add(new SemanticAnalysis());
+    mpm.run(llvmModule);
 
     g_outputStream << "\n";
     g_outputStream << "-------------------------------------------------------------------\n";

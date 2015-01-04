@@ -3,7 +3,6 @@
 
 #include <common/icerr.h>
 #include <frontend/IClassVisitor.h>
-#include <frontend/CompEA.h>
 #include <frontend/IcaType.h>
 
 #include <common/llvm_warnings_push.h>
@@ -32,7 +31,6 @@ class IcaValue
 {
 public:
     virtual void accept(IClassVisitor &) {}
-    virtual CompEA* codegen() = 0;
     virtual llvm::Value* genLLVM(GenLLVM*) = 0;
 };
 
@@ -42,7 +40,6 @@ class IcaExpression: public IcaValue
 {
 public:
     virtual void accept(IClassVisitor &) = 0;
-    virtual CompEA* codegen() = 0;
     virtual llvm::Value* genLLVM(GenLLVM*) = 0;
 };
 
@@ -56,7 +53,6 @@ public:
     IcaConstant(int value):m_value(value) {}
     
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-    virtual CompEA* codegen();
 
     virtual llvm::Value* genLLVM(GenLLVM*);
     
@@ -78,7 +74,6 @@ public:
     IcaSymbol& getSymbol() { return m_symbol; }
     
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-    virtual CompEA* codegen();
     virtual llvm::Value* genLLVM(GenLLVM*);
 private:
     IcaSymbol& m_symbol;//check this
@@ -114,7 +109,6 @@ public:
 
     //Visitors
     virtual void accept(IClassVisitor &visitor) { visitor.Visit(*this); }
-    virtual CompEA* codegen();
     virtual llvm::Value* genLLVM(GenLLVM*);
 private:
     IcaValue& m_left;
@@ -126,21 +120,20 @@ private:
 class IcaFunctionCall : public IcaExpression 
 {
 public:
-    IcaFunctionCall(IcaFunctionProtoType& fp, std::vector<IcaValue*>& params)
-        : m_functionProtoType(fp)
+    IcaFunctionCall(IcaFunction& fp, std::vector<IcaValue*>& params)
+        : m_function(fp)
         , m_paramList(params)
     {}
 
     //Getter-Setters
-    IcaFunctionProtoType& getFunctionProtoType() { return m_functionProtoType; }
+    IcaFunction& getFunctionProtoType() { return m_function; }
     std::vector<IcaValue*>& getParamList() { return m_paramList; }
 
     //Visitors
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-    virtual CompEA* codegen();
     virtual llvm::Value* genLLVM(GenLLVM*);
 private:
-    IcaFunctionProtoType& m_functionProtoType;
+    IcaFunction& m_function;
     std::vector<IcaValue*> m_paramList;
 };
 
@@ -160,19 +153,34 @@ public:
         : m_lval(lVal)
         , m_rval(rVal)
     {}
-    
+
     //Getter-Setters
     IcaVariable& getLVal() const { return m_lval; }
     IcaValue& getRVal() const { return m_rval; }
 
     //Visitors
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-    virtual CompEA* codegen();
     virtual llvm::Value* genLLVM(GenLLVM*);
 private:
     IcaVariable& m_lval;
     IcaValue& m_rval;
     IcaAssignment();
+};
+
+class IcaMultiVarAssignment : public IcaStatement
+{
+public:
+    IcaMultiVarAssignment(std::vector<std::string>& vars, IcaFunctionCall *pFuncCall)
+        : m_multiVarList(vars)
+        , m_pFuncCall(pFuncCall)
+    {}
+
+    virtual void accept(IClassVisitor &visitor) { visitor.Visit(*this); }
+    virtual llvm::Value* genLLVM(GenLLVM*);
+
+private:
+    IcaFunctionCall *m_pFuncCall;
+    std::vector<std::string>& m_multiVarList;
 };
 
 class IcaReturnStatement : public IcaStatement 
@@ -194,7 +202,6 @@ public:
     
     //Visitors
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-    virtual CompEA* codegen();
     virtual llvm::Value* genLLVM(GenLLVM*);
 
 private:
@@ -213,7 +220,6 @@ public:
 
     //Visitors	
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-    virtual CompEA* codegen();
     virtual llvm::Value* genLLVM(GenLLVM*);
 private:
     IcaExpression& m_expression;
@@ -226,36 +232,9 @@ class IcaBreakStatement : public IcaStatement
 public:
     //Visitors
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-    virtual CompEA* codegen() { return nullptr; }
     virtual llvm::Value* genLLVM(GenLLVM*);
 };
 
-class IcaFunctionProtoType
-{
-public:
-    IcaFunctionProtoType(const std::string& name, std::vector<IcaType*>& argTypeList, std::vector<IcaType*>& returnTypeList)
-        : m_name(name)
-        , m_argTypeList(argTypeList)
-        , m_returnType(returnTypeList)
-    {}
-
-    //Getter-Setters
-    std::string getName() const { return m_name; }
-    std::vector<IcaType*>& getTypeList() { return m_argTypeList; }
-    std::vector<IcaType*>& getReturnType() { return m_returnType; }
-
-    //overloaded operators
-    bool operator==(const IcaFunctionProtoType& fpOther) const;
-
-    //Visitors
-    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
-    
-private:
-    std::string m_name;
-    std::vector<IcaType*> m_argTypeList; //just store the datatypes; no need of names for the proto
-    std::vector<IcaType*> m_returnType;
-    IcaFunctionProtoType();
-};
 
 class IcaSymbol
 {
@@ -340,7 +319,6 @@ public:
     
     IcaBranchStatement(IcaExpression& condition);
     
-    virtual CompEA* codegen();
     virtual llvm::Value* genLLVM(GenLLVM*);
 
     virtual IcErr addStatement(IcaStatement& s);
@@ -366,7 +344,6 @@ public:
         : m_condition(condition)
     {}
 
-    virtual CompEA* codegen() { return nullptr; }
     virtual llvm::Value* genLLVM(GenLLVM*);
 
     virtual IcErr addStatement(IcaStatement& s);
@@ -385,19 +362,25 @@ private:
 class IcaFunction
 {
 public:
-    IcaFunction(IcaFunctionProtoType& protoType, std::vector<IcaSymbol*>& argSymbolList)
-        : m_protoType(protoType)
-        , m_argSymbolList(argSymbolList)
-        , m_symbolTable(*new IcaSymbolTable()), m_currentInsertStatement(NULL)
-    {}
+    IcaFunction(const std::string& name, std::vector<IcaType*>& argTypeList, std::vector<IcaType*>& returnTypeList, std::vector<IcaSymbol*>& argSymbolList)
+        : m_name(name)
+        , m_argTypeList(argTypeList)
+        , m_returnType(returnTypeList)
+        , m_symbolTable(*new IcaSymbolTable())
+        , m_currentInsertStatement(nullptr)
+        , m_pLLVMFunc(nullptr)
+    {
+        m_argSymbolList = argSymbolList;
+    }
 
     ~IcaFunction();
 
     //Getter-Setters
+    std::string getName() const { return m_name; }
+    std::vector<IcaType*>& getTypeList() { return m_argTypeList; }
+    std::vector<IcaType*>& getReturnType() { return m_returnType; }
 
-    std::string getName() const { return m_protoType.getName(); }
     std::vector<IcaStatement*>& getStatements() { return m_statementList; }
-    IcaFunctionProtoType& getProtoType() const { return m_protoType; }
     std::vector<IcaSymbol*>& getArgSymbolList() { return m_argSymbolList; }
     std::vector<IcaSymbol*>& getSymbols() { return m_symbolTable.getSymbols(); }
     IcaSymbolTable& getSymbolTable() { return m_symbolTable; }
@@ -406,9 +389,10 @@ public:
     IcErr addStatement(IcaStatement& s);
     IcErr addSymbol(IcaSymbol& sym);
 
+    llvm::Function* getLLVMFunc() { return m_pLLVMFunc; }
+
     bool endCodeBlock();
 
-    virtual CompEA* codegen();
     virtual llvm::Value* genLLVM(GenLLVM*);
 
     //overloaded operators
@@ -418,10 +402,15 @@ public:
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
 private:
     std::vector<IcaStatement*> m_statementList;
-    IcaFunctionProtoType& m_protoType;
     std::vector<IcaSymbol*> m_argSymbolList;
     IcaSymbolTable& m_symbolTable; // we should have a table for the function locals. this will get precedence over the global one
     IcaControlFlowStatement* m_currentInsertStatement;
+    llvm::Function*  m_pLLVMFunc;
+
+private:
+    std::string m_name;
+    std::vector<IcaType*> m_argTypeList; //just store the datatypes; no need of names for the proto
+    std::vector<IcaType*> m_returnType;
 
     //prevent unintended c++ synthesis
     IcaFunction();
@@ -437,16 +426,14 @@ public:
     std::string getName() const { return m_name; }
     std::vector<IcaFunction*>& getFunctions() { return m_functionList; }
     std::vector<IcaSymbol*>& getSymbols() { return m_symbolTable.getSymbols(); }
-    IcaFunctionProtoType* getProtoType(const std::string name, std::vector<IcaType*>& dataTypes);
-    IcaFunctionProtoType* getProtoType(const std::string name);//works till we allow overloading
+    IcaFunction* getProtoType(const std::string name, std::vector<IcaType*>& dataTypes);
+    IcaFunction* getProtoType(const std::string name);//works till we allow overloading
     IcaFunction* getFunction(const std::string name); //need to add support for datatypes too
 
     IcErr addFunction(IcaFunction& f);
     IcErr addSymbol(IcaSymbol& s);
-    IcErr addProtoType(IcaFunctionProtoType& fp);
     IcErr insertStatement(IcaFunction& f, IcaStatement& s);
 
-    virtual CompEA* codegen();
     virtual llvm::Value* genLLVM(GenLLVM*);
 
     //overloaded operators
@@ -458,7 +445,6 @@ public:
 private:
     std::string m_name;
     std::vector<IcaFunction*> m_functionList;
-    std::vector<IcaFunctionProtoType*> m_funcProtoList;
     IcaSymbolTable& m_symbolTable;
     IcarusModule();
 };
