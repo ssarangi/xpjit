@@ -83,7 +83,7 @@ void yyerror(std::string s)
 %token<integer> BREAK
 %token<integer> EQUALS
 %token<integer> NEQUALS
-%token<integer> PRINTF
+%token<integer> PRINT
 %token<integer> NEWLINE
 
 %token<string> IDENTIFIER
@@ -102,6 +102,7 @@ void yyerror(std::string s)
 %type<statement> assignment
 %type<statement> break_statement
 %type<statement> iteration_statement
+%type<statement> print_statement
 
 %type<identList> ident_list_allow_null
 
@@ -173,8 +174,25 @@ func_defn: FUNCTION IDENTIFIER LSQUARE retlist RSQUARE '(' arglist ')' '{'
     ;
 
 statement_block: statement_block statement |  ;
-    
+
+print_statement :
+PRINT '(' STRING_LITERAL ')' ';'
+{
+    $$ = new IcaPrintStatement($3);
+}
+|
+PRINT '(' NUMBER ')' ';'
+{
+    $$ = new IcaPrintStatement($3);
+}
+|
+PRINT '(' IDENTIFIER ')' ';'
+{
+    // $$ = new IcaPrintStatement($3);
+}
+
 statement: declaration 
+    | print_statement { builder->insertStatement(*$1); }
     | assignment  { builder->insertStatement(*$1);}
     | expression';' 
     { 
@@ -184,7 +202,6 @@ statement: declaration
     | while_statement { }
     | break_statement ';' { builder->insertStatement(*$1); }
     | if_else_statement {  }
-    | print_statement {  }
     | iteration_statement
     | ';' { g_outputStream <<"empty statement\n";}
     ;
@@ -193,11 +210,6 @@ iteration_statement
     : WHILE '(' expression ')' statement
     | DO statement WHILE '(' expression ')' ';'
     ;
-
-
-print_statement: PRINTF '(' expression ')' ';'
-    {
-    }
 
 if_else_statement: IF '(' expression ')' 
     {
@@ -276,7 +288,6 @@ expression: NUMBER { $$ = new IcaConstant($1); }
     | expression LESSTHANEQ expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::LTEQ); }
     | expression MORETHAN expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::GT); }
     | expression MORETHANEQ expression { $$ = new IcaBinopExpression(*$1, *$3, IcaBinopExpression::GTEQ); }
-    | print_statement { }
     | func_call { $$ = $1; }
     | '('expression')' { $$ = $2; }
     ;

@@ -85,7 +85,7 @@ int check_type()
 
 "break" { count(); return BREAK; }
 
-"printf" { count(); return PRINTF; }
+"print" { count(); return PRINT; }
 
 "do" { count(); return DO; }
 

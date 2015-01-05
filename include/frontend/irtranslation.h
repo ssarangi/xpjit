@@ -288,6 +288,53 @@ protected:
     IcaControlFlowStatement *m_currentInsertStatement;
 };
 
+enum PRINT_STMT_TYPE
+{
+    PRINT_CHAR,
+    PRINT_STRING,
+    PRINT_INT,
+    PRINT_FLOAT,
+    PRINT_DOUBLE
+};
+
+class IcaPrintStatement : public IcaStatement
+{
+public:
+    IcaPrintStatement(char c)
+        : m_stmtType(PRINT_CHAR)
+    {
+        m_data.c = c;
+    }
+
+    IcaPrintStatement(std::string s)
+        : m_stmtType(PRINT_STRING)
+    {
+        m_data.s = s.c_str();
+    }
+
+    IcaPrintStatement(int i)
+        : m_stmtType(PRINT_INT)
+    {
+        m_data.i32 = i;
+    }
+
+    virtual llvm::Value* genLLVM(GenLLVM*);
+    virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
+
+private:
+    union Data
+    {
+        char c;
+        const char *s;
+        int i32;
+        float f32;
+        double f64;
+    };
+
+    Data            m_data;
+    PRINT_STMT_TYPE m_stmtType;
+};
+
 //each branch in an if else
 class IcaBranch 
 {
