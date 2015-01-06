@@ -158,6 +158,12 @@ llvm::Value* IcaMultiVarAssignment::genLLVM(GenLLVM* g)
     return nullptr;
 }
 
+llvm::Value* IcaPrintStatement::genLLVM(GenLLVM* g)
+{
+    assert(0);
+    return nullptr;
+}
+
 llvm::Value* IcaAssignment::genLLVM(GenLLVM* g)
 {
     return g->getBuilder().CreateStore(getRVal().genLLVM(g),g->getNamedValues()[getLVal().getSymbol().getName()], false);

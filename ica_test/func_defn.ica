@@ -10,7 +10,7 @@ function main [void] () {
 	int a, b, c, d;
 	c = 3;
 	d = 4;
-	printc("a");
+	print("first print");
 	[a] = firstmethod(c, d);
 	[a, b] = secondmethod(c, d);
 

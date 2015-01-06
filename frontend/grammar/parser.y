@@ -51,6 +51,7 @@ void yyerror(std::string s)
 
 %union
 {
+    std::string*  stringVal;
     char         *string;
     int           integer;
     IcaValue     *value;
@@ -85,11 +86,13 @@ void yyerror(std::string s)
 %token<integer> NEQUALS
 %token<integer> PRINT
 %token<integer> NEWLINE
+%token<integer> CHAR_LITERAL
 
 %token<string> IDENTIFIER
-%token<string> STRING_LITERAL
 %token<string> LSQUARE
 %token<string> RSQUARE
+
+%token<stringVal> STRING_LITERAL
 
 %type<integer> datatype
 
@@ -176,9 +179,15 @@ func_defn: FUNCTION IDENTIFIER LSQUARE retlist RSQUARE '(' arglist ')' '{'
 statement_block: statement_block statement |  ;
 
 print_statement :
+PRINT '(' CHAR_LITERAL ')' ';'
+{
+    std::cout << "String " << *yytext << std::endl;
+    $$ = new IcaPrintStatement($3);
+}
+|
 PRINT '(' STRING_LITERAL ')' ';'
 {
-    $$ = new IcaPrintStatement($3);
+    $$ = new IcaPrintStatement(*$3);
 }
 |
 PRINT '(' NUMBER ')' ';'
@@ -192,7 +201,10 @@ PRINT '(' IDENTIFIER ')' ';'
 }
 
 statement: declaration 
-    | print_statement { builder->insertStatement(*$1); }
+    | print_statement
+    { 
+        builder->insertStatement(*$1);
+    }
     | assignment  { builder->insertStatement(*$1);}
     | expression';' 
     { 

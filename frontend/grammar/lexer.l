@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <assert.h>
 
 class IcaValue;
 class IcaStatement;
@@ -103,7 +104,9 @@ int check_type()
 
 ">=" { count(); return MORETHANEQ; }
 
-L?\"(\\.|[^\\"])*\" { count(); return(STRING_LITERAL); }
+\".*\"  { count(); yylval.stringVal = new std::string(yytext, yyleng); return(STRING_LITERAL); }
+
+\'.*\'  { count(); return(STRING_LITERAL); }
 
 [-+*/;=,)(\{\}] { count(); return *yytext; }
 
