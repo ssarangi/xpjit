@@ -66,9 +66,12 @@ bool X86PatternMatch::runOnModule(llvm::Module &M)
 {
     for (llvm::Module::iterator fb = M.begin(), fe = M.end(); fb != fe; ++fb)
     {
-        llvm::DominatorTree &DT = getAnalysis<llvm::DominatorTreeWrapperPass>(*fb).getDomTree();
-        createBasicBlocks(fb);
-        codeGenNode(DT.getRootNode());
+        if (!fb->isDeclaration())
+        {
+            llvm::DominatorTree &DT = getAnalysis<llvm::DominatorTreeWrapperPass>(*fb).getDomTree();
+            createBasicBlocks(fb);
+            codeGenNode(DT.getRootNode());
+        }
     }
 
     return false;

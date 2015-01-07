@@ -23,6 +23,7 @@ char DominanceFrontier::ID = 0;
 
 bool DominanceFrontier::runOnFunction(Function &F)
 {
+    ADD_HEADER("Dominance Frontier");
     g_outputStream << " Calculating Dominator Frontier for " << F.getName() << "\n";
 
     DominanceTreeConstructor& DT = getAnalysis<DominanceTreeConstructor>(); 

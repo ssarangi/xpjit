@@ -302,18 +302,26 @@ class IcaPrintStatement : public IcaStatement
 public:
     IcaPrintStatement(char c)
         : m_stmtType(PRINT_CHAR)
+        , m_pPutsFunc(nullptr)
     {
         m_data.c = c;
     }
 
     IcaPrintStatement(std::string s)
         : m_stmtType(PRINT_STRING)
+        , m_pPutsFunc(nullptr)
     {
-        m_data.s = s.c_str();
+        // Erase the quotes around it
+        s.erase(0, 1); // erase the first character
+        s.erase(s.size() - 1); // erase the last character
+
+        m_data.s = new char[s.length()];
+        strcpy(m_data.s, s.c_str());
     }
 
     IcaPrintStatement(int i)
         : m_stmtType(PRINT_INT)
+        , m_pPutsFunc(nullptr)
     {
         m_data.i32 = i;
     }
@@ -322,10 +330,13 @@ public:
     virtual void accept(IClassVisitor &visitor)  { visitor.Visit(*this); }
 
 private:
+    void declare_puts(GenLLVM *g);
+
+private:
     union Data
     {
         char c;
-        const char *s;
+        char *s;
         int i32;
         float f32;
         double f64;
@@ -333,6 +344,8 @@ private:
 
     Data            m_data;
     PRINT_STMT_TYPE m_stmtType;
+
+    llvm::Constant* m_pPutsFunc;
 };
 
 //each branch in an if else

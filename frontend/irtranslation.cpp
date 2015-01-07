@@ -233,5 +233,3 @@ IcaFunction* IcarusModule::getFunction(const std::string name)
     }
     return NULL;
 }
-
-//------------------Code generator methods

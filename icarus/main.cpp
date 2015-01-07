@@ -113,6 +113,7 @@ int Compile(char *fileName, char *pOutputFileName)
     if(gDebug.isDebuggable())
     {
         llvmModule.print(g_outputStream(), nullptr);
+        g_outputStream.flush();
     }
 
     std::string moduleStr;

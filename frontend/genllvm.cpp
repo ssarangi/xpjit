@@ -158,9 +158,30 @@ llvm::Value* IcaMultiVarAssignment::genLLVM(GenLLVM* g)
     return nullptr;
 }
 
+void IcaPrintStatement::declare_puts(GenLLVM *g)
+{
+    std::vector<llvm::Type *> putsArgs;
+    putsArgs.push_back(g->getBuilder().getInt8Ty()->getPointerTo());
+    llvm::ArrayRef<llvm::Type*>  argsRef(putsArgs);
+
+    llvm::FunctionType *putsType =
+        llvm::FunctionType::get(g->getBuilder().getInt32Ty(), argsRef, false);
+    m_pPutsFunc = g->getModule().getOrInsertFunction("puts", putsType);
+}
+
+
 llvm::Value* IcaPrintStatement::genLLVM(GenLLVM* g)
 {
-    assert(0);
+    if (!m_pPutsFunc)
+        declare_puts(g);
+
+    if (m_stmtType == PRINT_STRING)
+    {
+        // Create a global string.
+        llvm::Value *pString = g->getBuilder().CreateGlobalStringPtr(m_data.s);
+        g->getBuilder().CreateCall(m_pPutsFunc, pString);
+    }
+
     return nullptr;
 }
 
