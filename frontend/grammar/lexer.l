@@ -112,7 +112,7 @@ int check_type()
 
 [0-9]+ { yylval.integer = atoi(yytext);  count(); return NUMBER; }
 
-[a-zA-Z][a-zA-Z0-9]* { 
+[a-zA-Z_][a-zA-Z0-9_]* { 
     yylval.string = (char*)calloc(yyleng+1, sizeof(char));
         strncpy(yylval.string, yytext, yyleng); // Remember you need to free this.
     return IDENTIFIER; 

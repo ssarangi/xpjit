@@ -1,0 +1,16 @@
+function greater_than [int] (int a, int b) {
+	if (a > b)
+		return a;
+	else
+		return b;
+}
+
+function main [int] () {
+	int a, c, d;
+	c = 3;
+	d = 4;
+
+	a = greater_than(c, d);
+
+	return a;
+}

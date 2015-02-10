@@ -140,7 +140,6 @@ llvm::Value* IcaMultiVarAssignment::genLLVM(GenLLVM* g)
     }
     else if (m_multiVarList.size() == 1)
     {
-        g->getNamedValues()[m_multiVarList[0]]->dump();
         g->getBuilder().CreateStore(pRetVal, g->getNamedValues()[m_multiVarList[0]], false);
     }
     else
