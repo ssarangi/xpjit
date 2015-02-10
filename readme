@@ -1,1 +1,5 @@
-Original Code from https://github.com/chethanvasishta/Icarus
+This is an attempt to write my own compiler at this point for a language whose spec is undefined i.e. I am just doing whatever
+feels comfortable to me at this point.
+I took this repository from https://github.com/chethanvasishta/Icarus but it has changed quite a bit since then. My current goal
+is to write optimization passes myself instead of using the llvm ones, do code generation and some basic register allocation for
+now.
