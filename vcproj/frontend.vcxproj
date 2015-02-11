@@ -85,6 +85,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\frontend\ASTBuilder.cpp" />
+    <ClCompile Include="..\frontend\DebugInfo.cpp" />
     <ClCompile Include="..\frontend\irtranslation.cpp" />
     <ClCompile Include="..\frontend\findentryfunc.cpp" />
     <ClCompile Include="..\frontend\generated\lexer.cpp" />
@@ -117,6 +118,7 @@ del $(SolutionDir)frontend\generated\parser.output</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\frontend\DebugInfo.h" />
     <ClInclude Include="..\frontend\driver.h" />
     <ClInclude Include="..\frontend\generated\parser.hpp" />
     <ClInclude Include="..\include\frontend\ASTBuilder.h" />

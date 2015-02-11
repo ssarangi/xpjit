@@ -41,6 +41,9 @@
     <ClCompile Include="..\frontend\SemanticAnalysis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\frontend\DebugInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\frontend\grammar\lexer.l">
@@ -85,6 +88,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\frontend\SemanticAnalysis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\frontend\DebugInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
