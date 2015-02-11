@@ -14,6 +14,8 @@ public:
     llvm::DIType getFloatTy();
     llvm::DIType getIntTy();
 
+    void finalize();
+
 private:
     llvm::DICompileUnit   m_compileUnit;
     llvm::DIType          m_dblType;
