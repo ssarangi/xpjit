@@ -28,6 +28,7 @@ public:
     static void emitPrologue(std::ostream &s);
     static void emitEpilogue(std::ostream &s);
     static void emitFunctionPrologue(std::ostream &s);
+    static void emitFunctionEpilogue(std::ostream &s);
 
     static void emitMov(BaseVariable &dstReg, BaseVariable &srcReg, std::ostream &s);
 
@@ -49,6 +50,7 @@ public:
     static void emitJ(std::string label, std::ostream &s);
     static void emitJR(BackendRegister &reg, std::ostream &s);
     static void emitJAL(std::string label, std::ostream &s);
+    static void emitCall();
 
     static void emitComment(std::string comment, std::ostream &s);
 

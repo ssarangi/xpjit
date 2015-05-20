@@ -45,6 +45,11 @@ void X86InstSet::emitFunctionPrologue(std::ostream &s)
     s << "rep stosd" << std::endl;
 }
 
+void X86InstSet::emitFunctionEpilogue(std::ostream &s)
+{
+
+}
+
 void X86InstSet::emitEpilogue(std::ostream &s)
 {
     /*
@@ -158,4 +163,9 @@ void X86InstSet::emitDiv(BaseVariable &srcReg1, BaseVariable &srcReg2, std::ostr
 void X86InstSet::emitComment(std::string comment, std::ostream &s)
 {
     s << "/* " << comment << " */";
+}
+
+void X86InstSet::emitCall()
+{
+
 }

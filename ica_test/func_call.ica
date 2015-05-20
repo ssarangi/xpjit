@@ -1,0 +1,12 @@
+function firstmethod [int] (int a, int b) {
+	return a + b + 4;
+}
+
+function main [void] () {
+	int a, b, c, d;
+	c = 3;
+	d = 4;
+	print("first print");
+	[a] = firstmethod(c, d);
+	return 0;
+}

@@ -185,7 +185,7 @@ void LinearScanAllocator::performLinearScan()
 
 bool LinearScanAllocator::runOnFunction(llvm::Function &F)
 {
-    ADD_HEADER("Linear Scan Register Allocator Pass");
+    ADD_HEADER("Linear Scan Register Allocator Pass: " + F.getName().str());
 
     m_pLR = &getAnalysis<LiveRange>();
 

@@ -26,7 +26,7 @@ bool BlockLayoutPass::runOnFunction(llvm::Function &F)
     m_pDT = &getAnalysis<llvm::DominatorTreeWrapperPass>().getDomTree();
     m_pPDT = &getAnalysis<llvm::PostDominatorTree>();
 
-    ADD_HEADER("Block Layout Pass");
+    ADD_HEADER(std::string("Block Layout Pass: ") + F.getName().str());
 
     llvm::SmallPtrSet<llvm::BasicBlock*, 16> visited;
     llvm::BasicBlock *pEntryBB = F.begin();
@@ -36,7 +36,7 @@ bool BlockLayoutPass::runOnFunction(llvm::Function &F)
     for (llvm::df_ext_iterator<llvm::BasicBlock*, llvm::SmallPtrSet<llvm::BasicBlock*, 16>>
         di = llvm::df_ext_begin(pEntryBB, visited), de = llvm::df_ext_end(pEntryBB, visited);
         di != de;
-    ++di)
+        ++di)
     {
         g_outputStream << di->getName() << " ; " << bb_no << "\n";
         m_reverseOrderBlockLayout.push(*di);
@@ -81,7 +81,6 @@ unsigned int BlockLayoutPass::getInstructionID(llvm::Instruction *pI)
 
 unsigned int BlockLayoutPass::getInstructionID(llvm::Value *pV)
 {
-    pV->dump();
     assert(m_instructionToID.find(pV) != m_instructionToID.end());
     return m_instructionToID[pV];
 }

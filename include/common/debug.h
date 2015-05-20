@@ -22,10 +22,30 @@ using namespace std;
 #define ADD_HEADER(txt) \
 {                                                                                                         \
     g_outputStream << "\n";                                                                               \
-    g_outputStream << "-------------------------------------------------------------------\n";            \
+    g_outputStream << "---------------------------------------------------------------------------------------------\n";            \
     g_outputStream << "                         " << txt << "                        \n";                 \
-    g_outputStream << "-------------------------------------------------------------------\n";            \
+    g_outputStream << "---------------------------------------------------------------------------------------------\n";            \
 }
+
+#if defined _MSC_VER
+#   if _MSC_VER>=1300
+#       if !defined BUILD_MESSAGE
+#           define BUILD_MESSAGE_stringlize(x) #x
+#           define BUILD_MESSAGE_quote(x) BUILD_MESSAGE_stringlize(x)
+#           define BUILD_MESSAGE(x) __pragma(message(__FILE__ "(" BUILD_MESSAGE_quote(__LINE__) ") : " x))
+#       endif
+#   else
+#       define BUILD_MESSAGE(x)
+#   endif
+#else
+#   define BUILD_MESSAGE(x)
+#endif
+
+/*****************************************************************************\
+MACRO: TODO
+Use for code changes that need to happen, but are not in place now.
+\*****************************************************************************/
+#define TODO(x) BUILD_MESSAGE("TODO: " #x)
 
 class Debug 
 {

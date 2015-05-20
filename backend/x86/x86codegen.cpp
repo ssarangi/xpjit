@@ -39,6 +39,12 @@ BaseVariable* X86CodeGen::getSymbol(llvm::Value* pV)
         if (llvm::ConstantInt *pCI = llvm::dyn_cast<llvm::ConstantInt>(pC))
             pSymbol = new Immediate((int)pCI->getZExtValue());
     }
+    else if (llvm::Argument *pArg = llvm::dyn_cast<llvm::Argument>(pV))
+    {
+        TODO("Assign registers in the register allocator. For now just map to variables")
+
+        assert(0 && "Not handled yet");
+    }
     else
     {
         // Check if we already have a symbol in the symbol table. If not the create a symbol
@@ -58,6 +64,11 @@ void X86CodeGen::initializeAssembler()
     X86InstSet::emitPrologue(m_ostream);
 }
 
+void X86CodeGen::destroyAssembler()
+{
+    X86InstSet::emitEpilogue(m_ostream);
+}
+
 void X86CodeGen::createLabel(llvm::BasicBlock *pBlock)
 {
     std::string label = pBlock->getParent()->getName().str() + "_" + pBlock->getName().str();
@@ -71,8 +82,20 @@ bool X86CodeGen::runOnModule(llvm::Module& M)
 
     initializeAssembler();
 
+    // Emit the code for the main function at the end to ensure that the assembler emits the epilogue
+    // properly
+    llvm::Function *pMainF = nullptr;
     for (llvm::Module::iterator f = M.begin(), fe = M.end(); f != fe; ++f)
     {
+        if (f->isDeclaration())
+            continue;
+
+        if (f->getName() == llvm::StringRef("main"))
+        {
+            pMainF = f;
+            continue;
+        }
+
         m_pRegAllocator = &getAnalysis<LinearScanAllocator>(*f);
         // m_pTempStackSize = &getAnalysis<TemporaryStackSize>(*f);
         visitFunction(*f);
@@ -95,6 +118,9 @@ bool X86CodeGen::runOnModule(llvm::Module& M)
         }
     }
 
+    visitFunction(*pMainF);
+    destroyAssembler();
+
     return false;
 }
 
@@ -111,7 +137,7 @@ void X86CodeGen::visitBasicBlock(llvm::BasicBlock &BB)
 
 void X86CodeGen::visitReturnInst(llvm::ReturnInst &I)
 {
-    X86InstSet::emitEpilogue(m_ostream);
+    X86InstSet::emitFunctionEpilogue(m_ostream);
 }
 
 void X86CodeGen::visitBranchInst(llvm::BranchInst &I)
@@ -362,7 +388,7 @@ void X86CodeGen::visitIntrinsicInst(llvm::IntrinsicInst &I)
 // a generic CallSite visitor.
 void X86CodeGen::visitCallInst(llvm::CallInst &I)
 {
-
+    
 }
 
 void X86CodeGen::visitInvokeInst(llvm::InvokeInst &I)

@@ -28,6 +28,7 @@ public:
     }
 
     virtual void initializeAssembler();
+    virtual void destroyAssembler();
 
     virtual BaseVariable* getSymbol(llvm::Value* pV);
     virtual void loadBaseVariable(BaseVariable *pVar, std::ostream &s);
