@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "icarus", "icarus.vcxproj", "{6606E577-87C1-4608-BE96-05D613260058}"
 EndProject
@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "builtins", "vcproj\builtins
 	ProjectSection(ProjectDependencies) = postProject
 		{6606E577-87C1-4608-BE96-05D613260058} = {6606E577-87C1-4608-BE96-05D613260058}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "debug_exe", "vcproj\debug_exe.vcxproj", "{DA58F0D8-5CBA-4AFB-AB8B-207387C46D95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,9 @@ Global
 		{5CAC6378-B5E0-416C-AB05-CBD323E286B1}.Debug|Win32.Build.0 = Debug|Win32
 		{5CAC6378-B5E0-416C-AB05-CBD323E286B1}.Release|Win32.ActiveCfg = Release|Win32
 		{5CAC6378-B5E0-416C-AB05-CBD323E286B1}.Release|Win32.Build.0 = Release|Win32
+		{DA58F0D8-5CBA-4AFB-AB8B-207387C46D95}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DA58F0D8-5CBA-4AFB-AB8B-207387C46D95}.Release|Win32.ActiveCfg = Release|Win32
+		{DA58F0D8-5CBA-4AFB-AB8B-207387C46D95}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
