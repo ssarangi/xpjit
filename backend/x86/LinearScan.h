@@ -54,7 +54,7 @@ public:
         AU.setPreservesCFG();
     };
 
-    asmjit::Operand* getSymbol(llvm::Value *pV)
+    BaseVariable* getSymbol(llvm::Value *pV)
     {
         if (llvm::Instruction *pI = llvm::dyn_cast<llvm::Instruction>(pV))
         {
@@ -69,7 +69,7 @@ public:
     }
 
 private:
-    llvm::DenseMap<LiveRangeInterval*, asmjit::Operand*> m_liveRangeIntervalToBackendRegister;
+    llvm::DenseMap<LiveRangeInterval*, BaseVariable*> m_liveRangeIntervalToBackendRegister;
     unsigned int m_stackLocation;
 
     LiveRange *m_pLR;
