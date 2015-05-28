@@ -1,38 +1,34 @@
-#ifndef __X86_CODE_GEN__
-#define __X86_CODE_GEN__
+#ifndef __ASMJIT_CODE_GEN__
+#define __ASMJIT_CODE_GEN__
 
 #include <backend/iarchcodegen.h>
-#include "x86patternmatch.h"
-#include "LinearScan.h"
+#include "asmjit_patternmatch.h"
 #include "../tempstacksize.h"
 
 #include <asmjit/asmjit.h>
-#include <asmjit/x86/x86assembler.h>
 
-class X86CodeGen : public IArchCodeGen, public llvm::ModulePass, public llvm::InstVisitor<X86CodeGen>
+class AsmJitCodeGen : public IArchCodeGen, public llvm::ModulePass, public llvm::InstVisitor<AsmJitCodeGen>
 {
 public:
-    X86CodeGen()
+    AsmJitCodeGen()
         : llvm::ModulePass(ID)
         , m_temporaryBytesUsed(0)
-        , m_pX86PatternMatch(nullptr)
-        , m_pRegAllocator(nullptr)
-        , m_pRuntime(nullptr)
-        , m_pLogger(nullptr)
-        , m_pAssembler(nullptr)
+        , m_pAsmJitPatternMatch(nullptr)
+        , m_pJitRuntime(new asmjit::JitRuntime())
     {
-         m_pRuntime = new asmjit::JitRuntime();
-         m_pLogger = new asmjit::FileLogger();
-         m_pAssembler = new asmjit::X86Assembler(m_pRuntime, asmjit::kArchX64);
+        m_pCompiler = new asmjit::X86Compiler(m_pJitRuntime);
     }
 
-    ~X86CodeGen() { }
+    ~AsmJitCodeGen()
+    {
+        delete m_pJitRuntime;
+        delete m_pCompiler;
+    }
 
     virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const
     {
-        AU.addRequired<X86PatternMatch>();
+        AU.addRequired<AsmJitPatternMatch>();
         AU.addRequired<TemporaryStackSize>();
-        AU.addRequired<LinearScanAllocator>();
         AU.setPreservesAll();
     }
 
@@ -136,13 +132,10 @@ private:
     void storeTemporary(llvm::Instruction *pI);
 
 private:
-    unsigned int m_temporaryBytesUsed;
-    X86PatternMatch *m_pX86PatternMatch;
-    LinearScanAllocator *m_pRegAllocator;
-
-    asmjit::JitRuntime    *m_pRuntime;
-    asmjit::FileLogger    *m_pLogger;
-    asmjit::X86Assembler  *m_pAssembler;
+    unsigned int                        m_temporaryBytesUsed;
+    AsmJitPatternMatch                  *m_pAsmJitPatternMatch;
+    asmjit::JitRuntime                  *m_pJitRuntime;
+    asmjit::X86Compiler                 *m_pCompiler;
 
 public:
     static char ID;

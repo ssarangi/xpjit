@@ -3,6 +3,9 @@
 #include "common/debug.h"
 #include <assert.h>
 
+#include <asmjit/base/operand.h>
+#include <asmjit/x86/x86operand.h>
+
 #define NUM_X86_REGISTERS 4
 
 char LinearScanAllocator::ID = 0;
@@ -141,7 +144,7 @@ void LinearScanAllocator::performLinearScan()
 {
     std::vector<LiveRangeInterval*> sorted_intervals = sortLiveInterval();
     std::set<LiveRangeInterval*> active;
-    std::stack<BackendRegister*> free_registers;
+    std::stack<asmjit::Operand*> free_registers;
 
     // Do not add these registers. For now we will use a simplistic register allocation scheme.
     //free_registers.push(&RAX);
@@ -149,14 +152,14 @@ void LinearScanAllocator::performLinearScan()
     //free_registers.push(&RCX);
     //free_registers.push(&RDX);
 
-    free_registers.push(&R8);
-    free_registers.push(&R9);
-    free_registers.push(&R10);
-    free_registers.push(&R11);
-    free_registers.push(&R12);
-    free_registers.push(&R13);
-    free_registers.push(&R14);
-    free_registers.push(&R15);
+    free_registers.push(&asmjit::x86::r8d);
+    free_registers.push(&asmjit::x86::r9d);
+    free_registers.push(&asmjit::x86::r10d);
+    free_registers.push(&asmjit::x86::r11d);
+    free_registers.push(&asmjit::x86::r12d);
+    free_registers.push(&asmjit::x86::r13d);
+    free_registers.push(&asmjit::x86::r14d);
+    free_registers.push(&asmjit::x86::r15d);
 
     //// Precolor some of the intervals
     //for (auto interval : sorted_intervals)

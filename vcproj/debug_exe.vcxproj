@@ -11,13 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E13928A6-BC8A-4B27-90FF-1F363FBBA910}</ProjectGuid>
+    <ProjectGuid>{DA58F0D8-5CBA-4AFB-AB8B-207387C46D95}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>backend</RootNamespace>
+    <RootNamespace>debug_exe</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -41,12 +41,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);$(LLVM_DIR)\include</IncludePath>
-    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -54,21 +51,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(LLVM_DIR)\include;$(SolutionDir)include;$(SolutionDir)3rdparty\asmjit\include</AdditionalIncludeDirectories>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <Lib>
-      <AdditionalDependencies>asmjit.lib</AdditionalDependencies>
-    </Lib>
-    <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)3rdparty\asmjit\lib</AdditionalLibraryDirectories>
-    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -78,8 +66,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(LLVM_DIR)\include;$(SolutionDir)include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -89,41 +76,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\backend\asmjit\asmjit_codegen.h" />
-    <ClInclude Include="..\backend\asmjit\asmjit_patternmatch.h" />
-    <ClInclude Include="..\backend\mips\mipscodegen.h" />
-    <ClInclude Include="..\backend\mips\mipsinstset.h" />
-    <ClInclude Include="..\backend\mips\mipspatternmatch.h" />
-    <ClInclude Include="..\backend\regalloc.h" />
-    <ClInclude Include="..\backend\tempstacksize.h" />
-    <ClInclude Include="..\backend\x86\LinearScan.h" />
-    <ClInclude Include="..\backend\x86\x86codegen.h" />
-    <ClInclude Include="..\backend\x86\x86defines.h" />
-    <ClInclude Include="..\backend\x86\x86instset.h" />
-    <ClInclude Include="..\backend\x86\x86patternmatch.h" />
-    <ClInclude Include="..\include\backend\backendcodegen.h" />
-    <ClInclude Include="..\include\backend\backendvar.h" />
-    <ClInclude Include="..\include\backend\iarchcodegen.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\backend\asmjit\asmjit_codegen.cpp" />
-    <ClCompile Include="..\backend\asmjit\asmjit_patternmatch.cpp" />
-    <ClCompile Include="..\backend\backendcodegen.cpp" />
-    <ClCompile Include="..\backend\mips\mipscodegen.cpp" />
-    <ClCompile Include="..\backend\mips\mipsinstset.cpp" />
-    <ClCompile Include="..\backend\mips\mipspatternmatch.cpp" />
-    <ClCompile Include="..\backend\regalloc.cpp" />
-    <ClCompile Include="..\backend\tempstacksize.cpp" />
-    <ClCompile Include="..\backend\x86\LinearScan.cpp" />
-    <ClCompile Include="..\backend\x86\x86codegen.cpp" />
-    <ClCompile Include="..\backend\x86\x86defines.cpp" />
-    <ClCompile Include="..\backend\x86\x86instset.cpp" />
-    <ClCompile Include="..\backend\x86\x86patternmatch.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\common\common.vcxproj">
-      <Project>{f6d04041-f2b5-4545-b66c-378651fcb8b0}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
