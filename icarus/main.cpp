@@ -22,7 +22,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/PassManager.h>
+#include <llvm/IR/LegacyPassManager.h>
 #include <llvm/Support/ToolOutputFile.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 #include <common/llvm_warnings_pop.h>
@@ -38,7 +38,7 @@ IcarusModule *pIcarusModule;
 
 llvm::Function* findEntryFunc(llvm::Module& M)
 {
-    llvm::PassManager mpm;
+    llvm::legacy::PassManager mpm;
     FindEntryFunc* pEntryFunc = new FindEntryFunc();
     mpm.add(pEntryFunc);
     mpm.run(M);
@@ -88,7 +88,7 @@ int Compile(char *fileName, char *pOutputFileName)
         pIcarusModule = nullptr;
     }
 
-    llvm::PassManager mpm;
+    llvm::legacy::PassManager mpm;
     mpm.add(new SemanticAnalysis());
     mpm.run(llvmModule);
 

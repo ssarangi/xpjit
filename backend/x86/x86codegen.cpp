@@ -56,24 +56,19 @@ BaseVariable* X86CodeGen::getSymbol(llvm::Value* pV)
 
 void X86CodeGen::loadBaseVariable(BaseVariable *pVar, std::ostream &s)
 {
-
 }
 
 void X86CodeGen::initializeAssembler()
 {
-    X86InstSet::emitPrologue(m_ostream);
 }
 
 void X86CodeGen::destroyAssembler()
 {
-    X86InstSet::emitEpilogue(m_ostream);
 }
 
 void X86CodeGen::createLabel(llvm::BasicBlock *pBlock)
 {
-    std::string label = pBlock->getParent()->getName().str() + "_" + pBlock->getName().str();
-
-    m_ostream << label << ":" << std::endl;
+    ICARUS_NOT_IMPLEMENTED("Label Inst not implemented");
 }
 
 bool X86CodeGen::runOnModule(llvm::Module& M)
@@ -126,24 +121,22 @@ bool X86CodeGen::runOnModule(llvm::Module& M)
 
 void X86CodeGen::visitFunction(llvm::Function& F)
 {
-    m_ostream << F.getName().str() << "_entry:" << std::endl;
-    X86InstSet::emitFunctionPrologue(m_ostream);
+    ICARUS_NOT_IMPLEMENTED("Function Codegen not implemented");
 }
 
 void X86CodeGen::visitBasicBlock(llvm::BasicBlock &BB)
 {
-
+    ICARUS_NOT_IMPLEMENTED("Basic Block CodeGen not implemented");
 }
 
 void X86CodeGen::visitReturnInst(llvm::ReturnInst &I)
 {
-    X86InstSet::emitFunctionEpilogue(m_ostream);
+    ICARUS_NOT_IMPLEMENTED("Return Inst not implemented");
 }
 
 void X86CodeGen::visitBranchInst(llvm::BranchInst &I)
 {
-    //std::string label = m_pCurrentFunction->getName().str() + I.getName().str();
-    //X86InstSet::emitJAL(label, m_ostream);
+    ICARUS_NOT_IMPLEMENTED("Branch Inst not implemented");
 }
 
 void X86CodeGen::visitSwitchInst(llvm::SwitchInst &I)
@@ -321,7 +314,6 @@ void X86CodeGen::visitLandingPadInst(llvm::LandingPadInst &I)
     ICARUS_NOT_IMPLEMENTED("LandingPad Inst not implemented");
 }
 
-
 // Handle the special intrinsic instruction classes.
 void X86CodeGen::visitDbgDeclareInst(llvm::DbgDeclareInst &I)
 {
@@ -408,47 +400,7 @@ void X86CodeGen::visitCastInst(llvm::CastInst &I)
 
 void X86CodeGen::visitBinaryOperator(llvm::BinaryOperator &I)
 {
-    // COMMENT_STR_WITH_INSTR(I);
-
-    llvm::Instruction *pInst = llvm::cast<llvm::Instruction>(&I);
-
-    llvm::Value *pOp1 = I.getOperand(0);
-    llvm::Value *pOp2 = I.getOperand(1);
-
-    BaseVariable *pBop1 = getSymbol(pOp1);
-    BaseVariable *pBop2 = getSymbol(pOp2);
-
-    BaseVariable *pDst = getSymbol(&I);
-
-    switch (pInst->getOpcode())
-    {
-    case llvm::Instruction::Add:
-
-        X86InstSet::emitMov(RAX, *pBop1, m_ostream);
-        X86InstSet::emitAdd(RAX, *pBop2, m_ostream);
-        X86InstSet::emitMov(*pDst, RAX, m_ostream);
-        break;
-    case llvm::Instruction::Sub:
-        X86InstSet::emitMov(RAX, *pBop1, m_ostream);
-        X86InstSet::emitSub(RAX, *pBop2, m_ostream);
-        X86InstSet::emitMov(*pDst, RAX, m_ostream);
-        break;
-    case llvm::Instruction::Mul:
-        X86InstSet::emitMov(RAX, *pBop1, m_ostream);
-        X86InstSet::emitMov(RBX, *pBop2, m_ostream);
-        X86InstSet::emitMul(RAX, RBX, m_ostream);
-        X86InstSet::emitMov(*pDst, RAX, m_ostream);
-        break;
-    case llvm::Instruction::FDiv:
-        X86InstSet::emitDiv(*pBop1, *pBop2, m_ostream);
-        break;
-    case llvm::Instruction::FAdd:
-    case llvm::Instruction::FSub:
-    case llvm::Instruction::FMul:
-        ICARUS_NOT_IMPLEMENTED("Float methods not implemented yet");
-    }
-
-    std::string g = m_ostream.str();
+    ICARUS_NOT_IMPLEMENTED("Binary Operator Inst not implemented");
 }
 
 void X86CodeGen::visitCmpInst(llvm::CmpInst &I)

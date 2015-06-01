@@ -89,8 +89,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\backend\asmjit\asmjit_codegen.h" />
-    <ClInclude Include="..\backend\asmjit\asmjit_patternmatch.h" />
     <ClInclude Include="..\backend\mips\mipscodegen.h" />
     <ClInclude Include="..\backend\mips\mipsinstset.h" />
     <ClInclude Include="..\backend\mips\mipspatternmatch.h" />
@@ -106,8 +104,6 @@
     <ClInclude Include="..\include\backend\iarchcodegen.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\backend\asmjit\asmjit_codegen.cpp" />
-    <ClCompile Include="..\backend\asmjit\asmjit_patternmatch.cpp" />
     <ClCompile Include="..\backend\backendcodegen.cpp" />
     <ClCompile Include="..\backend\mips\mipscodegen.cpp" />
     <ClCompile Include="..\backend\mips\mipsinstset.cpp" />

@@ -13,9 +13,6 @@
     <Filter Include="x86">
       <UniqueIdentifier>{5cebac74-822d-4133-bc87-3d56672818a7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="asmjit">
-      <UniqueIdentifier>{2e623636-ca11-4a24-88d9-1d129e8f7318}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\backend\mips\mipscodegen.h">
@@ -57,12 +54,6 @@
     <ClInclude Include="..\backend\x86\x86defines.h">
       <Filter>x86</Filter>
     </ClInclude>
-    <ClInclude Include="..\backend\asmjit\asmjit_codegen.h">
-      <Filter>asmjit</Filter>
-    </ClInclude>
-    <ClInclude Include="..\backend\asmjit\asmjit_patternmatch.h">
-      <Filter>asmjit</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\mips\mipscodegen.cpp">
@@ -97,12 +88,6 @@
     </ClCompile>
     <ClCompile Include="..\backend\x86\LinearScan.cpp">
       <Filter>x86</Filter>
-    </ClCompile>
-    <ClCompile Include="..\backend\asmjit\asmjit_codegen.cpp">
-      <Filter>asmjit</Filter>
-    </ClCompile>
-    <ClCompile Include="..\backend\asmjit\asmjit_patternmatch.cpp">
-      <Filter>asmjit</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

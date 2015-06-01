@@ -10,7 +10,7 @@
 #include "regalloc.h"
 
 #include <common/llvm_warnings_push.h>
-#include <llvm/PassManager.h>
+#include <llvm/IR/LegacyPassManager.h>
 #include <llvm/ADT/PostOrderIterator.h>
 #include <llvm/IR/InstIterator.h>
 #include <common/llvm_warnings_pop.h>
@@ -20,7 +20,7 @@
 
 void GenerateCode(CodeGenModule& M, std::string outputFile)
 {
-    llvm::PassManager mpm;
+    llvm::legacy::PassManager mpm;
     // MipsCodeGen *pMipsCodeGen = new MipsCodeGen();
     // CodeGenPass *pCodeGenPass = new CodeGenPass(pMipsCodeGen);
     // mpm.add(new RegAlloc());
