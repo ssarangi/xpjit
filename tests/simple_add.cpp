@@ -11,10 +11,11 @@
 //}
 
 
-int main() {
-    int s, i, j;
-    for (s = 0, i = 0; i < 10000; i++) {
-        for (j = 0; j < 10000; j++)
-            s += i*j;
-    }
+int main()
+{
+    int a = 3;
+    if (a % 2 == 0)
+        return 1;
+    else
+        return 0;
 }

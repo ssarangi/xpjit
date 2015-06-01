@@ -6,6 +6,8 @@
 #include <common/llvm_warnings_push.h>
 #include <common/llvm_warnings_pop.h>
 
+#include <asmjit/x86/x86assembler.h>
+
 #include <stack>
 
 #define COMMENT_STR(STR)                        \
@@ -122,11 +124,35 @@ bool X86CodeGen::runOnModule(llvm::Module& M)
 void X86CodeGen::visitFunction(llvm::Function& F)
 {
     // Emit the prologue for the function
+    m_pAssembler->push(m_pAssembler->zbp);
+    m_pAssembler->mov(m_pAssembler->zbp, m_pAssembler->zsp);
+    m_pAssembler->sub(m_pAssembler->zsp, 192);
+    m_pAssembler->push(m_pAssembler->zbx);
+    m_pAssembler->push(m_pAssembler->zsi);
+    m_pAssembler->push(m_pAssembler->zdi);
+
+    m_pAssembler->lea(m_pAssembler->zdi, asmjit::X86Mem(m_pAssembler->zbp, 102));
+    m_pAssembler->mov(m_pAssembler->zcx, 48);
+    m_pAssembler->mov(m_pAssembler->zax, 0xCCCCCCCC);
+    m_pAssembler->stosd();
+    uint8_t *oldCursor = m_pAssembler->getCursor();
+
+    // Create a new label for the function exit
+    asmjit::Label exitLabel = m_pAssembler->newLabel();
+    m_pAssembler->pop(m_pAssembler->zdi);
+    m_pAssembler->pop(m_pAssembler->zsi);
+    m_pAssembler->pop(m_pAssembler->zbx);
+    m_pAssembler->mov(m_pAssembler->zsp, m_pAssembler->zbp);
+    m_pAssembler->pop(m_pAssembler->zbp);
+    m_pAssembler->ret(0);
+
+    // Reset the assembler to go to the previous location
+    m_pAssembler->setCursor(oldCursor);
 }
 
 void X86CodeGen::visitBasicBlock(llvm::BasicBlock &BB)
 {
-    ICARUS_NOT_IMPLEMENTED("Basic Block CodeGen not implemented");
+    // ICARUS_NOT_IMPLEMENTED("Basic Block CodeGen not implemented");
 }
 
 void X86CodeGen::visitReturnInst(llvm::ReturnInst &I)

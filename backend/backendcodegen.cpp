@@ -6,7 +6,6 @@
 #include "mips/mipspatternmatch.h"
 #include "x86/LinearScan.h"
 #include "x86/x86codegen.h"
-#include "asmjit/asmjit_codegen.h"
 #include "regalloc.h"
 
 #include <common/llvm_warnings_push.h>
@@ -27,7 +26,7 @@ void GenerateCode(CodeGenModule& M, std::string outputFile)
     // mpm.add(pMipsCodeGen);
     // mpm.add(pCodeGenPass);
 
-    AsmJitCodeGen *pCodeGen = new AsmJitCodeGen();
+    X86CodeGen *pCodeGen = new X86CodeGen();
     mpm.add(pCodeGen);
     mpm.run(*M.getLLVMModule());
 
