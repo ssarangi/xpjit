@@ -158,10 +158,5 @@ int main(int argc, char *argv[])
     assert(pOutput != nullptr && "No output file specified");
 
     Compile(pfilename, pOutput);
-
-    std::string pcmd = std::string("tools\\nasm.exe -f win64 ") + std::string(pOutput) + std::string(" -o output.o");
-
-    system(pcmd.c_str());
-    system("pause");
     return 0;
 }
