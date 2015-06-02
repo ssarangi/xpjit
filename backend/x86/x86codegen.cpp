@@ -6,6 +6,7 @@
 #include <common/llvm_warnings_push.h>
 #include <common/llvm_warnings_pop.h>
 
+#include <asmjit/asmjit.h>
 #include <asmjit/x86/x86assembler.h>
 
 #include <stack>
@@ -71,6 +72,16 @@ void X86CodeGen::destroyAssembler()
 void X86CodeGen::createLabel(llvm::BasicBlock *pBlock)
 {
     ICARUS_NOT_IMPLEMENTED("Label Inst not implemented");
+}
+
+void X86CodeGen::jit()
+{
+    typedef int(*FuncType)(void);
+
+    FuncType func = asmjit_cast<FuncType>(m_pAssembler->make());
+    func();
+
+    m_pRuntime->release((void*)func);
 }
 
 bool X86CodeGen::runOnModule(llvm::Module& M)

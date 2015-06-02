@@ -22,8 +22,9 @@ public:
         , m_pAssembler(nullptr)
     {
          m_pRuntime = new asmjit::JitRuntime();
-         m_pLogger = new asmjit::FileLogger();
+         m_pLogger = new asmjit::FileLogger(stdout);
          m_pAssembler = new asmjit::X86Assembler(m_pRuntime, asmjit::kArchX64);
+         m_pAssembler->setLogger(m_pLogger);
     }
 
     ~X86CodeGen() { }
@@ -131,6 +132,8 @@ public:
     virtual void visitInstruction(llvm::Instruction &I);
 
     void emitBrWithCmpInstruction(llvm::BranchInst *pBrInst, llvm::CmpInst *pCmpInst);
+
+    void jit();
 
 private:
     void storeTemporary(llvm::Instruction *pI);

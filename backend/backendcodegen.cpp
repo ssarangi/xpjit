@@ -30,6 +30,8 @@ void GenerateCode(CodeGenModule& M, std::string outputFile)
     mpm.add(pCodeGen);
     mpm.run(*M.getLLVMModule());
 
+    pCodeGen->jit();
+
     //// Open the file and write into it.
     //std::ofstream file;
     //file.open(outputFile);
