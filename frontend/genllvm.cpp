@@ -148,8 +148,9 @@ llvm::Value* IcaMultiVarAssignment::genLLVM(GenLLVM* g)
         {
             if (m_multiVarList[i] != "")
             {
-                llvm::Value *pLoad = g->getBuilder().CreateLoad(g->getBuilder().CreateStructGEP(pRetVal, i));
-                g->getBuilder().CreateStore(pLoad, g->getNamedValues()[m_multiVarList[i]], false);
+                assert(0 && "Reimplement this");
+                // llvm::Value *pLoad = g->getBuilder().CreateLoad(g->getBuilder().CreateStructGEP(pRetVal, i, ""));
+                // g->getBuilder().CreateStore(pLoad, g->getNamedValues()[m_multiVarList[i]], false);
             }
         }
     }
@@ -208,8 +209,9 @@ llvm::Value* IcaReturnStatement::genLLVM(GenLLVM* g)
         for (unsigned i = 0; i < pCurrentFuncRetType->getStructNumElements(); ++i)
         {
             llvm::Value *pExpr = m_values[i]->genLLVM(g);
-            llvm::Value *pElement = g->getBuilder().CreateStructGEP(pAlloca, i);
-            g->getBuilder().CreateStore(pExpr, pElement);
+            // llvm::Value *pElement = g->getBuilder().CreateStructGEP(pAlloca, i);
+            // g->getBuilder().CreateStore(pExpr, pElement);
+            assert(0 && "Reimplement this");
         }
 
         return g->getBuilder().CreateRet(g->getBuilder().CreateLoad(pAlloca));

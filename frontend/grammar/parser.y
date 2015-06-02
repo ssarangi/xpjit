@@ -2,6 +2,7 @@
 #include "frontend/irtranslation.h"
 #include "frontend/ASTBuilder.h"
 #include "common/debug.h"
+#include "parser.hpp"
 
 #include <stdio.h>
 #include <iostream>
@@ -28,7 +29,7 @@ std::vector<IcaValue*> parameterList;
 
 #include <stdio.h>
 
-extern char yytext[];
+extern char* yytext;
 extern int column;
 extern int lineNo;
 std::vector<std::string> lines;

@@ -155,7 +155,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\frontend\ASTBuilder.cpp" />
-    <ClCompile Include="..\frontend\DebugInfo.cpp" />
+    <ClCompile Include="..\frontend\DebugInfo.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\frontend\irtranslation.cpp" />
     <ClCompile Include="..\frontend\findentryfunc.cpp" />
     <ClCompile Include="..\frontend\generated\lexer.cpp" />
